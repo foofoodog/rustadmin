@@ -5,9 +5,10 @@ import {
   AlertTriangle, 
   CheckCircle2, 
   RefreshCw, 
-  Power,
-  ExternalLink,
-  Search
+  Power, 
+  Play, 
+  Search,
+  Zap
 } from 'lucide-react';
 import { rconService } from '../services/rconService';
 import { OxidePlugin } from '../types/rcon';
@@ -23,27 +24,33 @@ export const PluginsTab: React.FC = () => {
     return () => unsub();
   }, []);
 
-  const handleReload = async (pluginName: string) => {
-    setLoadingPlugin(pluginName);
+  const handleAction = async (action: 'reload' | 'unload' | 'load', stem: string) => {
+    setLoadingPlugin(stem);
     try {
-      await rconService.sendCommand(`oxide.reload "${pluginName}"`);
+      if (action === 'reload') {
+        await rconService.sendCommand(`oxide.reload ${stem}`);
+      } else if (action === 'unload') {
+        await rconService.sendCommand(`oxide.unload ${stem}`);
+      } else if (action === 'load') {
+        await rconService.sendCommand(`oxide.load ${stem}`);
+      }
       setTimeout(() => {
         rconService.sendCommand('plugins');
         setLoadingPlugin(null);
-      }, 1000);
+      }, 800);
     } catch {
       setLoadingPlugin(null);
     }
   };
 
-  const handleUnload = async (pluginName: string) => {
-    setLoadingPlugin(pluginName);
+  const handleReloadAll = async () => {
+    setLoadingPlugin('__all__');
     try {
-      await rconService.sendCommand(`oxide.unload "${pluginName}"`);
+      await rconService.sendCommand('oxide.reload *');
       setTimeout(() => {
         rconService.sendCommand('plugins');
         setLoadingPlugin(null);
-      }, 1000);
+      }, 1500);
     } catch {
       setLoadingPlugin(null);
     }
@@ -52,10 +59,13 @@ export const PluginsTab: React.FC = () => {
   const filteredPlugins = plugins.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
     p.filename.toLowerCase().includes(search.toLowerCase()) ||
+    p.stem.toLowerCase().includes(search.toLowerCase()) ||
     p.author.toLowerCase().includes(search.toLowerCase())
   );
 
-  const errorPlugins = plugins.filter((p) => !!p.error);
+  const errorPlugins = plugins.filter((p) => p.status === 'error' || !!p.error);
+  const loadedCount = plugins.filter((p) => p.status === 'loaded').length;
+  const unloadedCount = plugins.filter((p) => p.status === 'unloaded').length;
 
   return (
     <div className="space-y-4">
@@ -63,12 +73,20 @@ export const PluginsTab: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-900 border border-zinc-800 p-4 rounded-xl">
         <div className="flex items-center space-x-3">
           <Puzzle className="w-5 h-5 text-rust-500" />
-          <h2 className="text-base font-bold text-zinc-100">
-            Oxide / uMod Plugins ({plugins.length})
-          </h2>
+          <div>
+            <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
+              <span>Oxide / uMod Plugins ({plugins.length})</span>
+            </h2>
+            <div className="flex space-x-3 text-xs text-zinc-400 mt-0.5">
+              <span>Loaded: <b className="text-emerald-400">{loadedCount}</b></span>
+              {unloadedCount > 0 && <span>Unloaded: <b className="text-amber-400">{unloadedCount}</b></span>}
+              {errorPlugins.length > 0 && <span>Errors: <b className="text-rose-400">{errorPlugins.length}</b></span>}
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center space-x-2">
+          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-500" />
             <input
@@ -76,15 +94,28 @@ export const PluginsTab: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search plugin, author..."
-              className="pl-9 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-rust-500 w-48 sm:w-64"
+              className="pl-9 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-rust-500 w-44 sm:w-56"
             />
           </div>
+
+          {/* Reload All */}
+          <button
+            onClick={handleReloadAll}
+            disabled={loadingPlugin === '__all__'}
+            className="flex items-center space-x-1.5 px-3 py-1.5 bg-rust-600 hover:bg-rust-500 active:bg-rust-700 text-white rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
+            title="Reload all plugins"
+          >
+            <RotateCw className={`w-3.5 h-3.5 ${loadingPlugin === '__all__' ? 'animate-spin' : ''}`} />
+            <span>Reload All</span>
+          </button>
+
+          {/* Refresh List */}
           <button
             onClick={() => rconService.sendCommand('plugins')}
-            className="flex items-center space-x-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs font-semibold transition-colors"
+            className="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs transition-colors"
+            title="Refresh list"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Refresh</span>
+            <RefreshCw className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -98,8 +129,16 @@ export const PluginsTab: React.FC = () => {
           </div>
           <div className="space-y-1.5 pl-6 text-xs text-rose-300 font-mono">
             {errorPlugins.map((p) => (
-              <div key={p.name} className="bg-rose-950/80 p-2.5 rounded border border-rose-900/60">
-                <span className="font-bold text-rose-200">{p.name}:</span> {p.error}
+              <div key={p.stem} className="bg-rose-950/80 p-2.5 rounded border border-rose-900/60 flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-rose-200">{p.name}:</span> {p.error}
+                </div>
+                <button
+                  onClick={() => handleAction('reload', p.stem)}
+                  className="px-2 py-1 bg-rose-800 hover:bg-rose-700 text-white rounded text-[11px] font-semibold shrink-0 ml-3"
+                >
+                  Retry Load
+                </button>
               </div>
             ))}
           </div>
@@ -110,7 +149,7 @@ export const PluginsTab: React.FC = () => {
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         {filteredPlugins.length === 0 ? (
           <div className="p-12 text-center text-zinc-500 text-sm">
-            No plugins found. Ensure Oxide is installed and running.
+            No plugins found matching "{search}".
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -119,71 +158,118 @@ export const PluginsTab: React.FC = () => {
                 <tr>
                   <th className="py-3 px-4">#</th>
                   <th className="py-3 px-4">Plugin Name</th>
+                  <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4">Version</th>
                   <th className="py-3 px-4">Author</th>
-                  <th className="py-3 px-4">Filename</th>
                   <th className="py-3 px-4">Memory / Time</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/60">
                 {filteredPlugins.map((plugin) => {
-                  const hasError = !!plugin.error;
+                  const isLoaded = plugin.status === 'loaded';
+                  const isUnloaded = plugin.status === 'unloaded';
+                  const hasError = plugin.status === 'error';
+                  const isLoading = loadingPlugin === plugin.stem;
+
                   return (
                     <tr
-                      key={plugin.name}
+                      key={plugin.stem}
                       className={`hover:bg-zinc-800/40 transition-colors ${
-                        hasError ? 'bg-rose-950/20' : ''
+                        hasError
+                          ? 'bg-rose-950/20'
+                          : isUnloaded
+                          ? 'bg-zinc-950/40 opacity-75'
+                          : ''
                       }`}
                     >
                       <td className="py-3 px-4 font-mono text-zinc-500">{plugin.index}</td>
                       <td className="py-3 px-4 font-semibold text-zinc-100 flex items-center space-x-2">
                         {hasError ? (
                           <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
+                        ) : isUnloaded ? (
+                          <Power className="w-4 h-4 text-zinc-500 shrink-0" />
                         ) : (
                           <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                         )}
-                        <span>{plugin.name}</span>
+                        <div>
+                          <span>{plugin.name}</span>
+                          <span className="block text-[10px] text-zinc-500 font-mono font-normal">
+                            {plugin.filename}
+                          </span>
+                        </div>
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`px-2 py-0.5 rounded text-[11px] font-mono font-semibold ${
+                          className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
                             hasError
                               ? 'bg-rose-950 text-rose-400 border border-rose-800/60'
-                              : 'bg-zinc-800 text-zinc-300'
+                              : isUnloaded
+                              ? 'bg-amber-950/60 text-amber-400 border border-amber-900/40'
+                              : 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/40'
                           }`}
                         >
-                          v{plugin.version}
+                          {hasError ? 'Error' : isUnloaded ? 'Unloaded' : 'Active'}
                         </span>
                       </td>
+                      <td className="py-3 px-4 font-mono text-zinc-300">
+                        {isUnloaded ? '-' : `v${plugin.version}`}
+                      </td>
                       <td className="py-3 px-4 text-zinc-400">{plugin.author}</td>
-                      <td className="py-3 px-4 font-mono text-zinc-400">{plugin.filename}</td>
                       <td className="py-3 px-4 text-zinc-400 font-mono text-[11px]">
                         {plugin.memory}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end space-x-2">
-                          {/* Reload */}
-                          <button
-                            onClick={() => handleReload(plugin.name)}
-                            disabled={loadingPlugin === plugin.name}
-                            className="flex items-center space-x-1 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-900 text-zinc-200 rounded text-[11px] font-medium transition-colors"
-                            title="Reload Plugin"
-                          >
-                            <RotateCw
-                              className={`w-3 h-3 ${loadingPlugin === plugin.name ? 'animate-spin' : ''}`}
-                            />
-                            <span>Reload</span>
-                          </button>
+                        <div className="flex items-center justify-end space-x-1.5">
+                          {/* If Loaded: Show Reload + Unload */}
+                          {isLoaded && (
+                            <>
+                              <button
+                                onClick={() => handleAction('reload', plugin.stem)}
+                                disabled={isLoading}
+                                className="flex items-center space-x-1 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-900 text-zinc-200 rounded text-[11px] font-medium transition-colors"
+                                title={`Reload ${plugin.stem}`}
+                              >
+                                <RotateCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
+                                <span>Reload</span>
+                              </button>
+                              <button
+                                onClick={() => handleAction('unload', plugin.stem)}
+                                disabled={isLoading}
+                                className="flex items-center space-x-1 px-2 py-1 bg-zinc-800/80 hover:bg-rose-950 hover:text-rose-400 text-zinc-400 rounded text-[11px] transition-colors"
+                                title={`Unload ${plugin.stem}`}
+                              >
+                                <Power className="w-3 h-3" />
+                                <span>Unload</span>
+                              </button>
+                            </>
+                          )}
 
-                          {/* Unload */}
-                          <button
-                            onClick={() => handleUnload(plugin.name)}
-                            className="p-1 hover:bg-zinc-800 text-zinc-500 hover:text-rose-400 rounded transition-colors"
-                            title="Unload Plugin"
-                          >
-                            <Power className="w-3.5 h-3.5" />
-                          </button>
+                          {/* If Unloaded: Show Load button */}
+                          {isUnloaded && (
+                            <button
+                              onClick={() => handleAction('load', plugin.stem)}
+                              disabled={isLoading}
+                              className="flex items-center space-x-1 px-3 py-1 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-800/60 rounded text-[11px] font-semibold transition-colors"
+                              title={`Load ${plugin.stem}`}
+                            >
+                              <Play className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
+                              <span>Load</span>
+                            </button>
+                          )}
+
+                          {/* If Error: Show Retry button */}
+                          {hasError && (
+                            <button
+                              onClick={() => handleAction('reload', plugin.stem)}
+                              disabled={isLoading}
+                              className="flex items-center space-x-1 px-2.5 py-1 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800/60 rounded text-[11px] font-semibold transition-colors"
+                              title={`Retry compiling ${plugin.stem}`}
+                            >
+                              <RotateCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
+                              <span>Retry</span>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

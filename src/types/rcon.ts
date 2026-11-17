@@ -39,6 +39,8 @@ export interface OxidePlugin {
   author: string;
   memory: string;
   filename: string;
+  stem: string;
+  status: 'loaded' | 'unloaded' | 'error';
   error?: string;
 }
 

@@ -259,31 +259,56 @@ class RconService {
     const plugins: OxidePlugin[] = [];
     const lines = text.split('\n');
     for (const line of lines) {
-      // Example line: 01 "Stack Size Controller" (4.1.3) by AnExiledDev/patched by chrome (0.00s / 44 KB) - StackSizeController.cs
+      // 1. Active plugin: 01 "Stack Size Controller" (4.1.3) by Author (0.00s / 44 KB) - StackSizeController.cs
       const m = line.match(/^\s*(\d+)\s+"([^"]+)"\s*\(([^)]+)\)\s+by\s+([^(]+)\s*\(([^)]+)\)\s*-\s*(.+)/);
       if (m) {
+        const filename = m[6].trim();
+        const stem = filename.replace(/\.cs$/i, '');
         plugins.push({
           index: m[1],
           name: m[2].trim(),
           version: m[3].trim(),
           author: m[4].trim(),
           memory: m[5].trim(),
-          filename: m[6].trim(),
+          filename,
+          stem,
+          status: 'loaded',
         });
-      } else {
-        // Example failed compilation: 08 CopyPaste - Failed to compile: Argument 1: ...
-        const mErr = line.match(/^\s*(\d+)\s+([^-]+)\s*-\s*Failed to compile:\s*(.+)/);
-        if (mErr) {
-          plugins.push({
-            index: mErr[1],
-            name: mErr[2].trim(),
-            version: 'Compile Error',
-            author: '-',
-            memory: '-',
-            filename: `${mErr[2].trim()}.cs`,
-            error: mErr[3].trim(),
-          });
-        }
+        continue;
+      }
+
+      // 2. Unloaded plugin: 08 InstantCraft - Unloaded
+      const mUnloaded = line.match(/^\s*(\d+)\s+([^-]+)\s*-\s*Unloaded/i);
+      if (mUnloaded) {
+        const stem = mUnloaded[2].trim();
+        plugins.push({
+          index: mUnloaded[1],
+          name: stem,
+          version: 'Unloaded',
+          author: '-',
+          memory: '-',
+          filename: `${stem}.cs`,
+          stem,
+          status: 'unloaded',
+        });
+        continue;
+      }
+
+      // 3. Failed compilation: 08 CopyPaste - Failed to compile: Argument 1: ...
+      const mErr = line.match(/^\s*(\d+)\s+([^-]+)\s*-\s*Failed to compile:\s*(.+)/i);
+      if (mErr) {
+        const stem = mErr[2].trim();
+        plugins.push({
+          index: mErr[1],
+          name: stem,
+          version: 'Compile Error',
+          author: '-',
+          memory: '-',
+          filename: `${stem}.cs`,
+          stem,
+          status: 'error',
+          error: mErr[3].trim(),
+        });
       }
     }
     return plugins;
