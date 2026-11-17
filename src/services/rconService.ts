@@ -25,57 +25,80 @@ class RconService {
   }
 
   public connect(host: string, port: number, password: string) {
+    const uri = `ws://${host}:${port}/${password}`;
+
+    // If already connected or connecting to the same endpoint, don't recreate
+    if (
+      this.ws &&
+      this.currentHost === host &&
+      this.currentPort === port &&
+      this.currentPassword === password &&
+      (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
+    }
+
     this.currentHost = host;
     this.currentPort = port;
     this.currentPassword = password;
 
     if (this.ws) {
+      const oldWs = this.ws;
+      this.ws = null;
+      // Detach listeners so close/error events from the old socket don't affect state
+      oldWs.onopen = null;
+      oldWs.onmessage = null;
+      oldWs.onerror = null;
+      oldWs.onclose = null;
       try {
-        this.ws.close();
+        oldWs.close();
       } catch (e) {
         // ignore
       }
     }
 
     this.setState('connecting');
-    const uri = `ws://${host}:${port}/${encodeURIComponent(password)}`;
 
     try {
-      this.ws = new WebSocket(uri);
+      const socket = new WebSocket(uri);
+      this.ws = socket;
+
+      socket.onopen = () => {
+        if (this.ws !== socket) return;
+        this.setState('connected');
+        this.startPolling();
+        // Initial queries
+        this.sendCommand('status');
+        this.sendCommand('plugins');
+      };
+
+      socket.onmessage = (event) => {
+        if (this.ws !== socket) return;
+        try {
+          const data: RconMessage = JSON.parse(event.data);
+          data.timestamp = Date.now();
+          this.handleMessage(data);
+        } catch (err) {
+          console.error('Failed to parse WebSocket message:', err, event.data);
+        }
+      };
+
+      socket.onerror = (err) => {
+        if (this.ws !== socket) return;
+        console.error('WebSocket Error:', err);
+        this.setState('error');
+      };
+
+      socket.onclose = () => {
+        if (this.ws !== socket) return;
+        this.setState('disconnected');
+        this.stopPolling();
+        this.rejectAllPending();
+      };
     } catch (err) {
       console.error('Failed to create WebSocket:', err);
       this.setState('error');
-      return;
     }
-
-    this.ws.onopen = () => {
-      this.setState('connected');
-      this.startPolling();
-      // Initial queries
-      this.sendCommand('status');
-      this.sendCommand('plugins');
-    };
-
-    this.ws.onmessage = (event) => {
-      try {
-        const data: RconMessage = JSON.parse(event.data);
-        data.timestamp = Date.now();
-        this.handleMessage(data);
-      } catch (err) {
-        console.error('Failed to parse WebSocket message:', err, event.data);
-      }
-    };
-
-    this.ws.onerror = (err) => {
-      console.error('WebSocket Error:', err);
-      this.setState('error');
-    };
-
-    this.ws.onclose = () => {
-      this.setState('disconnected');
-      this.stopPolling();
-      this.rejectAllPending();
-    };
   }
 
   public disconnect() {
