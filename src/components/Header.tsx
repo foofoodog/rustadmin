@@ -99,16 +99,18 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenC
           <div className="flex items-center space-x-3">
             <button
               onClick={onOpenConnect}
+              title="Click to open RCON connection settings"
               className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                 connectionState === 'connected'
-                  ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-400 hover:bg-emerald-900/50'
+                  ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-400 hover:bg-emerald-900/50 shadow-sm'
                   : connectionState === 'connecting'
                   ? 'bg-amber-950/40 border-amber-800/60 text-amber-400 animate-pulse'
-                  : 'bg-rose-950/40 border-rose-800/60 text-rose-400 hover:bg-rose-900/50'
+                  : 'bg-rose-950/60 border-rose-600/80 text-rose-300 hover:bg-rose-900/70 animate-pulse shadow-lg shadow-rose-950/60 ring-1 ring-rose-500/50'
               }`}
             >
               {connectionState === 'connected' ? (
                 <>
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
                   <Wifi className="w-3.5 h-3.5" />
                   <span>Connected</span>
                 </>
@@ -119,7 +121,11 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenC
                 </>
               ) : (
                 <>
-                  <WifiOff className="w-3.5 h-3.5" />
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                  </span>
+                  <WifiOff className="w-3.5 h-3.5 text-rose-300" />
                   <span>Disconnected</span>
                 </>
               )}
