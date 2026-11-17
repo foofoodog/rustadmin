@@ -322,7 +322,7 @@ export const ConsoleTab: React.FC = () => {
 
       {/* Autocomplete Popup (In-Game Style) */}
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute bottom-[58px] left-3 right-3 sm:right-auto sm:w-[520px] bg-zinc-900/95 backdrop-blur-md border border-zinc-700/80 rounded-xl shadow-2xl overflow-hidden z-30 animate-in fade-in slide-in-from-bottom-2 duration-150">
+        <div className="absolute bottom-[58px] left-3 right-3 sm:right-auto sm:w-[580px] max-w-[calc(100%-24px)] bg-zinc-900/95 backdrop-blur-md border border-zinc-700/80 rounded-xl shadow-2xl overflow-hidden z-30 animate-in fade-in slide-in-from-bottom-2 duration-150">
           <div className="px-3 py-1.5 bg-zinc-950/80 border-b border-zinc-800 flex items-center justify-between text-[11px] text-zinc-400">
             <span className="flex items-center space-x-1.5 font-semibold text-zinc-300">
               <Sparkles className="w-3.5 h-3.5 text-rust-500" />
@@ -335,7 +335,7 @@ export const ConsoleTab: React.FC = () => {
               <kbd className="px-1.5 py-0.5 bg-zinc-800 text-zinc-200 rounded border border-zinc-700 text-[10px] font-mono">Tab</kbd> complete • <kbd className="px-1.5 py-0.5 bg-zinc-800 text-zinc-200 rounded border border-zinc-700 text-[10px] font-mono">↑↓</kbd> navigate
             </span>
           </div>
-          <div className="max-h-64 overflow-y-auto divide-y divide-zinc-800/40">
+          <div className="max-h-80 overflow-y-auto divide-y divide-zinc-800/40">
             {suggestions.map((sug, idx) => {
               const isSelected = idx === selectedSuggestionIndex;
               return (
@@ -344,11 +344,11 @@ export const ConsoleTab: React.FC = () => {
                   ref={isSelected ? selectedItemRef : null}
                   onClick={() => applySuggestion(sug)}
                   onMouseEnter={() => setSelectedSuggestionIndex(idx)}
-                  className={`px-3 py-2 cursor-pointer transition-colors flex items-center justify-between text-xs ${
+                  className={`px-3 py-2.5 cursor-pointer transition-colors flex items-center justify-between text-xs ${
                     isSelected ? 'bg-rust-950/70 border-l-2 border-rust-500 text-white' : 'hover:bg-zinc-800/50 text-zinc-300'
                   }`}
                 >
-                  <div className="space-y-0.5 flex-1 min-w-0 pr-2">
+                  <div className="space-y-1 flex-1 min-w-0 pr-2">
                     <div className="flex items-center space-x-2">
                       <span className={`font-mono font-bold ${isSelected ? 'text-white' : 'text-zinc-100'}`}>
                         {sug.command}
@@ -358,11 +358,13 @@ export const ConsoleTab: React.FC = () => {
                       </span>
                     </div>
                     {sug.syntax && (
-                      <div className="font-mono text-[11px] text-rust-400 truncate">
+                      <div className="font-mono text-[11px] text-rust-400 break-words whitespace-normal">
                         {sug.syntax}
                       </div>
                     )}
-                    <div className="text-[11px] text-zinc-400 truncate">{sug.description}</div>
+                    <div className="text-[11px] text-zinc-400 break-words whitespace-normal leading-relaxed">
+                      {sug.description}
+                    </div>
                   </div>
                 </div>
               );
