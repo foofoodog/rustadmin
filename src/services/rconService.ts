@@ -21,6 +21,9 @@ class RconService {
   private currentHost = '';
   private currentPort = 28016;
   private currentPassword = '';
+  private serverSeed = '1584212361';
+  private serverWorldSize = 2500;
+  private lastStatus: ServerStatus | null = null;
 
   public getState(): ConnectionState {
     return this.connectionState;
@@ -65,13 +68,15 @@ class RconService {
       const socket = new WebSocket(uri);
       this.ws = socket;
 
-      socket.onopen = () => {
+        socket.onopen = () => {
         if (this.ws !== socket) return;
         this.setState('connected');
         this.startPolling();
         // Initial queries (silent so console isn't flooded on connect)
         this.sendCommand('status', true);
         this.sendCommand('plugins', true);
+        this.sendCommand('server.seed', true);
+        this.sendCommand('server.worldsize', true);
       };
 
       socket.onmessage = (event) => {
@@ -243,6 +248,28 @@ class RconService {
       this.playersListeners.forEach((l) => l(parsedPlayers));
     }
 
+    // Check for Server Seed & WorldSize responses
+    if (msg.includes('server.seed:')) {
+      const match = msg.match(/server\.seed:\s*"(\d+)"/);
+      if (match) {
+        this.serverSeed = match[1];
+        if (this.lastStatus) {
+          this.lastStatus.seed = this.serverSeed;
+          this.statusListeners.forEach((l) => l({ ...this.lastStatus! }));
+        }
+      }
+    }
+    if (msg.includes('server.worldsize:')) {
+      const match = msg.match(/server\.worldsize:\s*"(\d+)"/);
+      if (match) {
+        this.serverWorldSize = parseInt(match[1], 10) || this.serverWorldSize;
+        if (this.lastStatus) {
+          this.lastStatus.worldSize = this.serverWorldSize;
+          this.statusListeners.forEach((l) => l({ ...this.lastStatus! }));
+        }
+      }
+    }
+
     // Check for Plugins output
     if (msg.includes('Listing') && msg.includes('plugins:')) {
       const parsedPlugins = this.parsePluginsOutput(msg);
@@ -265,7 +292,7 @@ class RconService {
       const mapMatch = text.match(/map\s*:\s*(.+)/);
       const playersMatch = text.match(/players\s*:\s*(\d+)\s*\((\d+)\s*max\)\s*\((\d+)\s*queued\)\s*\((\d+)\s*joining\)/);
 
-      return {
+      const parsed: ServerStatus = {
         hostname: hostnameMatch ? hostnameMatch[1].trim() : 'Rust Server',
         version: versionMatch ? versionMatch[1].trim() : '',
         map: mapMatch ? mapMatch[1].trim() : 'Procedural Map',
@@ -273,7 +300,11 @@ class RconService {
         maxPlayers: playersMatch ? parseInt(playersMatch[2], 10) : 50,
         queued: playersMatch ? parseInt(playersMatch[3], 10) : 0,
         joining: playersMatch ? parseInt(playersMatch[4], 10) : 0,
+        seed: this.serverSeed,
+        worldSize: this.serverWorldSize,
       };
+      this.lastStatus = parsed;
+      return parsed;
     } catch {
       return null;
     }

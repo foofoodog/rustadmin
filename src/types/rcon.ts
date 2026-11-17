@@ -30,6 +30,8 @@ export interface ServerStatus {
   fps?: number;
   uptime?: string;
   entities?: number;
+  seed?: string;
+  worldSize?: number;
 }
 
 export interface OxidePlugin {

@@ -66,14 +66,6 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenC
                 </span>
               </div>
             </div>
-
-            {status && connectionState === 'connected' && (
-              <div className="hidden md:flex items-center space-x-3 pl-4 border-l border-zinc-800 text-xs">
-                <span className="text-zinc-300 font-medium">{status.hostname}</span>
-                <span className="text-zinc-600">•</span>
-                <span className="text-zinc-400">{status.map}</span>
-              </div>
-            )}
           </div>
 
           {/* Navigation Tabs */}

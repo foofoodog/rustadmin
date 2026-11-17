@@ -27,6 +27,9 @@ export const DashboardTab: React.FC = () => {
 
   useEffect(() => {
     const unsub = rconService.onStatus(setStatus);
+    rconService.sendCommand('status');
+    rconService.sendCommand('server.seed', true);
+    rconService.sendCommand('server.worldsize', true);
     return () => unsub();
   }, []);
 
@@ -89,17 +92,25 @@ export const DashboardTab: React.FC = () => {
           </div>
         </div>
 
-        {/* Map Info Card */}
+        {/* Server & Map Info Card */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between text-zinc-400 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">Current Map</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Server & Map</span>
             <Radio className="w-4 h-4 text-emerald-500" />
           </div>
-          <div className="text-xl font-bold text-zinc-100 truncate">
-            {status ? status.map : 'Procedural Map'}
+          <div className="flex items-baseline space-x-2 truncate">
+            <span className="text-xl font-bold text-zinc-100 truncate" title={status ? status.hostname : 'Localhost'}>
+              {status ? status.hostname : 'Localhost'}
+            </span>
+            <span className="text-zinc-600 font-semibold">•</span>
+            <span className="text-sm font-semibold text-zinc-300 truncate" title={status ? status.map : 'Procedural Map'}>
+              {status ? status.map : 'Procedural Map'}
+            </span>
           </div>
-          <div className="mt-2 text-xs text-zinc-400">
-            Seed & Worldsize active
+          <div className="mt-2 text-xs text-zinc-400 flex items-center space-x-3 font-mono">
+            <span>Size: <b className="text-rust-400 font-semibold">{status?.worldSize || 2500}m</b></span>
+            <span className="text-zinc-600">•</span>
+            <span>Seed: <b className="text-zinc-200 font-semibold">{status?.seed || '1584212361'}</b></span>
           </div>
         </div>
 
