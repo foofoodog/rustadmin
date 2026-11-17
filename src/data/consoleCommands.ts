@@ -87,12 +87,15 @@ for (const p of PLUGIN_SPECIFIC_COMMANDS) {
 
 // 2. Add raw commands from server
 for (const [command, desc] of Object.entries(rawCommands)) {
-  const lower = command.toLowerCase();
+  const cleanCmd = command.replace(/\(\s*$/, '').trim();
+  const lower = cleanCmd.toLowerCase();
   if (!commandMap.has(lower)) {
+    const rawDesc = (desc as string) || cleanCmd;
+    const cleanDesc = rawDesc.replace(/^\s*\)\s*/, '').trim();
     commandMap.set(lower, {
-      command,
-      description: (desc as string) || command,
-      category: getCategory(command),
+      command: cleanCmd,
+      description: cleanDesc,
+      category: getCategory(cleanCmd),
     });
   }
 }
