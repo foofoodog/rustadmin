@@ -8,18 +8,25 @@ import {
   MapPin, 
   ExternalLink, 
   Compass, 
-  Crosshair,
-  Zap,
-  RefreshCw,
-  Search,
-  SlidersHorizontal,
-  Flame,
-  ShieldCheck,
-  ShoppingBag,
-  Pickaxe,
-  Mountain,
-  Droplets,
-  Move
+  Crosshair, 
+  Zap, 
+  RefreshCw, 
+  Search, 
+  SlidersHorizontal, 
+  Flame, 
+  ShieldCheck, 
+  ShoppingBag, 
+  Pickaxe, 
+  Mountain, 
+  Droplets, 
+  Move,
+  Anchor,
+  Fuel,
+  ShoppingCart,
+  Radio,
+  Warehouse,
+  CircleDot,
+  Skull
 } from 'lucide-react';
 import { rconService } from '../services/rconService';
 import { ServerStatus } from '../types/rcon';
@@ -126,7 +133,6 @@ const DEFAULT_MONUMENTS: Monument[] = [
 
 function categorizeMonument(name: string, type: string, prefab: string): MonumentCategory {
   const n = name.toLowerCase();
-  const p = prefab.toLowerCase();
 
   // Safe zones
   if (n.includes('outpost') || n.includes('bandit') || n.includes('fishing village') || n.includes('barn') || n.includes('ranch') || n.includes('stables')) {
@@ -170,6 +176,60 @@ function categorizeMonument(name: string, type: string, prefab: string): Monumen
   }
 
   return 'roadside';
+}
+
+// Glyph definitions for individual monuments & categories
+export interface GlyphConfig {
+  icon: React.FC<{ className?: string }>;
+  bg: string;
+  border: string;
+  text: string;
+  iconSize: string;
+  badgeSize: string;
+}
+
+export function getMonumentGlyph(m: Monument): GlyphConfig {
+  const n = m.name.toLowerCase();
+
+  // Distinct High-Profile Icons
+  if (n.includes('oil rig') || n.includes('oilrig')) {
+    return { icon: Anchor, bg: 'bg-rose-600', border: 'border-white', text: 'text-white', iconSize: 'w-3.5 h-3.5', badgeSize: 'w-6 h-6' };
+  }
+  if (n.includes('gas station')) {
+    return { icon: Fuel, bg: 'bg-amber-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
+  }
+  if (n.includes('supermarket')) {
+    return { icon: ShoppingCart, bg: 'bg-amber-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
+  }
+  if (n.includes('mining outpost')) {
+    return { icon: Warehouse, bg: 'bg-amber-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
+  }
+  if (n.includes('satellite')) {
+    return { icon: Radio, bg: 'bg-rose-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
+  }
+  if (n.includes('dome')) {
+    return { icon: CircleDot, bg: 'bg-rose-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
+  }
+  if (n.includes('ferry') || n.includes('harbor') || n.includes('fishing village')) {
+    return { icon: Anchor, bg: m.category === 'safezone' ? 'bg-emerald-600' : 'bg-rose-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
+  }
+
+  // Category fallbacks
+  switch (m.category) {
+    case 'safezone':
+      return { icon: ShieldCheck, bg: 'bg-emerald-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
+    case 'quarry':
+      return { icon: Pickaxe, bg: 'bg-orange-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
+    case 'cave':
+      return { icon: Mountain, bg: 'bg-purple-600', border: 'border-white', text: 'text-white', iconSize: 'w-2.5 h-2.5', badgeSize: 'w-4 h-4' };
+    case 'water':
+      return { icon: Droplets, bg: 'bg-sky-600', border: 'border-white', text: 'text-white', iconSize: 'w-2.5 h-2.5', badgeSize: 'w-4 h-4' };
+    case 'substation':
+      return { icon: Zap, bg: 'bg-zinc-800', border: 'border-zinc-500', text: 'text-amber-400', iconSize: 'w-2.5 h-2.5', badgeSize: 'w-3.5 h-3.5' };
+    case 'major':
+    default:
+      return { icon: Flame, bg: 'bg-rose-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
+  }
 }
 
 export const MapTab: React.FC = () => {
@@ -345,7 +405,7 @@ export const MapTab: React.FC = () => {
     });
   };
 
-  const handleMouseUp = (e: React.MouseEvent) => {
+  const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isDragging) return;
     setIsDragging(false);
 
@@ -368,6 +428,32 @@ export const MapTab: React.FC = () => {
     setPan({ x: 0, y: 0 });
   };
 
+  // Center the map view directly on coordinates (X, Z) with auto-pan and optional zoom
+  const centerOnCoords = (x: number, z: number, autoZoom = true) => {
+    const half = mapSize / 2;
+    const pX = (x + half) / mapSize;
+    const pZ = (half - z) / mapSize;
+
+    // Zoom in to at least 1.6x if currently zoomed out so the POI is prominent
+    const targetZoom = autoZoom ? Math.max(zoom, 1.6) : zoom;
+    const newPanX = Math.round(-(pX - 0.5) * 540 * targetZoom);
+    const newPanY = Math.round(-(pZ - 0.5) * 540 * targetZoom);
+
+    setZoom(targetZoom);
+    setPan({ x: newPanX, y: newPanY });
+    setSelectedCoord({ x: Math.round(x), z: Math.round(z) });
+  };
+
+  const selectMonument = (m: Monument) => {
+    // If the category of the monument is currently hidden, automatically turn it on!
+    if (!visibleCategories[m.category]) {
+      setVisibleCategories((prev) => ({ ...prev, [m.category]: true }));
+    }
+    centerOnCoords(m.x, m.z, true);
+    setToast(`Centered on: ${m.name}`);
+    setTimeout(() => setToast(null), 2500);
+  };
+
   const handleTeleport = async () => {
     if (!selectedCoord) return;
     try {
@@ -377,12 +463,6 @@ export const MapTab: React.FC = () => {
       setToast(`Failed: ${err.message}`);
     }
     setTimeout(() => setToast(null), 3000);
-  };
-
-  const selectMonument = (m: Monument) => {
-    setSelectedCoord({ x: Math.round(m.x), z: Math.round(m.z) });
-    setToast(`Selected: ${m.name}`);
-    setTimeout(() => setToast(null), 2500);
   };
 
   // Convert world X, Z into percentage positions for CSS (0% to 100%)
@@ -411,13 +491,12 @@ export const MapTab: React.FC = () => {
     });
   };
 
-  // Category visual styles
-  const categoryConfigs: Record<MonumentCategory, { label: string; color: string; badgeBg: string; border: string; dot: string; icon: React.FC<{ className?: string }> }> = {
+  // Category visual styles for filter badges
+  const categoryConfigs: Record<MonumentCategory, { label: string; color: string; badgeBg: string; dot: string; icon: React.FC<{ className?: string }> }> = {
     major: {
       label: 'Major',
       color: 'text-rose-400',
       badgeBg: 'bg-rose-500/10 border-rose-500/30 text-rose-300',
-      border: 'border-rose-400',
       dot: 'bg-rose-500',
       icon: Flame,
     },
@@ -425,7 +504,6 @@ export const MapTab: React.FC = () => {
       label: 'Safe Zones',
       color: 'text-emerald-400',
       badgeBg: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300',
-      border: 'border-emerald-400',
       dot: 'bg-emerald-500',
       icon: ShieldCheck,
     },
@@ -433,7 +511,6 @@ export const MapTab: React.FC = () => {
       label: 'Roadside',
       color: 'text-amber-400',
       badgeBg: 'bg-amber-500/10 border-amber-500/30 text-amber-300',
-      border: 'border-amber-400',
       dot: 'bg-amber-500',
       icon: ShoppingBag,
     },
@@ -441,7 +518,6 @@ export const MapTab: React.FC = () => {
       label: 'Quarries',
       color: 'text-orange-400',
       badgeBg: 'bg-orange-500/10 border-orange-500/30 text-orange-300',
-      border: 'border-orange-400',
       dot: 'bg-orange-500',
       icon: Pickaxe,
     },
@@ -449,7 +525,6 @@ export const MapTab: React.FC = () => {
       label: 'Caves & Tunnels',
       color: 'text-purple-400',
       badgeBg: 'bg-purple-500/10 border-purple-500/30 text-purple-300',
-      border: 'border-purple-400',
       dot: 'bg-purple-500',
       icon: Mountain,
     },
@@ -457,7 +532,6 @@ export const MapTab: React.FC = () => {
       label: 'Water & Nature',
       color: 'text-sky-400',
       badgeBg: 'bg-sky-500/10 border-sky-500/30 text-sky-300',
-      border: 'border-sky-400',
       dot: 'bg-sky-500',
       icon: Droplets,
     },
@@ -465,7 +539,6 @@ export const MapTab: React.FC = () => {
       label: 'Substations',
       color: 'text-zinc-400',
       badgeBg: 'bg-zinc-800 border-zinc-700 text-zinc-300',
-      border: 'border-zinc-400',
       dot: 'bg-zinc-400',
       icon: Zap,
     },
@@ -508,7 +581,7 @@ export const MapTab: React.FC = () => {
               </span>
             </h2>
             <p className="text-xs text-zinc-400">
-              Scroll wheel to zoom • Click & drag to pan • Click to select coordinate or teleport
+              Scroll wheel to zoom • Drag to pan • Click map to select • Click POI to center
             </p>
           </div>
         </div>
@@ -536,7 +609,7 @@ export const MapTab: React.FC = () => {
             <button
               onClick={handleResetView}
               className="p-1.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 rounded transition-colors"
-              title="Reset Zoom & Pan"
+              title="Reset Zoom & Pan to Center"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
@@ -654,12 +727,12 @@ export const MapTab: React.FC = () => {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={() => isDragging && setIsDragging(false)}
-          className={`lg:col-span-3 bg-zinc-900 border border-zinc-800 rounded-xl p-4 overflow-hidden shadow-sm flex items-center justify-center min-h-[620px] relative select-none ${
+          className={`lg:col-span-3 bg-zinc-950 border border-zinc-800 rounded-xl p-4 overflow-hidden shadow-inner flex items-center justify-center min-h-[620px] relative select-none ${
             isDragging ? 'cursor-grabbing' : 'cursor-grab'
           }`}
         >
           {/* Helper hint badge */}
-          <div className="absolute top-3 left-3 z-30 pointer-events-none flex items-center space-x-2 bg-zinc-950/80 backdrop-blur border border-zinc-800/80 px-2.5 py-1 rounded-md text-[11px] text-zinc-400 shadow-md">
+          <div className="absolute top-3 left-3 z-30 pointer-events-none flex items-center space-x-2 bg-zinc-950/85 backdrop-blur border border-zinc-800/80 px-2.5 py-1 rounded-md text-[11px] text-zinc-400 shadow-md">
             <Move className="w-3.5 h-3.5 text-rust-500" />
             <span>Drag to Pan • Mouse Wheel to Zoom ({Math.round(zoom * 100)}%)</span>
           </div>
@@ -671,7 +744,7 @@ export const MapTab: React.FC = () => {
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transformOrigin: 'center center',
             }}
-            className="relative w-[540px] h-[540px] bg-zinc-950 rounded-xl shadow-2xl cursor-crosshair border border-zinc-800/80 transition-transform duration-75 select-none"
+            className="relative w-[540px] h-[540px] bg-[#0c1421] rounded-xl shadow-2xl cursor-crosshair border border-zinc-800/80 transition-transform duration-75 select-none"
           >
             {/* Map Terrain Image */}
             <img
@@ -692,11 +765,11 @@ export const MapTab: React.FC = () => {
               </div>
             )}
 
-            {/* Monuments Pins */}
+            {/* POI Glyphs & Markers */}
             {filteredMonuments.map((m) => {
               const pos = toPercentage(m.x, m.z);
-              const cfg = categoryConfigs[m.category];
-              const isSubstation = m.category === 'substation';
+              const glyph = getMonumentGlyph(m);
+              const GlyphIcon = glyph.icon;
               const isSelected = selectedCoord && Math.hypot(selectedCoord.x - m.x, selectedCoord.z - m.z) < 25;
 
               return (
@@ -711,21 +784,29 @@ export const MapTab: React.FC = () => {
                   onMouseEnter={() => setHoveredMonument(m)}
                   onMouseLeave={() => setHoveredMonument(null)}
                 >
-                  {/* Monument Pin Dot */}
+                  {/* Glyph Circular Badge */}
                   <div
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/90 shadow-md transition-transform duration-150 group-hover:scale-150 ${
-                      isSubstation ? 'w-2 h-2 bg-zinc-400' : 'w-3 h-3 ' + cfg.dot
-                    } ${isSelected ? 'ring-2 ring-rust-500 scale-125' : ''}`}
-                  />
+                    className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center border shadow-md transition-all duration-150 group-hover:scale-125 group-hover:z-30 cursor-pointer ${
+                      glyph.bg
+                    } ${glyph.border} ${glyph.text} ${glyph.badgeSize} ${
+                      isSelected ? 'ring-4 ring-rust-500 scale-125 z-20 shadow-rust-500/60' : ''
+                    }`}
+                  >
+                    <GlyphIcon className={glyph.iconSize} />
+                  </div>
 
                   {/* High Detail Tooltip */}
-                  <div className="hidden group-hover:flex flex-col items-center absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-40 pointer-events-none">
-                    <div className="bg-zinc-950/95 border border-zinc-700/80 px-2.5 py-1 rounded shadow-xl text-white text-[11px] whitespace-nowrap flex items-center space-x-1.5 backdrop-blur-sm">
-                      <div className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-                      <span className="font-bold text-zinc-100">{m.name}</span>
-                      <span className="text-[10px] text-zinc-400 font-mono">
-                        ({Math.round(m.x)}, {Math.round(m.z)})
-                      </span>
+                  <div className="hidden group-hover:flex flex-col items-center absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 pointer-events-none">
+                    <div className="bg-zinc-950/95 border border-zinc-700 px-2.5 py-1.5 rounded-lg shadow-2xl text-white text-[11px] whitespace-nowrap flex items-center space-x-2 backdrop-blur-md">
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${glyph.bg} text-white`}>
+                        <GlyphIcon className="w-2.5 h-2.5" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-zinc-100">{m.name}</span>
+                        <span className="text-[10px] text-zinc-400 font-mono">
+                          X: {Math.round(m.x)} • Z: {Math.round(m.z)}
+                        </span>
+                      </div>
                     </div>
                     {/* Tooltip caret */}
                     <div className="w-1.5 h-1.5 bg-zinc-950 border-r border-b border-zinc-700 -mt-1 rotate-45" />
@@ -741,16 +822,18 @@ export const MapTab: React.FC = () => {
                 <div
                   key={p.id}
                   style={{ left: pos.left, top: pos.top }}
-                  className="absolute pointer-events-auto z-20 group"
+                  className="absolute pointer-events-auto z-20 group cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedCoord({ x: Math.round(p.x), z: Math.round(p.z) });
-                    setToast(`Selected player: ${p.name}`);
+                    centerOnCoords(p.x, p.z, true);
+                    setToast(`Centered on player: ${p.name}`);
                     setTimeout(() => setToast(null), 2000);
                   }}
                 >
-                  <div className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-cyan-400 border-2 border-white shadow-lg animate-pulse" />
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-1.5 py-0.5 bg-cyan-950/90 text-cyan-200 text-[10px] font-bold rounded whitespace-nowrap z-20 border border-cyan-600 shadow-md">
+                  <div className="absolute -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cyan-500 border-2 border-white shadow-lg flex items-center justify-center animate-pulse">
+                    <Users className="w-2.5 h-2.5 text-white" />
+                  </div>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-cyan-950/90 text-cyan-200 text-[10px] font-bold rounded whitespace-nowrap z-20 border border-cyan-600 shadow-md">
                     {p.name}
                   </div>
                 </div>
@@ -764,7 +847,7 @@ export const MapTab: React.FC = () => {
                 className="absolute pointer-events-none z-30"
               >
                 {/* Ping pulse centered on point */}
-                <div className="absolute -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full border-2 border-rust-500 bg-rust-500/20 animate-ping" />
+                <div className="absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-2 border-rust-500 bg-rust-500/20 animate-ping" />
 
                 {/* Crosshair centered on point */}
                 <div className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
@@ -786,7 +869,7 @@ export const MapTab: React.FC = () => {
                 <Compass className="w-4 h-4 text-rust-500" />
                 <span>Selected Coordinates</span>
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">Click map or pick a monument</p>
+              <p className="text-xs text-zinc-400 mt-0.5">Click map or pick a POI to center</p>
             </div>
 
             {selectedCoord ? (
@@ -837,27 +920,31 @@ export const MapTab: React.FC = () => {
                 />
               </div>
 
-              {/* Scrollable Monuments List */}
-              <div className="max-h-[280px] overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+              {/* Scrollable Monuments List with Glyphs */}
+              <div className="max-h-[280px] overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
                 {filteredMonuments.map((m) => {
-                  const cfg = categoryConfigs[m.category];
+                  const glyph = getMonumentGlyph(m);
+                  const GlyphIcon = glyph.icon;
                   const isSelected = selectedCoord && selectedCoord.x === Math.round(m.x) && selectedCoord.z === Math.round(m.z);
 
                   return (
                     <button
                       key={m.id}
                       onClick={() => selectMonument(m)}
-                      className={`w-full text-left p-2 rounded-lg border transition-all flex items-center justify-between text-xs ${
+                      className={`w-full text-left p-2 rounded-lg border transition-all flex items-center justify-between text-xs group ${
                         isSelected
-                          ? 'bg-rust-950/40 border-rust-500 text-rust-200'
+                          ? 'bg-rust-950/50 border-rust-500 text-rust-100 shadow-sm'
                           : 'bg-zinc-950/50 hover:bg-zinc-800/60 border-zinc-800/80 text-zinc-300'
                       }`}
+                      title="Click to center and target monument"
                     >
-                      <div className="flex items-center space-x-2 truncate">
-                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
+                      <div className="flex items-center space-x-2.5 truncate">
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${glyph.bg} ${glyph.text} border ${glyph.border}`}>
+                          <GlyphIcon className="w-2.5 h-2.5" />
+                        </div>
                         <span className="font-medium truncate">{m.name}</span>
                       </div>
-                      <span className="font-mono text-[10px] text-zinc-500 flex-shrink-0 ml-2">
+                      <span className="font-mono text-[10px] text-zinc-500 flex-shrink-0 ml-2 group-hover:text-zinc-300">
                         {Math.round(m.x)}, {Math.round(m.z)}
                       </span>
                     </button>
