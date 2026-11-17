@@ -31,6 +31,7 @@ export const ConsoleTab: React.FC = () => {
 
   const logContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const selectedItemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const unsub = rconService.onLog((msg) => {
@@ -45,6 +46,15 @@ export const ConsoleTab: React.FC = () => {
     }
   }, [logs, autoScroll]);
 
+  // Automatically scroll the suggestions list to keep selected suggestion in view
+  useEffect(() => {
+    if (showSuggestions && selectedItemRef.current) {
+      selectedItemRef.current.scrollIntoView({
+        block: 'nearest',
+      });
+    }
+  }, [selectedSuggestionIndex, showSuggestions]);
+
   // Update suggestions when command input changes
   useEffect(() => {
     const trimmed = command.trim();
@@ -57,10 +67,21 @@ export const ConsoleTab: React.FC = () => {
     // Only autocomplete the first word (the command itself)
     const firstWord = command.split(' ')[0].toLowerCase();
     if (firstWord.length >= 1) {
-      const matches = CONSOLE_COMMANDS.filter((c) =>
-        c.command.toLowerCase().startsWith(firstWord) ||
-        c.command.toLowerCase().includes(firstWord)
-      ).slice(0, 8);
+      // Prioritize exact prefix matches, then substring matches
+      const prefixMatches: CommandInfo[] = [];
+      const subMatches: CommandInfo[] = [];
+
+      for (const c of CONSOLE_COMMANDS) {
+        const cmdLower = c.command.toLowerCase();
+        if (cmdLower.startsWith(firstWord)) {
+          prefixMatches.push(c);
+        } else if (cmdLower.includes(firstWord)) {
+          subMatches.push(c);
+        }
+        if (prefixMatches.length + subMatches.length >= 60) break;
+      }
+
+      const matches = [...prefixMatches, ...subMatches].slice(0, 40);
 
       setSuggestions(matches);
       setSelectedSuggestionIndex(0);
@@ -263,39 +284,47 @@ export const ConsoleTab: React.FC = () => {
 
       {/* Autocomplete Popup (In-Game Style) */}
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute bottom-[58px] left-3 right-3 sm:right-auto sm:w-[480px] bg-zinc-900/95 backdrop-blur-md border border-zinc-700/80 rounded-xl shadow-2xl overflow-hidden z-30 animate-in fade-in slide-in-from-bottom-2 duration-150">
+        <div className="absolute bottom-[58px] left-3 right-3 sm:right-auto sm:w-[520px] bg-zinc-900/95 backdrop-blur-md border border-zinc-700/80 rounded-xl shadow-2xl overflow-hidden z-30 animate-in fade-in slide-in-from-bottom-2 duration-150">
           <div className="px-3 py-1.5 bg-zinc-950/80 border-b border-zinc-800 flex items-center justify-between text-[11px] text-zinc-400">
-            <span className="flex items-center space-x-1 font-semibold text-zinc-300">
+            <span className="flex items-center space-x-1.5 font-semibold text-zinc-300">
               <Sparkles className="w-3.5 h-3.5 text-rust-500" />
               <span>Console Suggestions</span>
+              <span className="text-[10px] text-zinc-500 font-mono">
+                ({selectedSuggestionIndex + 1}/{suggestions.length})
+              </span>
             </span>
-            <span>Press <kbd className="px-1.5 py-0.5 bg-zinc-800 text-zinc-200 rounded border border-zinc-700 text-[10px] font-mono">Tab</kbd> to complete</span>
+            <span>
+              <kbd className="px-1.5 py-0.5 bg-zinc-800 text-zinc-200 rounded border border-zinc-700 text-[10px] font-mono">Tab</kbd> complete • <kbd className="px-1.5 py-0.5 bg-zinc-800 text-zinc-200 rounded border border-zinc-700 text-[10px] font-mono">↑↓</kbd> navigate
+            </span>
           </div>
-          <div className="max-h-60 overflow-y-auto divide-y divide-zinc-800/40">
+          <div className="max-h-64 overflow-y-auto divide-y divide-zinc-800/40">
             {suggestions.map((sug, idx) => {
               const isSelected = idx === selectedSuggestionIndex;
               return (
                 <div
                   key={sug.command}
+                  ref={isSelected ? selectedItemRef : null}
                   onClick={() => applySuggestion(sug)}
                   onMouseEnter={() => setSelectedSuggestionIndex(idx)}
                   className={`px-3 py-2 cursor-pointer transition-colors flex items-center justify-between text-xs ${
-                    isSelected ? 'bg-rust-950/60 border-l-2 border-rust-500' : 'hover:bg-zinc-800/50'
+                    isSelected ? 'bg-rust-950/70 border-l-2 border-rust-500 text-white' : 'hover:bg-zinc-800/50 text-zinc-300'
                   }`}
                 >
-                  <div className="space-y-0.5">
+                  <div className="space-y-0.5 flex-1 min-w-0 pr-2">
                     <div className="flex items-center space-x-2">
-                      <span className="font-mono font-bold text-zinc-100">{sug.command}</span>
+                      <span className={`font-mono font-bold ${isSelected ? 'text-white' : 'text-zinc-100'}`}>
+                        {sug.command}
+                      </span>
                       <span className="px-1.5 py-0.2 bg-zinc-800 text-zinc-400 text-[10px] rounded font-semibold uppercase">
                         {sug.category}
                       </span>
                     </div>
                     {sug.syntax && (
-                      <div className="font-mono text-[11px] text-rust-400">
+                      <div className="font-mono text-[11px] text-rust-400 truncate">
                         {sug.syntax}
                       </div>
                     )}
-                    <div className="text-[11px] text-zinc-400">{sug.description}</div>
+                    <div className="text-[11px] text-zinc-400 truncate">{sug.description}</div>
                   </div>
                 </div>
               );
