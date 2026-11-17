@@ -1,0 +1,9 @@
+services:
+  rustadmin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rustadmin
+    restart: unless-stopped
+    ports:
+      - "3001:80"
