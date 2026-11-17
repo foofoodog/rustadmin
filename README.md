@@ -2,6 +2,8 @@
 
 A modern, high-performance web administration suite for Rust Dedicated Servers built on WebSocket WebRCON. Fully self-contained, lightning-fast, and designed for server owners, administrators, and event hosts.
 
+👉 **[View Full Visual Tour with Screenshots (12 Views)](screenshots.md)**
+
 ---
 
 ## 🌟 Key Features

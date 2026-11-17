@@ -17,8 +17,28 @@ import { rconService } from './services/rconService';
 import { getActiveProfile } from './services/serverProfiles';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const getTabFromHash = () => {
+    const hash = window.location.hash.replace('#', '').trim();
+    return hash || 'dashboard';
+  };
+
+  const [activeTab, setActiveTab] = useState(getTabFromHash);
   const [isConnectOpen, setIsConnectOpen] = useState(false);
+
+  useEffect(() => {
+    const onHashChange = () => {
+      setActiveTab(getTabFromHash());
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  const handleTabChange = (tab: string) => {
+    if (window.location.hash.replace('#', '') !== tab) {
+      window.location.hash = tab;
+    }
+    setActiveTab(tab);
+  };
 
   useEffect(() => {
     // Attempt auto-connect with saved active profile or defaults
@@ -34,7 +54,7 @@ export function App() {
     <div className="min-h-screen bg-zinc-950 flex flex-col font-sans text-zinc-100">
       <Header
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
         onOpenConnect={() => setIsConnectOpen(true)}
       />
 
