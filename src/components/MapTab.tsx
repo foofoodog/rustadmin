@@ -178,58 +178,65 @@ function categorizeMonument(name: string, type: string, prefab: string): Monumen
   return 'roadside';
 }
 
-// Glyph definitions for individual monuments & categories
-export interface GlyphConfig {
-  icon: React.FC<{ className?: string }>;
-  bg: string;
-  border: string;
-  text: string;
-  iconSize: string;
-  badgeSize: string;
-}
-
-export function getMonumentGlyph(m: Monument): GlyphConfig {
+// Exact RustMaps SVG mapping for all monuments
+export function getMonumentSvg(m: Monument): string {
   const n = m.name.toLowerCase();
+  const p = (m.prefab || '').toLowerCase();
 
-  // Distinct High-Profile Icons
-  if (n.includes('oil rig') || n.includes('oilrig')) {
-    return { icon: Anchor, bg: 'bg-rose-600', border: 'border-white', text: 'text-white', iconSize: 'w-3.5 h-3.5', badgeSize: 'w-6 h-6' };
-  }
-  if (n.includes('gas station')) {
-    return { icon: Fuel, bg: 'bg-amber-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
-  }
-  if (n.includes('supermarket')) {
-    return { icon: ShoppingCart, bg: 'bg-amber-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
-  }
-  if (n.includes('mining outpost')) {
-    return { icon: Warehouse, bg: 'bg-amber-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
-  }
-  if (n.includes('satellite')) {
-    return { icon: Radio, bg: 'bg-rose-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
-  }
-  if (n.includes('dome')) {
-    return { icon: CircleDot, bg: 'bg-rose-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
-  }
-  if (n.includes('ferry') || n.includes('harbor') || n.includes('fishing village')) {
-    return { icon: Anchor, bg: m.category === 'safezone' ? 'bg-emerald-600' : 'bg-rose-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
-  }
+  // Outpost & Bandit Town
+  if (n.includes('outpost') || p.includes('compound')) return '/monuments/Outpost.svg';
+  if (n.includes('bandit') || p.includes('bandit_town')) return '/monuments/Bandit_Town.svg';
 
-  // Category fallbacks
-  switch (m.category) {
-    case 'safezone':
-      return { icon: ShieldCheck, bg: 'bg-emerald-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
-    case 'quarry':
-      return { icon: Pickaxe, bg: 'bg-orange-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
-    case 'cave':
-      return { icon: Mountain, bg: 'bg-purple-600', border: 'border-white', text: 'text-white', iconSize: 'w-2.5 h-2.5', badgeSize: 'w-4 h-4' };
-    case 'water':
-      return { icon: Droplets, bg: 'bg-sky-600', border: 'border-white', text: 'text-white', iconSize: 'w-2.5 h-2.5', badgeSize: 'w-4 h-4' };
-    case 'substation':
-      return { icon: Zap, bg: 'bg-zinc-800', border: 'border-zinc-500', text: 'text-amber-400', iconSize: 'w-2.5 h-2.5', badgeSize: 'w-3.5 h-3.5' };
-    case 'major':
-    default:
-      return { icon: Flame, bg: 'bg-rose-600', border: 'border-white', text: 'text-white', iconSize: 'w-3 h-3', badgeSize: 'w-5 h-5' };
-  }
+  // Barn & Ranch / Stables
+  if (n.includes('large barn') || p.includes('stables_b')) return '/monuments/Large_Barn.svg';
+  if (n.includes('ranch') || n.includes('stable') || p.includes('stables_a')) return '/monuments/Horse_Stable.svg';
+
+  // Fishing Villages
+  if (n.includes('large fishing village') || p.includes('fishing_village_a')) return '/monuments/Fishing_Village_A.svg';
+  if (n.includes('fishing village') || p.includes('fishing_village_b')) return '/monuments/Fishing_Village_B.svg';
+
+  // Oil Rigs
+  if (n.includes('large oil rig') || n.includes('large oilrig') || p.includes('oilrig_1')) return '/monuments/Oilrig_Large.svg';
+  if (n.includes('oil rig') || n.includes('oilrig') || p.includes('oilrig_2')) return '/monuments/Oilrig_Small.svg';
+
+  // Major Radtowns
+  if (n.includes('silo') || p.includes('nuclear_missile_silo')) return '/monuments/Nuclear_Missile_Silo.svg';
+  if (n.includes('dome') || p.includes('sphere_tank')) return '/monuments/Sphere_Tank.svg';
+  if (n.includes('train yard') || n.includes('trainyard') || p.includes('trainyard_1')) return '/monuments/Trainyard.svg';
+  if (n.includes('military') || p.includes('military_base')) return '/monuments/Military_Base.svg';
+  if (n.includes('junkyard') || p.includes('junkyard_1')) return '/monuments/Junkyard.svg';
+  if (n.includes('sewer') || p.includes('radtown_small_3')) return '/monuments/Sewer_Branch.svg';
+  if (n.includes('satellite') || p.includes('satellite_dish')) return '/monuments/Satellite_Dish.svg';
+  if (n.includes('ferry') || p.includes('ferry_terminal')) return '/monuments/Ferry_Terminal_1.svg';
+  if (n.includes('harbor 2') || p.includes('harbor_2') || n.includes('large harbor')) return '/monuments/Harbor_Large.svg';
+  if (n.includes('harbor') || p.includes('harbor_1')) return '/monuments/Harbor_Small.svg';
+  if (n.includes('lighthouse') || p.includes('lighthouse')) return '/monuments/Lighthouse.svg';
+  if (n.includes('underwater') || p.includes('underwater_lab')) return '/monuments/Underwater_Lab.svg';
+
+  // Mining Quarries
+  if (n.includes('sulfur') || p.includes('mining_quarry_a')) return '/monuments/Sulfur_Quarry.svg';
+  if (n.includes('hqm') || p.includes('mining_quarry_c')) return '/monuments/Hqm_Quarry.svg';
+  if (n.includes('stone quarry') || p.includes('mining_quarry_b')) return '/monuments/Stone_Quarry.svg';
+
+  // Roadside
+  if (n.includes('gas station') || n.includes("oxum's") || p.includes('gas_station')) return '/monuments/Gasstation.svg';
+  if (n.includes('supermarket') || p.includes('supermarket')) return '/monuments/Supermarket.svg';
+  if (n.includes('mining outpost') || p.includes('warehouse')) return '/monuments/Warehouse.svg';
+
+  // Caves & Tunnels
+  if (n.includes('tunnel') || p.includes('tunnel-entrance') || p.includes('entrance_bunker')) return '/monuments/Tunnel_Entrance.svg';
+  if (n.includes('cave') || p.includes('cave')) return '/monuments/Cave.svg';
+
+  // Water & Nature
+  if (n.includes('water well') || p.includes('water_well')) return '/monuments/Water_Well.svg';
+  if (n.includes('swamp') || p.includes('swamp')) return '/monuments/Swamp.svg';
+  if (n.includes('jungle ruin') || p.includes('jungle_ruins')) return '/monuments/Jungle_Ruin.svg';
+  if (n.includes('ice lake') || n.includes('iceberg') || p.includes('ice_lake')) return '/monuments/Iceberg.svg';
+
+  // Substations
+  if (n.includes('substation') || p.includes('power_sub')) return '/monuments/Power_Substation.svg';
+
+  return '/monuments/Cave.svg';
 }
 
 export const MapTab: React.FC = () => {
@@ -765,13 +772,13 @@ export const MapTab: React.FC = () => {
               </div>
             )}
 
-            {/* POI Glyphs & Markers */}
+            {/* POI RustMaps SVG Markers */}
             {filteredMonuments.map((m) => {
               const pos = toPercentage(m.x, m.z);
-              const glyph = getMonumentGlyph(m);
-              const GlyphIcon = glyph.icon;
+              const svgUrl = getMonumentSvg(m);
               const isSelected = selectedCoord && Math.hypot(selectedCoord.x - m.x, selectedCoord.z - m.z) < 25;
               const isHovered = hoveredMonument?.id === m.id;
+              const isSubstation = m.category === 'substation';
 
               return (
                 <div
@@ -783,7 +790,7 @@ export const MapTab: React.FC = () => {
                     transformOrigin: 'center center',
                     zIndex: isHovered ? 40 : (isSelected ? 30 : 10),
                   }}
-                  className="absolute pointer-events-auto cursor-pointer"
+                  className="absolute pointer-events-auto cursor-pointer group"
                   onClick={(e) => {
                     e.stopPropagation();
                     selectMonument(m);
@@ -791,16 +798,16 @@ export const MapTab: React.FC = () => {
                   onMouseEnter={() => setHoveredMonument(m)}
                   onMouseLeave={() => setHoveredMonument(null)}
                 >
-                  {/* Glyph Circular Badge */}
-                  <div
-                    className={`rounded-full flex items-center justify-center border shadow-md transition-transform duration-150 hover:scale-125 ${
-                      glyph.bg
-                    } ${glyph.border} ${glyph.text} ${glyph.badgeSize} ${
-                      isSelected ? 'ring-4 ring-rust-500 scale-125 shadow-rust-500/60' : ''
+                  <img
+                    src={svgUrl}
+                    alt={m.name}
+                    draggable={false}
+                    className={`select-none pointer-events-none drop-shadow-md transition-transform duration-150 group-hover:scale-125 ${
+                      isSubstation ? 'w-5 h-5' : 'w-7 h-7'
+                    } ${
+                      isSelected ? 'ring-4 ring-rust-500 rounded-full scale-125 shadow-rust-500/60' : ''
                     }`}
-                  >
-                    <GlyphIcon className={glyph.iconSize} />
-                  </div>
+                  />
                 </div>
               );
             })}
@@ -860,8 +867,7 @@ export const MapTab: React.FC = () => {
             {/* Global Hovered POI Tooltip Card - Always on Top of All Pins & Fixed Screen Scale */}
             {hoveredMonument && (() => {
               const pos = toPercentage(hoveredMonument.x, hoveredMonument.z);
-              const glyph = getMonumentGlyph(hoveredMonument);
-              const GlyphIcon = glyph.icon;
+              const svgUrl = getMonumentSvg(hoveredMonument);
 
               return (
                 <div
@@ -871,12 +877,14 @@ export const MapTab: React.FC = () => {
                     transform: `translate(-50%, -100%) scale(${1 / zoom})`,
                     transformOrigin: 'bottom center',
                   }}
-                  className="absolute pointer-events-none z-50 flex flex-col items-center pb-2.5"
+                  className="absolute pointer-events-none z-50 flex flex-col items-center pb-3"
                 >
                   <div className="bg-zinc-950/95 border border-zinc-700/90 px-3 py-1.5 rounded-lg shadow-2xl text-white text-xs whitespace-nowrap flex items-center space-x-2.5 backdrop-blur-md">
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center ${glyph.bg} text-white shadow-sm flex-shrink-0`}>
-                      <GlyphIcon className="w-3 h-3" />
-                    </div>
+                    <img
+                      src={svgUrl}
+                      alt={hoveredMonument.name}
+                      className="w-5 h-5 object-contain flex-shrink-0 drop-shadow"
+                    />
                     <div className="flex flex-col">
                       <span className="font-bold text-zinc-100 text-xs">{hoveredMonument.name}</span>
                       <span className="text-[10px] text-zinc-400 font-mono">
@@ -955,8 +963,7 @@ export const MapTab: React.FC = () => {
               {/* Scrollable Monuments List with Glyphs */}
               <div className="max-h-[280px] overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
                 {filteredMonuments.map((m) => {
-                  const glyph = getMonumentGlyph(m);
-                  const GlyphIcon = glyph.icon;
+                  const svgUrl = getMonumentSvg(m);
                   const isSelected = selectedCoord && selectedCoord.x === Math.round(m.x) && selectedCoord.z === Math.round(m.z);
 
                   return (
@@ -971,9 +978,11 @@ export const MapTab: React.FC = () => {
                       title="Click to center and target monument"
                     >
                       <div className="flex items-center space-x-2.5 truncate">
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${glyph.bg} ${glyph.text} border ${glyph.border}`}>
-                          <GlyphIcon className="w-2.5 h-2.5" />
-                        </div>
+                        <img
+                          src={svgUrl}
+                          alt={m.name}
+                          className="w-5 h-5 object-contain flex-shrink-0 drop-shadow-sm"
+                        />
                         <span className="font-medium truncate">{m.name}</span>
                       </div>
                       <span className="font-mono text-[10px] text-zinc-500 flex-shrink-0 ml-2 group-hover:text-zinc-300">
