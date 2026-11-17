@@ -15,69 +15,11 @@ import {
 import { 
   RUST_ITEMS, 
   RustItem, 
-  RUST_CATEGORIES, 
-  getItemIconUrl, 
-  getItemFallbackIconUrl, 
-  getItemTertiaryIconUrl 
+  RUST_CATEGORIES 
 } from '../data/rustItems';
+import { ItemSprite } from './ItemSprite';
 import { rconService } from '../services/rconService';
 import { Player } from '../types/rcon';
-
-// Resilient Item Image with 3-tier CDN fallback and icon placeholder
-const ItemImage: React.FC<{ item: RustItem; className?: string }> = ({ item, className = "max-h-full max-w-full object-contain" }) => {
-  const [tier, setTier] = useState<number>(1);
-
-  const handleError = () => {
-    setTier((prev) => prev + 1);
-  };
-
-  if (tier === 1) {
-    return (
-      <img
-        src={getItemIconUrl(item.shortname)}
-        alt={item.name}
-        loading="lazy"
-        onError={handleError}
-        className={className}
-      />
-    );
-  }
-
-  if (tier === 2) {
-    return (
-      <img
-        src={getItemFallbackIconUrl(item.shortname)}
-        alt={item.name}
-        loading="lazy"
-        onError={handleError}
-        className={className}
-      />
-    );
-  }
-
-  if (tier === 3) {
-    return (
-      <img
-        src={getItemTertiaryIconUrl(item.shortname, item.icon)}
-        alt={item.name}
-        loading="lazy"
-        onError={handleError}
-        className={className}
-      />
-    );
-  }
-
-  // Tier 4: Stylish Fallback Badge
-  const shortDisplay = item.shortname.split('.').pop() || item.name.slice(0, 4);
-  return (
-    <div className="w-14 h-14 rounded-lg bg-zinc-800/80 border border-zinc-700/60 flex flex-col items-center justify-center text-zinc-400 group-hover:border-rust-500/50 transition-colors p-1">
-      <Package className="w-6 h-6 text-rust-400/80 mb-0.5" />
-      <span className="text-[9px] font-mono font-medium text-zinc-400 uppercase truncate max-w-[50px] text-center">
-        {shortDisplay}
-      </span>
-    </div>
-  );
-};
 
 export const ItemsTab: React.FC = () => {
   const [items] = useState<RustItem[]>(RUST_ITEMS);
@@ -271,9 +213,11 @@ export const ItemsTab: React.FC = () => {
                 )}
 
                 <div className="w-20 h-20 flex items-center justify-center p-1 relative mb-2">
-                  <ItemImage
-                    item={item}
-                    className="max-h-full max-w-full object-contain filter drop-shadow group-hover:scale-105 transition-transform"
+                  <ItemSprite
+                    shortname={item.shortname}
+                    size={72}
+                    alt={item.name}
+                    className="filter drop-shadow group-hover:scale-105 transition-transform"
                   />
                 </div>
                 <div className="w-full">
@@ -334,9 +278,10 @@ export const ItemsTab: React.FC = () => {
 
             <div className="flex items-start space-x-3 border-b border-zinc-800 pb-3">
               <div className="w-16 h-16 bg-zinc-950 border border-zinc-800 rounded-lg p-1.5 flex items-center justify-center shrink-0">
-                <ItemImage
-                  item={selectedItem}
-                  className="max-h-full max-w-full object-contain"
+                <ItemSprite
+                  shortname={selectedItem.shortname}
+                  size={56}
+                  alt={selectedItem.name}
                 />
               </div>
               <div className="flex-1 min-w-0 pr-4">
