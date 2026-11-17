@@ -7,6 +7,7 @@ import {
   Terminal, 
   Users, 
   Puzzle, 
+  ShieldCheck,
   MessageSquare, 
   LayoutDashboard,
   Map as MapIcon,
@@ -41,7 +42,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenC
     { id: 'map', label: 'Map', icon: MapIcon },
     { id: 'items', label: 'Items', icon: Package },
     { id: 'players', label: 'Players', icon: Users, badge: status ? `${status.players}/${status.maxPlayers}` : undefined },
-    { id: 'plugins', label: 'Oxide Plugins', icon: Puzzle },
+    { id: 'plugins', label: 'Plugins', icon: Puzzle },
+    { id: 'permissions', label: 'Permissions', icon: ShieldCheck },
     { id: 'chat', label: 'Chat', icon: MessageSquare },
   ];
 

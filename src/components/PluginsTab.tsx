@@ -8,12 +8,17 @@ import {
   Power, 
   Play, 
   Search,
-  Zap
+  Zap,
+  ShieldCheck
 } from 'lucide-react';
 import { rconService } from '../services/rconService';
 import { OxidePlugin } from '../types/rcon';
 
-export const PluginsTab: React.FC = () => {
+interface PluginsTabProps {
+  onNavigateToPermissions?: () => void;
+}
+
+export const PluginsTab: React.FC<PluginsTabProps> = ({ onNavigateToPermissions }) => {
   const [plugins, setPlugins] = useState<OxidePlugin[]>([]);
   const [search, setSearch] = useState('');
   const [loadingPlugin, setLoadingPlugin] = useState<string | null>(null);
@@ -108,6 +113,17 @@ export const PluginsTab: React.FC = () => {
             <RotateCw className={`w-3.5 h-3.5 ${loadingPlugin === '__all__' ? 'animate-spin' : ''}`} />
             <span>Reload All</span>
           </button>
+
+          {onNavigateToPermissions && (
+            <button
+              onClick={onNavigateToPermissions}
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 rounded-lg text-xs font-medium transition-colors"
+              title="Open Oxide Permissions Manager"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-rust-400" />
+              <span>Permissions</span>
+            </button>
+          )}
 
           {/* Refresh List */}
           <button

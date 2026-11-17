@@ -6,6 +6,7 @@ import { MapTab } from './components/MapTab';
 import { ItemsTab } from './components/ItemsTab';
 import { PlayersTab } from './components/PlayersTab';
 import { PluginsTab } from './components/PluginsTab';
+import { PermissionsManager } from './components/PermissionsManager';
 import { ChatTab } from './components/ChatTab';
 import { ConnectModal } from './components/ConnectModal';
 import { rconService } from './services/rconService';
@@ -37,7 +38,8 @@ export function App() {
         {activeTab === 'map' && <MapTab />}
         {activeTab === 'items' && <ItemsTab />}
         {activeTab === 'players' && <PlayersTab />}
-        {activeTab === 'plugins' && <PluginsTab />}
+        {activeTab === 'plugins' && <PluginsTab onNavigateToPermissions={() => setActiveTab('permissions')} />}
+        {activeTab === 'permissions' && <PermissionsManager />}
         {activeTab === 'chat' && <ChatTab />}
       </main>
 
