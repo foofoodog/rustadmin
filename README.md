@@ -1,7 +1,11 @@
 # RustAdmin WebRCON
 
+[![Deploy to GitHub Pages](https://github.com/foofoodog/rustadmin/actions/workflows/deploy.yml/badge.svg)](https://github.com/foofoodog/rustadmin/actions/workflows/deploy.yml)
+[![Live Demo](https://img.shields.io/badge/Demo-Live%20on%20GitHub%20Pages-22c55e?style=flat&logo=github)](https://foofoodog.github.io/rustadmin/)
+
 A modern, high-performance web administration suite for Rust Dedicated Servers built on WebSocket WebRCON. Fully self-contained, lightning-fast, and designed for server owners, administrators, and event hosts.
 
+🎮 **Live Demo:** [https://foofoodog.github.io/rustadmin/](https://foofoodog.github.io/rustadmin/)  
 👉 **[View Full Visual Tour with Screenshots (12 Views)](screenshots.md)**
 
 ---

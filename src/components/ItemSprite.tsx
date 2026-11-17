@@ -59,7 +59,7 @@ export const ItemSprite: React.FC<ItemSpriteProps> = ({
       style={{
         width: `${size}px`,
         height: `${size}px`,
-        backgroundImage: "url('/items-spritesheet.webp')",
+        backgroundImage: `url('${import.meta.env.BASE_URL}items-spritesheet.webp')`,
         backgroundPosition: `${bgX}px ${bgY}px`,
         backgroundSize: `${bgWidth}px ${bgHeight}px`,
         backgroundRepeat: 'no-repeat',

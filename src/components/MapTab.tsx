@@ -182,61 +182,62 @@ function categorizeMonument(name: string, type: string, prefab: string): Monumen
 export function getMonumentSvg(m: Monument): string {
   const n = m.name.toLowerCase();
   const p = (m.prefab || '').toLowerCase();
+  const base = import.meta.env.BASE_URL;
 
   // Outpost & Bandit Town
-  if (n.includes('outpost') || p.includes('compound')) return '/monuments/Outpost.svg';
-  if (n.includes('bandit') || p.includes('bandit_town')) return '/monuments/Bandit_Town.svg';
+  if (n.includes('outpost') || p.includes('compound')) return `${base}monuments/Outpost.svg`;
+  if (n.includes('bandit') || p.includes('bandit_town')) return `${base}monuments/Bandit_Town.svg`;
 
   // Barn & Ranch / Stables
-  if (n.includes('large barn') || p.includes('stables_b')) return '/monuments/Large_Barn.svg';
-  if (n.includes('ranch') || n.includes('stable') || p.includes('stables_a')) return '/monuments/Horse_Stable.svg';
+  if (n.includes('large barn') || p.includes('stables_b')) return `${base}monuments/Large_Barn.svg`;
+  if (n.includes('ranch') || n.includes('stable') || p.includes('stables_a')) return `${base}monuments/Horse_Stable.svg`;
 
   // Fishing Villages
-  if (n.includes('large fishing village') || p.includes('fishing_village_a')) return '/monuments/Fishing_Village_A.svg';
-  if (n.includes('fishing village') || p.includes('fishing_village_b')) return '/monuments/Fishing_Village_B.svg';
+  if (n.includes('large fishing village') || p.includes('fishing_village_a')) return `${base}monuments/Fishing_Village_A.svg`;
+  if (n.includes('fishing village') || p.includes('fishing_village_b')) return `${base}monuments/Fishing_Village_B.svg`;
 
   // Oil Rigs
-  if (n.includes('large oil rig') || n.includes('large oilrig') || p.includes('oilrig_1')) return '/monuments/Oilrig_Large.svg';
-  if (n.includes('oil rig') || n.includes('oilrig') || p.includes('oilrig_2')) return '/monuments/Oilrig_Small.svg';
+  if (n.includes('large oil rig') || n.includes('large oilrig') || p.includes('oilrig_1')) return `${base}monuments/Oilrig_Large.svg`;
+  if (n.includes('oil rig') || n.includes('oilrig') || p.includes('oilrig_2')) return `${base}monuments/Oilrig_Small.svg`;
 
   // Major Radtowns
-  if (n.includes('silo') || p.includes('nuclear_missile_silo')) return '/monuments/Nuclear_Missile_Silo.svg';
-  if (n.includes('dome') || p.includes('sphere_tank')) return '/monuments/Sphere_Tank.svg';
-  if (n.includes('train yard') || n.includes('trainyard') || p.includes('trainyard_1')) return '/monuments/Trainyard.svg';
-  if (n.includes('military') || p.includes('military_base')) return '/monuments/Military_Base.svg';
-  if (n.includes('junkyard') || p.includes('junkyard_1')) return '/monuments/Junkyard.svg';
-  if (n.includes('sewer') || p.includes('radtown_small_3')) return '/monuments/Sewer_Branch.svg';
-  if (n.includes('satellite') || p.includes('satellite_dish')) return '/monuments/Satellite_Dish.svg';
-  if (n.includes('ferry') || p.includes('ferry_terminal')) return '/monuments/Ferry_Terminal_1.svg';
-  if (n.includes('harbor 2') || p.includes('harbor_2') || n.includes('large harbor')) return '/monuments/Harbor_Large.svg';
-  if (n.includes('harbor') || p.includes('harbor_1')) return '/monuments/Harbor_Small.svg';
-  if (n.includes('lighthouse') || p.includes('lighthouse')) return '/monuments/Lighthouse.svg';
-  if (n.includes('underwater') || p.includes('underwater_lab')) return '/monuments/Underwater_Lab.svg';
+  if (n.includes('silo') || p.includes('nuclear_missile_silo')) return `${base}monuments/Nuclear_Missile_Silo.svg`;
+  if (n.includes('dome') || p.includes('sphere_tank')) return `${base}monuments/Sphere_Tank.svg`;
+  if (n.includes('train yard') || n.includes('trainyard') || p.includes('trainyard_1')) return `${base}monuments/Trainyard.svg`;
+  if (n.includes('military') || p.includes('military_base')) return `${base}monuments/Military_Base.svg`;
+  if (n.includes('junkyard') || p.includes('junkyard_1')) return `${base}monuments/Junkyard.svg`;
+  if (n.includes('sewer') || p.includes('radtown_small_3')) return `${base}monuments/Sewer_Branch.svg`;
+  if (n.includes('satellite') || p.includes('satellite_dish')) return `${base}monuments/Satellite_Dish.svg`;
+  if (n.includes('ferry') || p.includes('ferry_terminal')) return `${base}monuments/Ferry_Terminal_1.svg`;
+  if (n.includes('harbor 2') || p.includes('harbor_2') || n.includes('large harbor')) return `${base}monuments/Harbor_Large.svg`;
+  if (n.includes('harbor') || p.includes('harbor_1')) return `${base}monuments/Harbor_Small.svg`;
+  if (n.includes('lighthouse') || p.includes('lighthouse')) return `${base}monuments/Lighthouse.svg`;
+  if (n.includes('underwater') || p.includes('underwater_lab')) return `${base}monuments/Underwater_Lab.svg`;
 
   // Mining Quarries
-  if (n.includes('sulfur') || p.includes('mining_quarry_a')) return '/monuments/Sulfur_Quarry.svg';
-  if (n.includes('hqm') || p.includes('mining_quarry_c')) return '/monuments/Hqm_Quarry.svg';
-  if (n.includes('stone quarry') || p.includes('mining_quarry_b')) return '/monuments/Stone_Quarry.svg';
+  if (n.includes('sulfur') || p.includes('mining_quarry_a')) return `${base}monuments/Sulfur_Quarry.svg`;
+  if (n.includes('hqm') || p.includes('mining_quarry_c')) return `${base}monuments/Hqm_Quarry.svg`;
+  if (n.includes('stone quarry') || p.includes('mining_quarry_b')) return `${base}monuments/Stone_Quarry.svg`;
 
   // Roadside
-  if (n.includes('gas station') || n.includes("oxum's") || p.includes('gas_station')) return '/monuments/Gasstation.svg';
-  if (n.includes('supermarket') || p.includes('supermarket')) return '/monuments/Supermarket.svg';
-  if (n.includes('mining outpost') || p.includes('warehouse')) return '/monuments/Warehouse.svg';
+  if (n.includes('gas station') || n.includes("oxum's") || p.includes('gas_station')) return `${base}monuments/Gasstation.svg`;
+  if (n.includes('supermarket') || p.includes('supermarket')) return `${base}monuments/Supermarket.svg`;
+  if (n.includes('mining outpost') || p.includes('warehouse')) return `${base}monuments/Warehouse.svg`;
 
   // Caves & Tunnels
-  if (n.includes('tunnel') || p.includes('tunnel-entrance') || p.includes('entrance_bunker')) return '/monuments/Tunnel_Entrance.svg';
-  if (n.includes('cave') || p.includes('cave')) return '/monuments/Cave.svg';
+  if (n.includes('tunnel') || p.includes('tunnel-entrance') || p.includes('entrance_bunker')) return `${base}monuments/Tunnel_Entrance.svg`;
+  if (n.includes('cave') || p.includes('cave')) return `${base}monuments/Cave.svg`;
 
   // Water & Nature
-  if (n.includes('water well') || p.includes('water_well')) return '/monuments/Water_Well.svg';
-  if (n.includes('swamp') || p.includes('swamp')) return '/monuments/Swamp.svg';
-  if (n.includes('jungle ruin') || p.includes('jungle_ruins')) return '/monuments/Jungle_Ruin.svg';
-  if (n.includes('ice lake') || n.includes('iceberg') || p.includes('ice_lake')) return '/monuments/Iceberg.svg';
+  if (n.includes('water well') || p.includes('water_well')) return `${base}monuments/Water_Well.svg`;
+  if (n.includes('swamp') || p.includes('swamp')) return `${base}monuments/Swamp.svg`;
+  if (n.includes('jungle ruin') || p.includes('jungle_ruins')) return `${base}monuments/Jungle_Ruin.svg`;
+  if (n.includes('ice lake') || n.includes('iceberg') || p.includes('ice_lake')) return `${base}monuments/Iceberg.svg`;
 
   // Substations
-  if (n.includes('substation') || p.includes('power_sub')) return '/monuments/Power_Substation.svg';
+  if (n.includes('substation') || p.includes('power_sub')) return `${base}monuments/Power_Substation.svg`;
 
-  return '/monuments/Cave.svg';
+  return `${base}monuments/Cave.svg`;
 }
 
 export const MapTab: React.FC = () => {
