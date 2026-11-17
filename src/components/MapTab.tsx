@@ -771,12 +771,19 @@ export const MapTab: React.FC = () => {
               const glyph = getMonumentGlyph(m);
               const GlyphIcon = glyph.icon;
               const isSelected = selectedCoord && Math.hypot(selectedCoord.x - m.x, selectedCoord.z - m.z) < 25;
+              const isHovered = hoveredMonument?.id === m.id;
 
               return (
                 <div
                   key={m.id}
-                  style={{ left: pos.left, top: pos.top }}
-                  className="absolute pointer-events-auto z-10 group"
+                  style={{
+                    left: pos.left,
+                    top: pos.top,
+                    transform: `translate(-50%, -50%) scale(${1 / zoom})`,
+                    transformOrigin: 'center center',
+                    zIndex: isHovered ? 40 : (isSelected ? 30 : 10),
+                  }}
+                  className="absolute pointer-events-auto cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
                     selectMonument(m);
@@ -786,30 +793,13 @@ export const MapTab: React.FC = () => {
                 >
                   {/* Glyph Circular Badge */}
                   <div
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center border shadow-md transition-all duration-150 group-hover:scale-125 group-hover:z-30 cursor-pointer ${
+                    className={`rounded-full flex items-center justify-center border shadow-md transition-transform duration-150 hover:scale-125 ${
                       glyph.bg
                     } ${glyph.border} ${glyph.text} ${glyph.badgeSize} ${
-                      isSelected ? 'ring-4 ring-rust-500 scale-125 z-20 shadow-rust-500/60' : ''
+                      isSelected ? 'ring-4 ring-rust-500 scale-125 shadow-rust-500/60' : ''
                     }`}
                   >
                     <GlyphIcon className={glyph.iconSize} />
-                  </div>
-
-                  {/* High Detail Tooltip */}
-                  <div className="hidden group-hover:flex flex-col items-center absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 pointer-events-none">
-                    <div className="bg-zinc-950/95 border border-zinc-700 px-2.5 py-1.5 rounded-lg shadow-2xl text-white text-[11px] whitespace-nowrap flex items-center space-x-2 backdrop-blur-md">
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${glyph.bg} text-white`}>
-                        <GlyphIcon className="w-2.5 h-2.5" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-zinc-100">{m.name}</span>
-                        <span className="text-[10px] text-zinc-400 font-mono">
-                          X: {Math.round(m.x)} • Z: {Math.round(m.z)}
-                        </span>
-                      </div>
-                    </div>
-                    {/* Tooltip caret */}
-                    <div className="w-1.5 h-1.5 bg-zinc-950 border-r border-b border-zinc-700 -mt-1 rotate-45" />
                   </div>
                 </div>
               );
@@ -821,8 +811,13 @@ export const MapTab: React.FC = () => {
               return (
                 <div
                   key={p.id}
-                  style={{ left: pos.left, top: pos.top }}
-                  className="absolute pointer-events-auto z-20 group cursor-pointer"
+                  style={{
+                    left: pos.left,
+                    top: pos.top,
+                    transform: `translate(-50%, -50%) scale(${1 / zoom})`,
+                    transformOrigin: 'center center',
+                  }}
+                  className="absolute pointer-events-auto z-20 cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
                     centerOnCoords(p.x, p.z, true);
@@ -830,10 +825,10 @@ export const MapTab: React.FC = () => {
                     setTimeout(() => setToast(null), 2000);
                   }}
                 >
-                  <div className="absolute -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-cyan-500 border-2 border-white shadow-lg flex items-center justify-center animate-pulse">
+                  <div className="w-5 h-5 rounded-full bg-cyan-500 border-2 border-white shadow-lg flex items-center justify-center animate-pulse">
                     <Users className="w-2.5 h-2.5 text-white" />
                   </div>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-cyan-950/90 text-cyan-200 text-[10px] font-bold rounded whitespace-nowrap z-20 border border-cyan-600 shadow-md">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-cyan-950/90 text-cyan-200 text-[10px] font-bold rounded whitespace-nowrap border border-cyan-600 shadow-md">
                     {p.name}
                   </div>
                 </div>
@@ -843,20 +838,57 @@ export const MapTab: React.FC = () => {
             {/* Clicked Target Marker */}
             {selectedCoord && (
               <div
-                style={toPercentage(selectedCoord.x, selectedCoord.z)}
+                style={{
+                  ...toPercentage(selectedCoord.x, selectedCoord.z),
+                  transform: `translate(-50%, -50%) scale(${1 / zoom})`,
+                  transformOrigin: 'center center',
+                }}
                 className="absolute pointer-events-none z-30"
               >
                 {/* Ping pulse centered on point */}
-                <div className="absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-2 border-rust-500 bg-rust-500/20 animate-ping" />
+                <div className="w-8 h-8 rounded-full border-2 border-rust-500 bg-rust-500/20 animate-ping" />
 
                 {/* Crosshair centered on point */}
-                <div className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center">
                   <Crosshair className="w-6 h-6 text-rust-400 drop-shadow-[0_0_4px_rgba(0,0,0,0.9)]" />
                   {/* Exact center dot */}
                   <div className="w-1.5 h-1.5 rounded-full bg-rust-500 absolute" />
                 </div>
               </div>
             )}
+
+            {/* Global Hovered POI Tooltip Card - Always on Top of All Pins & Fixed Screen Scale */}
+            {hoveredMonument && (() => {
+              const pos = toPercentage(hoveredMonument.x, hoveredMonument.z);
+              const glyph = getMonumentGlyph(hoveredMonument);
+              const GlyphIcon = glyph.icon;
+
+              return (
+                <div
+                  style={{
+                    left: pos.left,
+                    top: pos.top,
+                    transform: `translate(-50%, -100%) scale(${1 / zoom})`,
+                    transformOrigin: 'bottom center',
+                  }}
+                  className="absolute pointer-events-none z-50 flex flex-col items-center pb-2.5"
+                >
+                  <div className="bg-zinc-950/95 border border-zinc-700/90 px-3 py-1.5 rounded-lg shadow-2xl text-white text-xs whitespace-nowrap flex items-center space-x-2.5 backdrop-blur-md">
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center ${glyph.bg} text-white shadow-sm flex-shrink-0`}>
+                      <GlyphIcon className="w-3 h-3" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-zinc-100 text-xs">{hoveredMonument.name}</span>
+                      <span className="text-[10px] text-zinc-400 font-mono">
+                        X: {Math.round(hoveredMonument.x)} • Z: {Math.round(hoveredMonument.z)}
+                      </span>
+                    </div>
+                  </div>
+                  {/* Tooltip caret */}
+                  <div className="w-2 h-2 bg-zinc-950 border-r border-b border-zinc-700 -mt-1 rotate-45" />
+                </div>
+              );
+            })()}
           </div>
         </div>
 
