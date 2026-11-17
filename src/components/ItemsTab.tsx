@@ -6,11 +6,12 @@ import {
   Users, 
   X, 
   Check, 
-  Zap,
-  Filter,
-  Layers,
-  ChevronDown,
-  Info
+  Zap, 
+  Filter, 
+  Layers, 
+  ChevronDown, 
+  Info,
+  Sparkles
 } from 'lucide-react';
 import { 
   RUST_ITEMS, 
@@ -51,6 +52,9 @@ export const ItemsTab: React.FC = () => {
       if (item.isVehicle) {
         counts['Vehicles'] = (counts['Vehicles'] || 0) + 1;
       }
+      if (item.isDlc) {
+        counts['DLC / Packs'] = (counts['DLC / Packs'] || 0) + 1;
+      }
     }
     return counts;
   }, [items]);
@@ -59,6 +63,8 @@ export const ItemsTab: React.FC = () => {
     return items.filter((item) => {
       if (selectedCategory === 'Vehicles') {
         if (!item.isVehicle && item.category !== 'Vehicles') return false;
+      } else if (selectedCategory === 'DLC / Packs') {
+        if (!item.isDlc) return false;
       } else if (selectedCategory !== 'All' && item.category !== selectedCategory) {
         return false;
       }
@@ -212,6 +218,16 @@ export const ItemsTab: React.FC = () => {
                   </span>
                 )}
 
+                {/* DLC Badge on top-left */}
+                {item.isDlc && (
+                  <span
+                    className="absolute top-2 left-2 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-purple-950/90 text-purple-300 border border-purple-800/70 shadow-sm"
+                    title={item.dlcPack || 'DLC / Special Content'}
+                  >
+                    DLC
+                  </span>
+                )}
+
                 <div className="w-20 h-20 flex items-center justify-center p-1 relative mb-2">
                   <ItemSprite
                     shortname={item.shortname}
@@ -307,6 +323,26 @@ export const ItemsTab: React.FC = () => {
             {selectedItem.description && (
               <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-lg p-3 text-xs text-zinc-300 leading-relaxed max-h-28 overflow-y-auto break-words whitespace-pre-wrap scrollbar-thin scrollbar-thumb-zinc-800">
                 <p>{selectedItem.description}</p>
+              </div>
+            )}
+
+            {/* DLC Spawning Note */}
+            {selectedItem.isDlc && (
+              <div className="bg-purple-950/40 border border-purple-800/60 rounded-lg p-2.5 flex items-start space-x-2.5 text-xs text-purple-200">
+                <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-bold text-purple-300">
+                      {selectedItem.dlcPack || 'DLC Content'}
+                    </span>
+                    <span className="text-[10px] uppercase font-semibold px-1.5 py-0.2 rounded bg-purple-900/60 text-purple-300 border border-purple-700/60">
+                      Admin Spawning Allowed
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-purple-300/80 leading-relaxed">
+                    Players can receive, wear, and use this item even if they don't own the DLC on Steam. DLC ownership is only required for players to craft or reskin it at a repair bench.
+                  </p>
+                </div>
               </div>
             )}
 

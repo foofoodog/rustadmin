@@ -11,6 +11,177 @@ export interface RustItem {
   rarity?: string;
   icon?: string;
   isVehicle?: boolean;
+  dlcPack?: string;
+  isDlc?: boolean;
+}
+
+export function getDlcPack(shortname: string, name: string): string | null {
+  const s = shortname.toLowerCase();
+  const n = name.toLowerCase();
+
+  // Abyss Pack
+  if (s.includes('diver') || s.includes('abyss')) return 'Abyss Pack';
+
+  // Sunburn DLC
+  if (
+    s.includes('sunglasses') ||
+    s.includes('beachtowel') ||
+    s.includes('beachchair') ||
+    s.includes('beachparasol') ||
+    s.includes('beachtable') ||
+    s.includes('boogieboard') ||
+    s.includes('paddlingpool') ||
+    s.includes('abovegroundpool') ||
+    s.includes('innertube') ||
+    s.includes('gun.water') ||
+    s.includes('pistol.water') ||
+    s.includes('instant_camera') ||
+    s.includes('photoframe') ||
+    s.includes('water.gun')
+  ) {
+    return 'Sunburn DLC';
+  }
+
+  // Voice Props DLC
+  if (
+    s.includes('cassette') ||
+    s.includes('boombox') ||
+    s.includes('connected.speaker') ||
+    s.includes('mobilephone') ||
+    s.includes('discoball') ||
+    s.includes('discofloor') ||
+    s.includes('laserlight') ||
+    s.includes('soundlight') ||
+    s.includes('strobelight') ||
+    s.includes('megaphone') ||
+    s.includes('microphonestand')
+  ) {
+    return 'Voice Props DLC';
+  }
+
+  // Instruments DLC
+  if (
+    s.includes('fun.bass') ||
+    s.includes('fun.cowbell') ||
+    s.includes('fun.flute') ||
+    s.includes('fun.guitar') ||
+    s.includes('fun.jerrycanguitar') ||
+    s.includes('fun.tambourine') ||
+    s.includes('fun.trumpet') ||
+    s.includes('fun.tuba') ||
+    s.includes('drumkit') ||
+    s.includes('piano') ||
+    s.includes('xylophone')
+  ) {
+    return 'Instruments DLC';
+  }
+
+  // Arctic Pack
+  if (
+    s.includes('arcticsuit') ||
+    s.includes('tomaha') ||
+    s.includes('rifle.ak.ice') ||
+    s.includes('sculpture.ice') ||
+    s.includes('icemask') ||
+    s.includes('icevest')
+  ) {
+    return 'Arctic Pack';
+  }
+
+  // Lumberjack Pack
+  if (s.includes('lumberjack')) return 'Lumberjack Pack';
+
+  // Frontier Pack
+  if (s.includes('frontier') || s.includes('rockingchair') || s.includes('wantedposter')) return 'Frontier Pack';
+
+  // Medieval Pack
+  if (
+    s.includes('medieval') ||
+    s.includes('knightsarmour') ||
+    s.includes('knighttorso') ||
+    s.includes('batteringram') ||
+    s.includes('catapult') ||
+    s.includes('ballista') ||
+    s.includes('siegetower')
+  ) {
+    return 'Medieval Pack';
+  }
+
+  // Special Edition / Nomad / Space Packs
+  if (
+    s.includes('spacesuit') ||
+    s.includes('nomadsuit') ||
+    s.includes('alien.costume') ||
+    s.includes('hazmat.plague') ||
+    s.includes('hazmat.krieg') ||
+    s.includes('krieg.')
+  ) {
+    return 'Special Edition Pack';
+  }
+
+  // Games Room Pack
+  if (
+    s.includes('arcade.machine.chippy') ||
+    s.includes('pooltable') ||
+    s.includes('cardtable') ||
+    s.includes('dartboard') ||
+    s.includes('gamesroom')
+  ) {
+    return 'Games Room Pack';
+  }
+
+  // Twitch Rivals
+  if (s.includes('twitch')) return 'Twitch Drops';
+
+  // Lunar New Year
+  if (
+    s.includes('dragonmask') ||
+    s.includes('oxmask') ||
+    s.includes('ratmask') ||
+    s.includes('tigermask') ||
+    s.includes('rabbitmask') ||
+    s.includes('snakemask') ||
+    s.includes('dragondoorknocker') ||
+    s.includes('lunar.') ||
+    s.includes('chineselantern') ||
+    s.includes('lny26')
+  ) {
+    return 'Lunar New Year';
+  }
+
+  // Halloween
+  if (
+    s.includes('halloween') ||
+    s.includes('frankenstein') ||
+    s.includes('scarecrow') ||
+    s.includes('ghostsheet') ||
+    s.includes('cursedcauldron') ||
+    s.includes('spiderweb') ||
+    s.includes('jackolantern') ||
+    s.includes('dracula') ||
+    s.includes('mummymask') ||
+    s.includes('skull_fire_pit') ||
+    s.includes('skulldoorknocker') ||
+    s.includes('skullspikes')
+  ) {
+    return 'Halloween Event';
+  }
+
+  // Festive / Xmas
+  if (
+    s.includes('xmas') ||
+    s.includes('candycane') ||
+    s.includes('giantcandycane') ||
+    s.includes('giantlollipop') ||
+    s.includes('gingerbread') ||
+    s.includes('santa') ||
+    s.includes('sled') ||
+    s.includes('stocking')
+  ) {
+    return 'Festive Event';
+  }
+
+  return null;
 }
 
 export const VEHICLE_SHORTNAMES = new Set([
@@ -53,18 +224,23 @@ function computeDefaultAmount(item: any): number {
   return Math.min(stack, 10);
 }
 
-export const RUST_ITEMS: RustItem[] = (allItemsData as any[]).map((item) => ({
-  id: item.id,
-  name: item.name,
-  shortname: item.shortname,
-  category: item.category,
-  defaultAmount: computeDefaultAmount(item),
-  description: item.description,
-  stackable: item.stackable || 1,
-  rarity: item.rarity,
-  icon: item.icon || `${item.shortname}.webp`,
-  isVehicle: VEHICLE_SHORTNAMES.has(item.shortname)
-}));
+export const RUST_ITEMS: RustItem[] = (allItemsData as any[]).map((item) => {
+  const dlc = getDlcPack(item.shortname, item.name);
+  return {
+    id: item.id,
+    name: item.name,
+    shortname: item.shortname,
+    category: item.category,
+    defaultAmount: computeDefaultAmount(item),
+    description: item.description,
+    stackable: item.stackable || 1,
+    rarity: item.rarity,
+    icon: item.icon || `${item.shortname}.webp`,
+    isVehicle: VEHICLE_SHORTNAMES.has(item.shortname),
+    dlcPack: dlc || undefined,
+    isDlc: !!dlc
+  };
+});
 
 export const RUST_CATEGORIES = [
   'All',
@@ -82,7 +258,8 @@ export const RUST_CATEGORIES = [
   'Components',
   'Electrical',
   'Fun',
-  'Vehicles'
+  'Vehicles',
+  'DLC / Packs'
 ] as const;
 
 export function getItemIconUrl(shortname: string): string {
