@@ -91,15 +91,15 @@ export const ConsoleTab: React.FC = () => {
     }
   }, [command]);
 
-  const handleSendCommand = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const cmd = command.trim();
+  const executeCommand = async (rawCmd: string) => {
+    const cmd = rawCmd.trim();
     if (!cmd) return;
 
     setShowSuggestions(false);
     setCommandHistory((prev) => [cmd, ...prev.slice(0, 50)]);
     setHistoryIndex(-1);
     setCommand('');
+    if (inputRef.current) inputRef.current.focus();
 
     // Echo locally in console
     setLogs((prev) => [
@@ -143,15 +143,37 @@ export const ConsoleTab: React.FC = () => {
     }
   };
 
+  const handleSendCommand = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    executeCommand(command);
+  };
+
   const applySuggestion = (sug: CommandInfo) => {
-    setCommand(sug.command + ' ');
-    setShowSuggestions(false);
-    if (inputRef.current) inputRef.current.focus();
+    const needsArgs = sug.syntax && (sug.syntax.includes('<') || sug.syntax.includes('['));
+    if (needsArgs) {
+      setCommand(sug.command + ' ');
+      setShowSuggestions(false);
+      if (inputRef.current) inputRef.current.focus();
+    } else {
+      setShowSuggestions(false);
+      executeCommand(sug.command);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // If autocomplete is visible
     if (showSuggestions && suggestions.length > 0) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const selected = suggestions[selectedSuggestionIndex];
+        if (selected) {
+          applySuggestion(selected);
+        } else {
+          setShowSuggestions(false);
+          executeCommand(command);
+        }
+        return;
+      }
       if (e.key === 'Tab') {
         e.preventDefault();
         applySuggestion(suggestions[selectedSuggestionIndex]);
@@ -357,11 +379,12 @@ export const ConsoleTab: React.FC = () => {
         {['status', 'plugins', 'serverinfo', 'playerlistpos', 'server.save', 'oxide.version'].map((cmd) => (
           <button
             key={cmd}
+            type="button"
             onClick={() => {
-              setCommand(cmd);
-              rconService.sendCommand(cmd);
+              setShowSuggestions(false);
+              executeCommand(cmd);
             }}
-            className="px-2 py-0.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded font-mono text-[11px] shrink-0 transition-colors"
+            className="px-2 py-0.5 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 text-zinc-300 rounded font-mono text-[11px] shrink-0 transition-colors"
           >
             {cmd}
           </button>
