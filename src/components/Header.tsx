@@ -9,6 +9,8 @@ import {
   Puzzle, 
   MessageSquare, 
   LayoutDashboard,
+  Map as MapIcon,
+  Package,
   Settings
 } from 'lucide-react';
 import { rconService } from '../services/rconService';
@@ -36,6 +38,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenC
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'console', label: 'Console', icon: Terminal },
+    { id: 'map', label: 'Map', icon: MapIcon },
+    { id: 'items', label: 'Items', icon: Package },
     { id: 'players', label: 'Players', icon: Users, badge: status ? `${status.players}/${status.maxPlayers}` : undefined },
     { id: 'plugins', label: 'Oxide Plugins', icon: Puzzle },
     { id: 'chat', label: 'Chat', icon: MessageSquare },

@@ -8,10 +8,12 @@ import {
   CheckCircle2, 
   AlertTriangle, 
   AlertCircle,
-  MessageSquare
+  HelpCircle,
+  Sparkles
 } from 'lucide-react';
 import { rconService } from '../services/rconService';
 import { RconMessage } from '../types/rcon';
+import { CONSOLE_COMMANDS, CommandInfo } from '../data/consoleCommands';
 
 export const ConsoleTab: React.FC = () => {
   const [logs, setLogs] = useState<RconMessage[]>([]);
@@ -21,6 +23,11 @@ export const ConsoleTab: React.FC = () => {
   const [filterType, setFilterType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [autoScroll, setAutoScroll] = useState(true);
+
+  // Autocomplete state
+  const [suggestions, setSuggestions] = useState<CommandInfo[]>([]);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const logContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,12 +45,37 @@ export const ConsoleTab: React.FC = () => {
     }
   }, [logs, autoScroll]);
 
+  // Update suggestions when command input changes
+  useEffect(() => {
+    const trimmed = command.trim();
+    if (!trimmed) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Only autocomplete the first word (the command itself)
+    const firstWord = command.split(' ')[0].toLowerCase();
+    if (firstWord.length >= 1) {
+      const matches = CONSOLE_COMMANDS.filter((c) =>
+        c.command.toLowerCase().startsWith(firstWord) ||
+        c.command.toLowerCase().includes(firstWord)
+      ).slice(0, 8);
+
+      setSuggestions(matches);
+      setSelectedSuggestionIndex(0);
+      setShowSuggestions(matches.length > 0 && !command.includes(' '));
+    } else {
+      setShowSuggestions(false);
+    }
+  }, [command]);
+
   const handleSendCommand = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const cmd = command.trim();
     if (!cmd) return;
 
-    // Add to history
+    setShowSuggestions(false);
     setCommandHistory((prev) => [cmd, ...prev.slice(0, 50)]);
     setHistoryIndex(-1);
     setCommand('');
@@ -74,7 +106,37 @@ export const ConsoleTab: React.FC = () => {
     }
   };
 
+  const applySuggestion = (sug: CommandInfo) => {
+    setCommand(sug.command + ' ');
+    setShowSuggestions(false);
+    if (inputRef.current) inputRef.current.focus();
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // If autocomplete is visible
+    if (showSuggestions && suggestions.length > 0) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        applySuggestion(suggestions[selectedSuggestionIndex]);
+        return;
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedSuggestionIndex((prev) => (prev + 1) % suggestions.length);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedSuggestionIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
+        return;
+      }
+      if (e.key === 'Escape') {
+        setShowSuggestions(false);
+        return;
+      }
+    }
+
+    // Normal Command History navigation
     if (e.key === 'ArrowUp') {
       e.preventDefault();
       if (historyIndex + 1 < commandHistory.length) {
@@ -117,7 +179,7 @@ export const ConsoleTab: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-lg">
+    <div className="flex flex-col h-[calc(100vh-140px)] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-lg relative">
       {/* Console Toolbar */}
       <div className="flex flex-wrap items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-900/90 gap-2">
         <div className="flex items-center space-x-2">
@@ -199,12 +261,55 @@ export const ConsoleTab: React.FC = () => {
         )}
       </div>
 
+      {/* Autocomplete Popup (In-Game Style) */}
+      {showSuggestions && suggestions.length > 0 && (
+        <div className="absolute bottom-[58px] left-3 right-3 sm:right-auto sm:w-[480px] bg-zinc-900/95 backdrop-blur-md border border-zinc-700/80 rounded-xl shadow-2xl overflow-hidden z-30 animate-in fade-in slide-in-from-bottom-2 duration-150">
+          <div className="px-3 py-1.5 bg-zinc-950/80 border-b border-zinc-800 flex items-center justify-between text-[11px] text-zinc-400">
+            <span className="flex items-center space-x-1 font-semibold text-zinc-300">
+              <Sparkles className="w-3.5 h-3.5 text-rust-500" />
+              <span>Console Suggestions</span>
+            </span>
+            <span>Press <kbd className="px-1.5 py-0.5 bg-zinc-800 text-zinc-200 rounded border border-zinc-700 text-[10px] font-mono">Tab</kbd> to complete</span>
+          </div>
+          <div className="max-h-60 overflow-y-auto divide-y divide-zinc-800/40">
+            {suggestions.map((sug, idx) => {
+              const isSelected = idx === selectedSuggestionIndex;
+              return (
+                <div
+                  key={sug.command}
+                  onClick={() => applySuggestion(sug)}
+                  onMouseEnter={() => setSelectedSuggestionIndex(idx)}
+                  className={`px-3 py-2 cursor-pointer transition-colors flex items-center justify-between text-xs ${
+                    isSelected ? 'bg-rust-950/60 border-l-2 border-rust-500' : 'hover:bg-zinc-800/50'
+                  }`}
+                >
+                  <div className="space-y-0.5">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-mono font-bold text-zinc-100">{sug.command}</span>
+                      <span className="px-1.5 py-0.2 bg-zinc-800 text-zinc-400 text-[10px] rounded font-semibold uppercase">
+                        {sug.category}
+                      </span>
+                    </div>
+                    {sug.syntax && (
+                      <div className="font-mono text-[11px] text-rust-400">
+                        {sug.syntax}
+                      </div>
+                    )}
+                    <div className="text-[11px] text-zinc-400">{sug.description}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Quick Command Pills */}
       <div className="flex items-center space-x-2 px-4 py-2 border-t border-zinc-800/80 bg-zinc-900/50 overflow-x-auto text-xs">
         <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider shrink-0">
           Quick:
         </span>
-        {['status', 'plugins', 'serverinfo', 'playerlist', 'server.save', 'oxide.version'].map((cmd) => (
+        {['status', 'plugins', 'serverinfo', 'playerlistpos', 'server.save', 'oxide.version'].map((cmd) => (
           <button
             key={cmd}
             onClick={() => {
@@ -230,7 +335,7 @@ export const ConsoleTab: React.FC = () => {
             value={command}
             onChange={(e) => setCommand(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type console command (e.g. status, plugins, weather.rain 1)..."
+            placeholder="Type console command (Tab to autocomplete)..."
             className="w-full pl-8 pr-4 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 font-mono focus:outline-none focus:border-rust-500 transition-colors"
           />
         </div>

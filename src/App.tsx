@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { DashboardTab } from './components/DashboardTab';
 import { ConsoleTab } from './components/ConsoleTab';
+import { MapTab } from './components/MapTab';
+import { ItemsTab } from './components/ItemsTab';
 import { PlayersTab } from './components/PlayersTab';
 import { PluginsTab } from './components/PluginsTab';
 import { ChatTab } from './components/ChatTab';
@@ -32,6 +34,8 @@ export function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
         {activeTab === 'dashboard' && <DashboardTab />}
         {activeTab === 'console' && <ConsoleTab />}
+        {activeTab === 'map' && <MapTab />}
+        {activeTab === 'items' && <ItemsTab />}
         {activeTab === 'players' && <PlayersTab />}
         {activeTab === 'plugins' && <PluginsTab />}
         {activeTab === 'chat' && <ChatTab />}
