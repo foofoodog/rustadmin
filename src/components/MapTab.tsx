@@ -272,10 +272,17 @@ export const MapTab: React.FC = () => {
             {selectedCoord && (
               <div
                 style={toPercentage(selectedCoord.x, selectedCoord.z)}
-                className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20"
+                className="absolute pointer-events-none z-20"
               >
-                <div className="w-6 h-6 rounded-full border-2 border-rust-500 bg-rust-500/30 flex items-center justify-center animate-ping" />
-                <Crosshair className="w-5 h-5 text-rust-400 absolute -top-2.5 -left-2.5" />
+                {/* Ping pulse centered on point */}
+                <div className="absolute -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full border-2 border-rust-500 bg-rust-500/20 animate-ping" />
+
+                {/* Crosshair centered on point */}
+                <div className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                  <Crosshair className="w-6 h-6 text-rust-400 drop-shadow-[0_0_4px_rgba(0,0,0,0.9)]" />
+                  {/* Exact center dot */}
+                  <div className="w-1.5 h-1.5 rounded-full bg-rust-500 absolute" />
+                </div>
               </div>
             )}
           </div>
