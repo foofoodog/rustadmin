@@ -18,7 +18,16 @@ import { CONSOLE_COMMANDS, CommandInfo } from '../data/consoleCommands';
 export const ConsoleTab: React.FC = () => {
   const [logs, setLogs] = useState<RconMessage[]>([]);
   const [command, setCommand] = useState('');
-  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [commandHistory, setCommandHistory] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('rustadmin_cmd_history');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return ['env.time', 'oxide.version', 'server.save', 'playerlistpos', 'status'];
+  });
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [filterType, setFilterType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,6 +41,8 @@ export const ConsoleTab: React.FC = () => {
   const logContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const selectedItemRef = useRef<HTMLDivElement>(null);
+  const isNavigatingHistory = useRef(false);
+  const draftCommandRef = useRef('');
 
   useEffect(() => {
     const unsub = rconService.onLog((msg) => {
@@ -57,6 +68,13 @@ export const ConsoleTab: React.FC = () => {
 
   // Update suggestions when command input changes
   useEffect(() => {
+    // If the change came from navigating history with up/down arrows, suppress autocomplete popup
+    if (isNavigatingHistory.current) {
+      isNavigatingHistory.current = false;
+      setShowSuggestions(false);
+      return;
+    }
+
     const trimmed = command.trim();
     if (!trimmed) {
       setSuggestions([]);
@@ -96,8 +114,16 @@ export const ConsoleTab: React.FC = () => {
     if (!cmd) return;
 
     setShowSuggestions(false);
-    setCommandHistory((prev) => [cmd, ...prev.slice(0, 50)]);
+    setCommandHistory((prev) => {
+      const filtered = prev.filter((c) => c !== cmd);
+      const updated = [cmd, ...filtered].slice(0, 100);
+      try {
+        localStorage.setItem('rustadmin_cmd_history', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
     setHistoryIndex(-1);
+    draftCommandRef.current = '';
     setCommand('');
     if (inputRef.current) inputRef.current.focus();
 
@@ -161,7 +187,7 @@ export const ConsoleTab: React.FC = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // If autocomplete is visible
+    // If autocomplete is visible, arrow keys navigate suggestions
     if (showSuggestions && suggestions.length > 0) {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -195,23 +221,60 @@ export const ConsoleTab: React.FC = () => {
       }
     }
 
-    // Normal Command History navigation
+    // Command History navigation (Up to go further back in history, Down to return forward)
     if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (historyIndex + 1 < commandHistory.length) {
-        const newIndex = historyIndex + 1;
-        setHistoryIndex(newIndex);
-        setCommand(commandHistory[newIndex]);
+      if (commandHistory.length > 0) {
+        e.preventDefault();
+        // Save uncommitted draft input when first starting history navigation
+        if (historyIndex === -1) {
+          draftCommandRef.current = command;
+        }
+        const nextIndex = historyIndex + 1;
+        if (nextIndex < commandHistory.length) {
+          isNavigatingHistory.current = true;
+          setShowSuggestions(false);
+          setHistoryIndex(nextIndex);
+          setCommand(commandHistory[nextIndex]);
+          setTimeout(() => {
+            if (inputRef.current) {
+              inputRef.current.selectionStart = inputRef.current.selectionEnd = inputRef.current.value.length;
+            }
+          }, 0);
+        }
       }
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      if (historyIndex - 1 >= 0) {
-        const newIndex = historyIndex - 1;
-        setHistoryIndex(newIndex);
-        setCommand(commandHistory[newIndex]);
-      } else if (historyIndex - 1 === -1) {
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      if (commandHistory.length > 0 && historyIndex >= 0) {
+        e.preventDefault();
+        const nextIndex = historyIndex - 1;
+        isNavigatingHistory.current = true;
+        setShowSuggestions(false);
+        if (nextIndex >= 0) {
+          setHistoryIndex(nextIndex);
+          setCommand(commandHistory[nextIndex]);
+        } else {
+          setHistoryIndex(-1);
+          setCommand(draftCommandRef.current);
+        }
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.selectionStart = inputRef.current.selectionEnd = inputRef.current.value.length;
+          }
+        }, 0);
+      }
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      if (historyIndex >= 0) {
+        e.preventDefault();
+        isNavigatingHistory.current = true;
+        setShowSuggestions(false);
         setHistoryIndex(-1);
-        setCommand('');
+        setCommand(draftCommandRef.current);
+        return;
       }
     }
   };
@@ -403,11 +466,28 @@ export const ConsoleTab: React.FC = () => {
             ref={inputRef}
             type="text"
             value={command}
-            onChange={(e) => setCommand(e.target.value)}
+            onChange={(e) => {
+              isNavigatingHistory.current = false;
+              setHistoryIndex(-1);
+              setCommand(e.target.value);
+            }}
             onKeyDown={handleKeyDown}
-            placeholder="Type console command (Tab to autocomplete)..."
-            className="w-full pl-8 pr-4 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-100 font-mono focus:outline-none focus:border-rust-500 transition-colors"
+            placeholder={
+              historyIndex >= 0
+                ? `History item ${historyIndex + 1} of ${commandHistory.length}...`
+                : 'Type console command (Tab to autocomplete, ↑/↓ for history)...'
+            }
+            className={`w-full pl-8 ${historyIndex >= 0 ? 'pr-44' : 'pr-4'} py-2 bg-zinc-950 border ${
+              historyIndex >= 0 ? 'border-rust-500/70 shadow-sm shadow-rust-950/40' : 'border-zinc-800'
+            } rounded-lg text-sm text-zinc-100 font-mono focus:outline-none focus:border-rust-500 transition-colors`}
           />
+          {historyIndex >= 0 && (
+            <div className="absolute right-3 top-2.5 flex items-center space-x-1.5 pointer-events-none select-none">
+              <span className="text-[10px] font-mono font-medium text-rust-400 bg-rust-950/90 border border-rust-800/80 px-2 py-0.5 rounded shadow-sm">
+                History {historyIndex + 1}/{commandHistory.length}
+              </span>
+            </div>
+          )}
         </div>
         <button
           type="submit"
