@@ -928,12 +928,35 @@ export const MapTab: React.FC = () => {
                     teleportpos {selectedCoord.x} 50 {selectedCoord.z}
                   </span>
                 </div>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={handleTeleport}
+                    className="flex-1 py-2 bg-rust-600 hover:bg-rust-500 active:bg-rust-700 text-white rounded-lg text-xs font-semibold transition-colors flex items-center justify-center space-x-1.5 shadow-sm"
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>Teleport Admin</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(`teleportpos ${selectedCoord.x} 50 ${selectedCoord.z}`);
+                      setToast('Copied teleport command to clipboard!');
+                      setTimeout(() => setToast(null), 2000);
+                    }}
+                    className="px-3 py-2 bg-zinc-800 hover:bg-zinc-750 text-zinc-300 rounded-lg text-xs font-semibold transition-colors"
+                    title="Copy teleport command"
+                  >
+                    Copy
+                  </button>
+                </div>
                 <button
-                  onClick={handleTeleport}
-                  className="w-full mt-2 py-2 bg-rust-600 hover:bg-rust-500 active:bg-rust-700 text-white rounded-lg text-xs font-semibold transition-colors flex items-center justify-center space-x-1.5 shadow-sm"
+                  onClick={async () => {
+                    await rconService.sendCommand(`spawnat minicopter ${selectedCoord.x} 50 ${selectedCoord.z}`);
+                    setToast(`Spawned minicopter at (${selectedCoord.x}, ${selectedCoord.z})`);
+                    setTimeout(() => setToast(null), 2500);
+                  }}
+                  className="w-full py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-rust-500/50 text-zinc-300 text-xs font-medium rounded-lg transition-colors flex items-center justify-center space-x-1.5"
                 >
-                  <MapPin className="w-3.5 h-3.5" />
-                  <span>Teleport to Location</span>
+                  <span>🚁 Spawn Minicopter Here</span>
                 </button>
               </div>
             ) : (

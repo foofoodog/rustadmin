@@ -6,26 +6,32 @@ import { MapTab } from './components/MapTab';
 import { ItemsTab } from './components/ItemsTab';
 import { PlayersTab } from './components/PlayersTab';
 import { PluginsTab } from './components/PluginsTab';
-import { PermissionsManager } from './components/PermissionsManager';
 import { ChatTab } from './components/ChatTab';
+import { KitsTab } from './components/KitsTab';
+import { CombatFeedTab } from './components/CombatFeedTab';
+import { ConvarsTab } from './components/ConvarsTab';
+import { AutomationTab } from './components/AutomationTab';
+import { PrefabSpawnerTab } from './components/PrefabSpawnerTab';
 import { ConnectModal } from './components/ConnectModal';
 import { rconService } from './services/rconService';
+import { getActiveProfile } from './services/serverProfiles';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isConnectOpen, setIsConnectOpen] = useState(false);
 
   useEffect(() => {
-    // Attempt auto-connect with saved settings or defaults
-    const host = localStorage.getItem('rustadmin_host') || '127.0.0.1';
-    const port = parseInt(localStorage.getItem('rustadmin_port') || '28016', 10);
-    const pass = localStorage.getItem('rustadmin_pass') || 'rcon.password';
+    // Attempt auto-connect with saved active profile or defaults
+    const profile = getActiveProfile();
+    const host = localStorage.getItem('rustadmin_host') || profile.host;
+    const port = parseInt(localStorage.getItem('rustadmin_port') || profile.port.toString(), 10);
+    const pass = localStorage.getItem('rustadmin_pass') || profile.password;
 
     rconService.connect(host, port, pass);
   }, []);
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col font-sans">
+    <div className="min-h-screen bg-zinc-950 flex flex-col font-sans text-zinc-100">
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -33,14 +39,25 @@ export function App() {
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        {/* Server Section */}
         {activeTab === 'dashboard' && <DashboardTab />}
+        {activeTab === 'convars' && <ConvarsTab />}
+        {activeTab === 'automation' && <AutomationTab />}
+
+        {/* Monitoring Section */}
         {activeTab === 'console' && <ConsoleTab />}
         {activeTab === 'map' && <MapTab />}
-        {activeTab === 'items' && <ItemsTab />}
-        {activeTab === 'players' && <PlayersTab />}
-        {activeTab === 'plugins' && <PluginsTab onNavigateToPermissions={() => setActiveTab('permissions')} />}
-        {activeTab === 'permissions' && <PermissionsManager />}
+        {activeTab === 'combat' && <CombatFeedTab />}
         {activeTab === 'chat' && <ChatTab />}
+
+        {/* Players & Plugins Section */}
+        {(activeTab === 'players-list' || activeTab === 'players') && <PlayersTab />}
+        {activeTab === 'plugins' && <PluginsTab />}
+
+        {/* Arsenal & Spawner Section */}
+        {activeTab === 'items' && <ItemsTab />}
+        {activeTab === 'kits' && <KitsTab />}
+        {activeTab === 'prefabs' && <PrefabSpawnerTab />}
       </main>
 
       <ConnectModal
