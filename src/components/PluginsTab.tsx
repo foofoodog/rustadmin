@@ -17,7 +17,8 @@ import {
   Check, 
   X, 
   ShieldAlert,
-  Sparkles
+  Sparkles,
+  ExternalLink
 } from 'lucide-react';
 import { rconService } from '../services/rconService';
 import { OxidePlugin } from '../types/rcon';
@@ -467,6 +468,15 @@ export const PluginsTab: React.FC = () => {
                           <div>
                             <div className="flex items-center space-x-2">
                               <span>{plugin.name}</span>
+                              <a
+                                href={`https://umod.org/plugins/${plugin.stem.toLowerCase()}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-zinc-500 hover:text-rust-400 p-0.5 rounded hover:bg-zinc-800 transition-colors inline-flex items-center"
+                                title={`Open ${plugin.name} documentation on umod.org`}
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </a>
                               <button
                                 onClick={() => toggleExpand(plugin.stem)}
                                 className={`text-[10px] font-mono px-1.5 py-0.2 rounded transition-colors ${
@@ -515,6 +525,18 @@ export const PluginsTab: React.FC = () => {
                         {/* Actions */}
                         <td className="py-3 px-4 text-right">
                           <div className="flex items-center justify-end space-x-1.5">
+                            {/* uMod External Page Link */}
+                            <a
+                              href={`https://umod.org/plugins/${plugin.stem.toLowerCase()}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center space-x-1 px-2 py-1 bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded text-[11px] transition-colors"
+                              title={`View ${plugin.name} documentation on umod.org`}
+                            >
+                              <ExternalLink className="w-3 h-3 text-rust-400" />
+                              <span>uMod</span>
+                            </a>
+
                             {isLoaded && (
                               <>
                                 <button
