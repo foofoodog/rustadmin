@@ -601,6 +601,16 @@ export const PluginsTab: React.FC = () => {
                                   <span className="text-zinc-500 text-[11px]">
                                     (Group: <strong className="text-zinc-300 font-mono">{selectedGroup}</strong>)
                                   </span>
+                                  <a
+                                    href={`https://umod.org/plugins/${plugin.stem.toLowerCase()}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[11px] text-zinc-400 hover:text-rust-400 hover:border-zinc-700 transition-colors ml-1"
+                                    title={`View ${plugin.name} documentation on umod.org`}
+                                  >
+                                    <span>uMod Docs</span>
+                                    <ExternalLink className="w-3 h-3 text-rust-400" />
+                                  </a>
                                 </div>
 
                                 <div className="flex items-center space-x-2">
