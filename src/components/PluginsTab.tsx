@@ -25,7 +25,7 @@ export const PluginsTab: React.FC<PluginsTabProps> = ({ onNavigateToPermissions 
 
   useEffect(() => {
     const unsub = rconService.onPlugins(setPlugins);
-    rconService.sendCommand('plugins');
+    rconService.sendCommand('plugins', true);
     return () => unsub();
   }, []);
 
@@ -40,7 +40,7 @@ export const PluginsTab: React.FC<PluginsTabProps> = ({ onNavigateToPermissions 
         await rconService.sendCommand(`oxide.load ${stem}`);
       }
       setTimeout(() => {
-        rconService.sendCommand('plugins');
+        rconService.sendCommand('plugins', true);
         setLoadingPlugin(null);
       }, 800);
     } catch {
@@ -53,7 +53,7 @@ export const PluginsTab: React.FC<PluginsTabProps> = ({ onNavigateToPermissions 
     try {
       await rconService.sendCommand('oxide.reload *');
       setTimeout(() => {
-        rconService.sendCommand('plugins');
+        rconService.sendCommand('plugins', true);
         setLoadingPlugin(null);
       }, 1500);
     } catch {

@@ -43,8 +43,23 @@ export const PermissionsManager: React.FC = () => {
     const unsubPlayers = rconService.onPlayers(setOnlinePlayers);
     loadAllPermissions();
     loadGroups();
-    return () => unsubPlayers();
-  }, []);
+
+    // Listen for permission changes from the console or other events
+    const unsubPerms = rconService.onPermissionsChange(() => {
+      loadAllPermissions();
+      loadGroups();
+      if (targetType === 'group' && selectedGroup) {
+        loadGroupDetails(selectedGroup);
+      } else if (targetType === 'user' && selectedUser) {
+        loadUserDetails(selectedUser);
+      }
+    });
+
+    return () => {
+      unsubPlayers();
+      unsubPerms();
+    };
+  }, [targetType, selectedGroup, selectedUser]);
 
   useEffect(() => {
     if (targetType === 'group' && selectedGroup) {
@@ -61,11 +76,11 @@ export const PermissionsManager: React.FC = () => {
 
   const loadAllPermissions = async () => {
     try {
-      const resp = await rconService.sendCommand('oxide.show perms');
+      const resp = await rconService.sendCommand('oxide.show perms', true);
       if (resp && resp.Message) {
-        // Parse permissions list
-        const text = resp.Message.replace(/^Permissions:\s*/i, '').trim();
-        const perms = text.split(/,\s*/).map((p) => p.trim()).filter(Boolean);
+        // Parse permissions list (e.g. "Permissions:\noxide.plugins, oxide.load...")
+        const text = resp.Message.replace(/^Permissions:\s*/im, '').trim();
+        const perms = text.split(/[\s,]+/).map((p) => p.trim()).filter(Boolean);
         if (perms.length > 0) {
           setAllPerms(Array.from(new Set(perms)).sort());
         }
@@ -77,10 +92,10 @@ export const PermissionsManager: React.FC = () => {
 
   const loadGroups = async () => {
     try {
-      const resp = await rconService.sendCommand('oxide.show groups');
+      const resp = await rconService.sendCommand('oxide.show groups', true);
       if (resp && resp.Message) {
-        const text = resp.Message.replace(/^Groups:\s*/i, '').trim();
-        const grps = text.split(/,\s*/).map((g) => g.trim()).filter(Boolean);
+        const text = resp.Message.replace(/^Groups:\s*/im, '').trim();
+        const grps = text.split(/[\s,]+/).map((g) => g.trim()).filter(Boolean);
         if (grps.length > 0) {
           setGroups(Array.from(new Set(grps)));
         }
@@ -93,7 +108,7 @@ export const PermissionsManager: React.FC = () => {
   const loadGroupDetails = async (groupName: string) => {
     setLoading(true);
     try {
-      const resp = await rconService.sendCommand(`oxide.show group ${groupName}`);
+      const resp = await rconService.sendCommand(`oxide.show group ${groupName}`, true);
       if (resp && resp.Message) {
         parseTargetDetails(resp.Message);
       }
@@ -105,7 +120,7 @@ export const PermissionsManager: React.FC = () => {
   const loadUserDetails = async (userId: string) => {
     setLoading(true);
     try {
-      const resp = await rconService.sendCommand(`oxide.show user ${userId}`);
+      const resp = await rconService.sendCommand(`oxide.show user ${userId}`, true);
       if (resp && resp.Message) {
         parseTargetDetails(resp.Message);
       }
@@ -137,7 +152,7 @@ export const PermissionsManager: React.FC = () => {
       }
 
       if (permsSection) {
-        if (!line.includes('No permissions')) {
+        if (!line.includes('No permissions') && !line.includes('has no permissions')) {
           line.split(/,\s*/).forEach((p) => {
             const clean = p.trim();
             if (clean) perms.add(clean);
@@ -160,9 +175,12 @@ export const PermissionsManager: React.FC = () => {
   const togglePermission = async (perm: string) => {
     const isGranted = grantedPerms.has(perm);
     const target = targetType === 'group' ? selectedGroup : selectedUser;
+    if (!target) return;
+
+    // Use standard Oxide syntax: oxide.grant group <group> <perm>
     const cmd = isGranted
-      ? `oxide.revoke ${targetType} "${target}" "${perm}"`
-      : `oxide.grant ${targetType} "${target}" "${perm}"`;
+      ? `oxide.revoke ${targetType} ${target} ${perm}`
+      : `oxide.grant ${targetType} ${target} ${perm}`;
 
     try {
       // Optimistic update
@@ -174,8 +192,19 @@ export const PermissionsManager: React.FC = () => {
       }
       setGrantedPerms(next);
 
-      await rconService.sendCommand(cmd);
-      triggerToast(isGranted ? `Revoked ${perm}` : `Granted ${perm}`);
+      // Log to console so user sees GUI actions reflected in Console tab
+      rconService.logToConsole(`> ${cmd}`);
+
+      const resp = await rconService.sendCommand(cmd, false);
+      if (resp && resp.Message) {
+        triggerToast(resp.Message);
+      } else {
+        triggerToast(isGranted ? `Revoked ${perm}` : `Granted ${perm}`);
+      }
+
+      // Re-query to guarantee complete sync
+      if (targetType === 'group') loadGroupDetails(selectedGroup);
+      else loadUserDetails(selectedUser);
     } catch (err: any) {
       triggerToast(`Error: ${err.message}`);
       // Revert on error
@@ -186,35 +215,49 @@ export const PermissionsManager: React.FC = () => {
 
   const grantCategory = async (categoryPerms: string[]) => {
     const target = targetType === 'group' ? selectedGroup : selectedUser;
+    if (!target) return;
+
     for (const perm of categoryPerms) {
       if (!grantedPerms.has(perm)) {
-        await rconService.sendCommand(`oxide.grant ${targetType} "${target}" "${perm}"`);
+        const cmd = `oxide.grant ${targetType} ${target} ${perm}`;
+        rconService.logToConsole(`> ${cmd}`);
+        await rconService.sendCommand(cmd, false);
       }
     }
     const next = new Set(grantedPerms);
     categoryPerms.forEach((p) => next.add(p));
     setGrantedPerms(next);
     triggerToast(`Granted all in category`);
+    if (targetType === 'group') loadGroupDetails(selectedGroup);
+    else loadUserDetails(selectedUser);
   };
 
   const revokeCategory = async (categoryPerms: string[]) => {
     const target = targetType === 'group' ? selectedGroup : selectedUser;
+    if (!target) return;
+
     for (const perm of categoryPerms) {
       if (grantedPerms.has(perm)) {
-        await rconService.sendCommand(`oxide.revoke ${targetType} "${target}" "${perm}"`);
+        const cmd = `oxide.revoke ${targetType} ${target} ${perm}`;
+        rconService.logToConsole(`> ${cmd}`);
+        await rconService.sendCommand(cmd, false);
       }
     }
     const next = new Set(grantedPerms);
     categoryPerms.forEach((p) => next.delete(p));
     setGrantedPerms(next);
     triggerToast(`Revoked all in category`);
+    if (targetType === 'group') loadGroupDetails(selectedGroup);
+    else loadUserDetails(selectedUser);
   };
 
   const handleAddGroup = async (e: React.FormEvent) => {
     e.preventDefault();
     const g = newGroupName.trim().toLowerCase();
     if (!g) return;
-    await rconService.sendCommand(`oxide.group add "${g}"`);
+    const cmd = `oxide.group add ${g}`;
+    rconService.logToConsole(`> ${cmd}`);
+    await rconService.sendCommand(cmd, false);
     setNewGroupName('');
     triggerToast(`Group '${g}' created`);
     loadGroups();
@@ -224,17 +267,21 @@ export const PermissionsManager: React.FC = () => {
     e.preventDefault();
     const uid = newPlayerId.trim();
     if (!uid || !selectedGroup) return;
-    await rconService.sendCommand(`oxide.usergroup add "${uid}" "${selectedGroup}"`);
+    const cmd = `oxide.usergroup add ${uid} ${selectedGroup}`;
+    rconService.logToConsole(`> ${cmd}`);
+    await rconService.sendCommand(cmd, false);
     setNewPlayerId('');
     triggerToast(`Added ${uid} to group ${selectedGroup}`);
     loadGroupDetails(selectedGroup);
   };
 
   const handleRemoveUserFromGroup = async (playerStr: string) => {
-    // playerStr is e.g. "76561198000000000 (Name)"
     const m = playerStr.match(/(\d{17})/);
-    const uid = m ? m[1] : playerStr;
-    await rconService.sendCommand(`oxide.usergroup remove "${uid}" "${selectedGroup}"`);
+    const uid = m ? m[1] : playerStr.trim();
+    if (!uid || !selectedGroup) return;
+    const cmd = `oxide.usergroup remove ${uid} ${selectedGroup}`;
+    rconService.logToConsole(`> ${cmd}`);
+    await rconService.sendCommand(cmd, false);
     triggerToast(`Removed from group ${selectedGroup}`);
     loadGroupDetails(selectedGroup);
   };
@@ -313,13 +360,16 @@ export const PermissionsManager: React.FC = () => {
             <button
               onClick={() => {
                 loadAllPermissions();
+                loadGroups();
                 if (targetType === 'group') loadGroupDetails(selectedGroup);
                 else if (selectedUser) loadUserDetails(selectedUser);
+                triggerToast('Refreshed permissions');
               }}
-              className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs transition-colors"
-              title="Refresh Permissions"
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs font-semibold transition-colors border border-zinc-700/60"
+              title="Refresh Permissions & Groups"
             >
-              <RotateCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <span>Sync</span>
             </button>
           </div>
         </div>

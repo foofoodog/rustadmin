@@ -311,7 +311,7 @@ export const MapTab: React.FC = () => {
 
   const fetchLiveMonuments = async () => {
     try {
-      const resp = await rconService.sendCommand('world.monuments');
+      const resp = await rconService.sendCommand('world.monuments', true);
       if (resp && resp.Message && resp.Message.includes('assets/')) {
         parseMonumentsOutput(resp.Message);
       }
@@ -352,7 +352,7 @@ export const MapTab: React.FC = () => {
 
   const fetchPlayerPositions = async () => {
     try {
-      const resp = await rconService.sendCommand('playerlistpos');
+      const resp = await rconService.sendCommand('playerlistpos', true);
       if (resp && resp.Message) {
         parsePlayerPositions(resp.Message);
       }

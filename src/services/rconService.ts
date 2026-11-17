@@ -13,6 +13,8 @@ class RconService {
   private statusListeners: Listener<ServerStatus>[] = [];
   private playersListeners: Listener<Player[]>[] = [];
   private pluginsListeners: Listener<OxidePlugin[]>[] = [];
+  private permissionChangeListeners: (() => void)[] = [];
+  private silentRequests = new Set<number>();
 
   private connectionState: ConnectionState = 'disconnected';
   private pollTimer: number | null = null;
@@ -67,9 +69,9 @@ class RconService {
         if (this.ws !== socket) return;
         this.setState('connected');
         this.startPolling();
-        // Initial queries
-        this.sendCommand('status');
-        this.sendCommand('plugins');
+        // Initial queries (silent so console isn't flooded on connect)
+        this.sendCommand('status', true);
+        this.sendCommand('plugins', true);
       };
 
       socket.onmessage = (event) => {
@@ -119,8 +121,8 @@ class RconService {
     this.stopPolling();
     this.pollTimer = window.setInterval(() => {
       if (this.connectionState === 'connected') {
-        this.sendCommand('status');
-        this.sendCommand('plugins');
+        // Silently poll status for dashboard metrics and player count without console spam
+        this.sendCommand('status', true);
       }
     }, 5000);
   }
@@ -143,7 +145,7 @@ class RconService {
     this.pendingRequests.clear();
   }
 
-  public sendCommand(command: string): Promise<RconMessage> {
+  public sendCommand(command: string, silent = false): Promise<RconMessage> {
     return new Promise((resolve, reject) => {
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
         reject(new Error('RCON is not connected'));
@@ -151,6 +153,9 @@ class RconService {
       }
 
       const id = ++this.messageCounter;
+      if (silent) {
+        this.silentRequests.add(id);
+      }
       this.pendingRequests.set(id, resolve);
 
       const payload = {
@@ -162,15 +167,48 @@ class RconService {
       try {
         this.ws.send(JSON.stringify(payload));
       } catch (err) {
+        this.silentRequests.delete(id);
         this.pendingRequests.delete(id);
         reject(err);
       }
     });
   }
 
+  public logToConsole(message: string, type: 'Generic' | 'Log' | 'Warning' | 'Error' | 'Chat' = 'Generic') {
+    const item: RconMessage = {
+      Identifier: 9999,
+      Message: message,
+      Type: type,
+      timestamp: Date.now(),
+    };
+    this.logListeners.forEach((l) => l(item));
+  }
+
+  public onPermissionsChange(listener: () => void): () => void {
+    this.permissionChangeListeners.push(listener);
+    return () => {
+      this.permissionChangeListeners = this.permissionChangeListeners.filter((l) => l !== listener);
+    };
+  }
+
+  public notifyPermissionsChange() {
+    this.permissionChangeListeners.forEach((l) => {
+      try {
+        l();
+      } catch (e) {
+        console.error('Error in permission change listener:', e);
+      }
+    });
+  }
+
   private handleMessage(data: RconMessage) {
-    // Notify log listeners
-    this.logListeners.forEach((l) => l(data));
+    const isSilent = this.silentRequests.has(data.Identifier);
+    if (isSilent) {
+      this.silentRequests.delete(data.Identifier);
+    } else {
+      // Notify log listeners only when not marked silent
+      this.logListeners.forEach((l) => l(data));
+    }
 
     // Handle responses to specific commands
     if (data.Identifier > 0 && this.pendingRequests.has(data.Identifier)) {
@@ -180,6 +218,20 @@ class RconService {
     }
 
     const msg = data.Message || '';
+
+    // Automatically trigger permission refresh if an oxide permission message is detected
+    if (
+      msg.includes('granted permission') ||
+      msg.includes('revoked permission') ||
+      msg.includes('added to group') ||
+      msg.includes('removed from group') ||
+      msg.includes('Group created') ||
+      msg.includes('Group removed') ||
+      msg.includes('already has permission') ||
+      msg.includes('does not have permission')
+    ) {
+      this.notifyPermissionsChange();
+    }
 
     // Check for Status output
     if (msg.includes('hostname:') && msg.includes('version :')) {

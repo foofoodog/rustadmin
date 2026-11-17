@@ -114,6 +114,22 @@ export const ConsoleTab: React.FC = () => {
 
     try {
       await rconService.sendCommand(cmd);
+      // Trigger sync for Permissions Tab if a permission or group command was run
+      const lower = cmd.toLowerCase();
+      if (
+        lower.startsWith('oxide.grant') ||
+        lower.startsWith('oxide.revoke') ||
+        lower.startsWith('oxide.group') ||
+        lower.startsWith('oxide.usergroup') ||
+        lower.startsWith('o.grant') ||
+        lower.startsWith('o.revoke') ||
+        lower.startsWith('grant ') ||
+        lower.startsWith('revoke ')
+      ) {
+        setTimeout(() => {
+          rconService.notifyPermissionsChange();
+        }, 300);
+      }
     } catch (err: any) {
       setLogs((prev) => [
         ...prev,
