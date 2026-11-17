@@ -46,7 +46,7 @@ const ItemImage: React.FC<{ item: RustItem; className?: string }> = ({ item, cla
   if (tier === 2) {
     return (
       <img
-        src={getItemFallbackIconUrl(item.shortname, item.icon)}
+        src={getItemFallbackIconUrl(item.shortname)}
         alt={item.name}
         loading="lazy"
         onError={handleError}
@@ -58,7 +58,7 @@ const ItemImage: React.FC<{ item: RustItem; className?: string }> = ({ item, cla
   if (tier === 3) {
     return (
       <img
-        src={getItemTertiaryIconUrl(item.shortname)}
+        src={getItemTertiaryIconUrl(item.shortname, item.icon)}
         alt={item.name}
         loading="lazy"
         onError={handleError}

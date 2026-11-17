@@ -86,14 +86,14 @@ export const RUST_CATEGORIES = [
 ] as const;
 
 export function getItemIconUrl(shortname: string): string {
+  return `/items/${shortname}.png`;
+}
+
+export function getItemFallbackIconUrl(shortname: string): string {
   return `https://wiki.rustclash.com/img/items180/${shortname}.png`;
 }
 
-export function getItemFallbackIconUrl(shortname: string, iconFilename?: string): string {
+export function getItemTertiaryIconUrl(shortname: string, iconFilename?: string): string {
   const file = iconFilename || `${shortname}.webp`;
   return `https://raw.githubusercontent.com/bobosneefdev/rust-items-json/master/data/icons/${file}`;
-}
-
-export function getItemTertiaryIconUrl(shortname: string): string {
-  return `https://raw.githubusercontent.com/Angelnfa/recoil-icons/main/${shortname}.png`;
 }
