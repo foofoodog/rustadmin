@@ -373,11 +373,15 @@ export const MapTab: React.FC = () => {
     const list: MapPlayerPos[] = [];
     const lines = text.split('\n');
     for (const line of lines) {
-      const m = line.match(/^(\d{17})\s+"([^"]+)"\s+\(([-\d.]+),\s*([-\d.]+),\s*([-\d.]+)\)/);
+      const m = line.match(/^(\d{17})\s+(.+?)\s+\(([-\d.]+),\s*([-\d.]+),\s*([-\d.]+)\)/);
       if (m) {
+        let name = m[2].trim();
+        if (name.startsWith('"') && name.endsWith('"')) {
+          name = name.slice(1, -1);
+        }
         list.push({
           id: m[1],
-          name: m[2],
+          name,
           x: parseFloat(m[3]),
           y: parseFloat(m[4]),
           z: parseFloat(m[5]),
