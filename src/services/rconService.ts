@@ -9,6 +9,7 @@ class RconService {
   private pendingRequests = new Map<number, (response: RconMessage) => void>();
   private stateListeners: Listener<ConnectionState>[] = [];
   private logListeners: Listener<RconMessage>[] = [];
+  private logHistory: RconMessage[] = [];
   private chatListeners: Listener<ChatMessage>[] = [];
   private statusListeners: Listener<ServerStatus>[] = [];
   private playersListeners: Listener<Player[]>[] = [];
@@ -179,6 +180,21 @@ class RconService {
     });
   }
 
+  public getLogHistory(): RconMessage[] {
+    return [...this.logHistory];
+  }
+
+  public clearLogHistory(): void {
+    this.logHistory = [];
+  }
+
+  public addLogToHistory(msg: RconMessage): void {
+    this.logHistory.push(msg);
+    if (this.logHistory.length > 2000) {
+      this.logHistory.shift();
+    }
+  }
+
   public logToConsole(message: string, type: 'Generic' | 'Log' | 'Warning' | 'Error' | 'Chat' = 'Generic') {
     const item: RconMessage = {
       Identifier: 9999,
@@ -186,6 +202,7 @@ class RconService {
       Type: type,
       timestamp: Date.now(),
     };
+    this.addLogToHistory(item);
     this.logListeners.forEach((l) => l(item));
   }
 
@@ -211,6 +228,7 @@ class RconService {
     if (isSilent) {
       this.silentRequests.delete(data.Identifier);
     } else {
+      this.addLogToHistory(data);
       // Notify log listeners only when not marked silent
       this.logListeners.forEach((l) => l(data));
     }

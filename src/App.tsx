@@ -60,24 +60,24 @@ export function App() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
         {/* Server Section */}
-        {activeTab === 'dashboard' && <DashboardTab />}
-        {activeTab === 'convars' && <ConvarsTab />}
-        {activeTab === 'automation' && <AutomationTab />}
+        <div className={activeTab === 'dashboard' ? 'block' : 'hidden'}><DashboardTab /></div>
+        <div className={activeTab === 'convars' ? 'block' : 'hidden'}><ConvarsTab /></div>
+        <div className={activeTab === 'automation' ? 'block' : 'hidden'}><AutomationTab /></div>
 
         {/* Monitoring Section */}
-        {activeTab === 'console' && <ConsoleTab />}
-        {activeTab === 'map' && <MapTab />}
-        {activeTab === 'combat' && <CombatFeedTab />}
-        {activeTab === 'chat' && <ChatTab />}
+        <div className={activeTab === 'console' ? 'block' : 'hidden'}><ConsoleTab /></div>
+        <div className={activeTab === 'map' ? 'block' : 'hidden'}><MapTab /></div>
+        <div className={activeTab === 'combat' ? 'block' : 'hidden'}><CombatFeedTab /></div>
+        <div className={activeTab === 'chat' ? 'block' : 'hidden'}><ChatTab /></div>
 
         {/* Players & Plugins Section */}
-        {(activeTab === 'players-list' || activeTab === 'players') && <PlayersTab />}
-        {activeTab === 'plugins' && <PluginsTab />}
+        <div className={(activeTab === 'players-list' || activeTab === 'players') ? 'block' : 'hidden'}><PlayersTab /></div>
+        <div className={activeTab === 'plugins' ? 'block' : 'hidden'}><PluginsTab /></div>
 
         {/* Arsenal & Spawner Section */}
-        {activeTab === 'items' && <ItemsTab />}
-        {activeTab === 'kits' && <KitsTab />}
-        {activeTab === 'prefabs' && <PrefabSpawnerTab />}
+        <div className={activeTab === 'items' ? 'block' : 'hidden'}><ItemsTab /></div>
+        <div className={activeTab === 'kits' ? 'block' : 'hidden'}><KitsTab /></div>
+        <div className={activeTab === 'prefabs' ? 'block' : 'hidden'}><PrefabSpawnerTab /></div>
       </main>
 
       <ConnectModal

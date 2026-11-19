@@ -16,7 +16,7 @@ import { rconService } from '../services/rconService';
 import { RconMessage, Player } from '../types/rcon';
 
 export const ConsoleTab: React.FC = () => {
-  const [logs, setLogs] = useState<RconMessage[]>([]);
+  const [logs, setLogs] = useState<RconMessage[]>(() => rconService.getLogHistory());
   const [command, setCommand] = useState('');
   const [commandHistory, setCommandHistory] = useState<string[]>(() => {
     try {
@@ -133,15 +133,14 @@ export const ConsoleTab: React.FC = () => {
     if (inputRef.current) inputRef.current.focus();
 
     // Echo locally in console
-    setLogs((prev) => [
-      ...prev,
-      {
-        Identifier: 9999,
-        Message: `> ${cmd}`,
-        Type: 'Generic',
-        timestamp: Date.now(),
-      },
-    ]);
+    const localEcho: RconMessage = {
+      Identifier: 9999,
+      Message: `> ${cmd}`,
+      Type: 'Generic',
+      timestamp: Date.now(),
+    };
+    rconService.addLogToHistory(localEcho);
+    setLogs((prev) => [...prev.slice(-1999), localEcho]);
 
     try {
       await rconService.sendCommand(cmd);

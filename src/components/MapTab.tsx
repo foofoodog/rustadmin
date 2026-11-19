@@ -280,7 +280,11 @@ export const MapTab: React.FC = () => {
   });
 
   useEffect(() => {
-    const unsub = rconService.onStatus(setStatus);
+    const unsub = rconService.onStatus((s) => {
+      setStatus(s);
+      if (s.worldSize) setMapSize(s.worldSize);
+      if (s.seed) setMapSeed(s.seed);
+    });
     rconService.sendCommand('status');
     fetchPlayerPositions();
     fetchLiveMonuments();
@@ -391,6 +395,19 @@ export const MapTab: React.FC = () => {
     setPlayers(list);
   };
 
+  // 7x7 Grid: 1 ocean tile ring on all 4 borders around the 5x5 land island
+  // For a 2500m map, land is 5 cells of 500m. 7 cells = 3500m total bounds (-1750 to +1750).
+  // Small Oil Rig (Z=+1570) sits in D1 ocean; Large Oil Rig (Z=-1582) sits in B7 ocean.
+  const GRID_COLS = 7;
+  const GRID_ROWS = 7;
+  const OCEAN_TILES_PER_SIDE = 1;
+  const cellSize = mapSize / 5;
+  const totalWorldSize = cellSize * GRID_COLS;
+  const halfWorldSize = totalWorldSize / 2;
+  const landPercentOffset = (OCEAN_TILES_PER_SIDE / GRID_COLS) * 100;
+  const landPercentSize = (5 / GRID_COLS) * 100;
+  const MAP_PIXELS = 560;
+
   // Dragging & clicking interactions
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0 && e.button !== 1) return;
@@ -427,9 +444,8 @@ export const MapTab: React.FC = () => {
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
-      const half = mapSize / 2;
-      const worldX = Math.round(((clickX / rect.width) * mapSize) - half);
-      const worldZ = Math.round(half - ((clickY / rect.height) * mapSize));
+      const worldX = Math.round(((clickX / rect.width) * totalWorldSize) - halfWorldSize);
+      const worldZ = Math.round(halfWorldSize - ((clickY / rect.height) * totalWorldSize));
 
       setSelectedCoord({ x: worldX, z: worldZ });
     }
@@ -442,14 +458,13 @@ export const MapTab: React.FC = () => {
 
   // Center the map view directly on coordinates (X, Z) with auto-pan and optional zoom
   const centerOnCoords = (x: number, z: number, autoZoom = true) => {
-    const half = mapSize / 2;
-    const pX = (x + half) / mapSize;
-    const pZ = (half - z) / mapSize;
+    const pX = (x + halfWorldSize) / totalWorldSize;
+    const pZ = (halfWorldSize - z) / totalWorldSize;
 
     // Zoom in to at least 1.6x if currently zoomed out so the POI is prominent
     const targetZoom = autoZoom ? Math.max(zoom, 1.6) : zoom;
-    const newPanX = Math.round(-(pX - 0.5) * 540 * targetZoom);
-    const newPanY = Math.round(-(pZ - 0.5) * 540 * targetZoom);
+    const newPanX = Math.round(-(pX - 0.5) * MAP_PIXELS * targetZoom);
+    const newPanY = Math.round(-(pZ - 0.5) * MAP_PIXELS * targetZoom);
 
     setZoom(targetZoom);
     setPan({ x: newPanX, y: newPanY });
@@ -479,9 +494,8 @@ export const MapTab: React.FC = () => {
 
   // Convert world X, Z into percentage positions for CSS (0% to 100%)
   const toPercentage = (x: number, z: number) => {
-    const half = mapSize / 2;
-    const left = ((x + half) / mapSize) * 100;
-    const top = ((half - z) / mapSize) * 100;
+    const left = ((x + halfWorldSize) / totalWorldSize) * 100;
+    const top = ((halfWorldSize - z) / totalWorldSize) * 100;
     return { left: `${left}%`, top: `${top}%` };
   };
 
@@ -755,25 +769,50 @@ export const MapTab: React.FC = () => {
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transformOrigin: 'center center',
+              width: `${MAP_PIXELS}px`,
+              height: `${MAP_PIXELS}px`,
             }}
-            className="relative w-[540px] h-[540px] bg-[#0c1421] rounded-xl shadow-2xl cursor-crosshair border border-zinc-800/80 transition-transform duration-75 select-none"
+            className="relative bg-gradient-to-b from-[#091b2d] via-[#0d2843] to-[#071625] rounded-xl shadow-2xl cursor-crosshair border border-cyan-950/80 transition-transform duration-75 select-none overflow-hidden"
           >
-            {/* Map Terrain Image */}
+            {/* Deep Water Ripple Texture in Ocean */}
+            <div className="absolute inset-0 bg-[radial-gradient(#163a5e_1px,transparent_1px)] [background-size:16px_16px] opacity-35 pointer-events-none" />
+
+            {/* Map Terrain Image in Center 5x5 Island Area */}
             <img
               src="https://content.rustmaps.com/maps/290/4349c039912148afb138c9d2590b7b1d/map_raw_normalized.webp"
               alt="Rust Map"
               draggable={false}
-              className="w-full h-full object-cover pointer-events-none opacity-90 rounded-xl"
+              style={{
+                position: 'absolute',
+                left: `${landPercentOffset}%`,
+                top: `${landPercentOffset}%`,
+                width: `${landPercentSize}%`,
+                height: `${landPercentSize}%`,
+              }}
+              className="object-cover pointer-events-none opacity-95 rounded-lg shadow-2xl border border-cyan-800/30"
             />
 
-            {/* Grid Overlay */}
+            {/* 7x7 Grid Overlay (A-G, 1-7) */}
             {visibleCategories.grid && (
-              <div className="absolute inset-0 grid grid-cols-5 grid-rows-5 pointer-events-none opacity-25 border border-white/20">
-                {Array.from({ length: 25 }).map((_, i) => (
-                  <div key={i} className="border border-white/20 flex items-start p-1 text-[8px] font-mono text-white">
-                    {String.fromCharCode(65 + (i % 5))}{Math.floor(i / 5) + 1}
-                  </div>
-                ))}
+              <div className="absolute inset-0 grid grid-cols-7 grid-rows-7 pointer-events-none opacity-30 border border-white/20">
+                {Array.from({ length: GRID_COLS * GRID_ROWS }).map((_, i) => {
+                  const col = i % GRID_COLS;
+                  const row = Math.floor(i / GRID_COLS);
+                  const colLetter = String.fromCharCode(65 + col);
+                  const rowNum = row + 1;
+                  const isOcean = col === 0 || col === GRID_COLS - 1 || row === 0 || row === GRID_ROWS - 1;
+                  return (
+                    <div
+                      key={i}
+                      className={`border border-white/15 flex items-start justify-between p-1 text-[8px] font-mono ${
+                        isOcean ? 'bg-cyan-950/30 text-cyan-300' : 'text-white'
+                      }`}
+                    >
+                      <span>{colLetter}{rowNum}</span>
+                      {isOcean && <span className="text-[6.5px] text-cyan-400/50 font-sans tracking-wider">OCEAN</span>}
+                    </div>
+                  );
+                })}
               </div>
             )}
 
