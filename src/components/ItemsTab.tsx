@@ -11,13 +11,15 @@ import {
   Layers, 
   ChevronDown, 
   Info,
-  Sparkles
+  Sparkles,
+  ExternalLink
 } from 'lucide-react';
 import { 
   RUST_ITEMS, 
   RustItem, 
   RUST_CATEGORIES 
 } from '../data/rustItems';
+import { getItemStats, getRustClashWikiUrl } from '../data/itemStats';
 import { ItemSprite } from './ItemSprite';
 import { rconService } from '../services/rconService';
 import { Player } from '../types/rcon';
@@ -226,13 +228,14 @@ export const ItemsTab: React.FC = () => {
                   </span>
                 )}
 
-                {/* DLC Badge on top-left */}
+                {/* DLC Pack Badge on top-left */}
                 {item.isDlc && (
                   <span
-                    className="absolute top-2 left-2 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-purple-950/90 text-purple-300 border border-purple-800/70 shadow-sm"
-                    title={item.dlcPack || 'DLC / Special Content'}
+                    className="absolute top-2 left-2 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-purple-950/90 text-purple-300 border border-purple-800/70 shadow-sm flex items-center space-x-1 max-w-[110px]"
+                    title={item.dlcPack || 'DLC Content'}
                   >
-                    DLC
+                    <Sparkles className="w-2.5 h-2.5 text-purple-400 shrink-0" />
+                    <span className="truncate">{item.dlcPack || 'DLC'}</span>
                   </span>
                 )}
 
@@ -257,6 +260,37 @@ export const ItemsTab: React.FC = () => {
                   >
                     {item.shortname}
                   </span>
+
+                  {/* Compact Item Stats preview on card */}
+                  {(() => {
+                    const stats = getItemStats(item.shortname);
+                    if (!stats) return null;
+                    if (stats.damage !== undefined) {
+                      return (
+                        <div className="flex items-center space-x-1 text-[10px] text-zinc-400 font-mono mt-0.5 truncate">
+                          <span className="text-rose-400 font-semibold">{stats.damage} Dmg</span>
+                          {stats.attackSpeed && <span className="text-zinc-500">• {stats.attackSpeed}</span>}
+                        </div>
+                      );
+                    }
+                    if (stats.projectileProtection) {
+                      return (
+                        <div className="flex items-center space-x-1 text-[10px] text-zinc-400 font-mono mt-0.5 truncate">
+                          <span className="text-emerald-400 font-semibold">{stats.projectileProtection} Proj</span>
+                          {stats.meleeProtection && <span className="text-zinc-500">• {stats.meleeProtection} Mel</span>}
+                        </div>
+                      );
+                    }
+                    if (stats.instantHealth) {
+                      return (
+                        <div className="flex items-center space-x-1 text-[10px] text-emerald-400 font-mono mt-0.5 truncate">
+                          <span className="font-semibold">+{stats.instantHealth} HP</span>
+                          {stats.healthOverTime && <span className="text-zinc-500">(+{stats.healthOverTime})</span>}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
                 <button
                   onClick={(e) => {
@@ -316,6 +350,12 @@ export const ItemsTab: React.FC = () => {
                       {selectedItem.rarity}
                     </span>
                   )}
+                  {selectedItem.isDlc && (
+                    <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded bg-purple-950/90 text-purple-300 border border-purple-800/70 text-[10px] font-bold uppercase shadow-sm">
+                      <Sparkles className="w-2.5 h-2.5 text-purple-400" />
+                      <span>{selectedItem.dlcPack || 'DLC Content'}</span>
+                    </span>
+                  )}
                 </div>
                 <span className="text-xs font-mono text-rust-400 block truncate">{selectedItem.shortname}</span>
                 <div className="flex items-center space-x-3 text-[11px] text-zinc-500 mt-1">
@@ -329,30 +369,154 @@ export const ItemsTab: React.FC = () => {
 
             {/* Description if available */}
             {selectedItem.description && (
-              <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-lg p-3 text-xs text-zinc-300 leading-relaxed max-h-28 overflow-y-auto break-words whitespace-pre-wrap scrollbar-thin scrollbar-thumb-zinc-800">
+              <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-lg p-3 text-xs text-zinc-300 leading-relaxed max-h-24 overflow-y-auto break-words whitespace-pre-wrap scrollbar-thin scrollbar-thumb-zinc-800">
                 <p>{selectedItem.description}</p>
               </div>
             )}
 
-            {/* DLC Spawning Note */}
-            {selectedItem.isDlc && (
-              <div className="bg-purple-950/40 border border-purple-800/60 rounded-lg p-2.5 flex items-start space-x-2.5 text-xs text-purple-200">
-                <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                <div className="space-y-0.5">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-bold text-purple-300">
-                      {selectedItem.dlcPack || 'DLC Content'}
-                    </span>
-                    <span className="text-[10px] uppercase font-semibold px-1.5 py-0.2 rounded bg-purple-900/60 text-purple-300 border border-purple-700/60">
-                      Admin Spawning Allowed
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-purple-300/80 leading-relaxed">
-                    Players can receive, wear, and use this item even if they don't own the DLC on Steam. DLC ownership is only required for players to craft or reskin it at a repair bench.
-                  </p>
+            {/* Item Statistics Card (Mirrors RustClash Wiki layout) */}
+            {(() => {
+              const stats = getItemStats(selectedItem.shortname);
+              const wikiUrl = getRustClashWikiUrl(selectedItem.shortname, selectedItem.name);
+
+              return (
+                <div className="space-y-2">
+                  {stats && (
+                    <div className="bg-[#181824]/90 border border-[#2b2b3d] rounded-lg p-3 text-xs shadow-inner space-y-2">
+                      <div className="flex items-center justify-between pb-1.5 border-b border-[#2d2d42]">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                          Item Statistics
+                        </span>
+                        <a
+                          href={wikiUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1 text-[11px] text-rust-400 hover:text-rust-300 transition-colors font-medium hover:underline"
+                          title="Open item page on wiki.rustclash.com"
+                        >
+                          <span>RustClash Wiki</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-0.5 font-sans">
+                        {stats.damage !== undefined && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Damage</span>
+                            <span className="font-semibold text-zinc-100">{stats.damage}</span>
+                          </div>
+                        )}
+                        {stats.attackSpeed && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Attack Speed</span>
+                            <span className="font-semibold text-zinc-100">{stats.attackSpeed}</span>
+                          </div>
+                        )}
+                        {stats.range && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Range</span>
+                            <span className="font-semibold text-zinc-100">{stats.range}</span>
+                          </div>
+                        )}
+                        {stats.drawTime && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Draw</span>
+                            <span className="font-semibold text-zinc-100">{stats.drawTime}</span>
+                          </div>
+                        )}
+                        {stats.throwable && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Throw</span>
+                            <span className="font-semibold text-zinc-100">{stats.throwable}</span>
+                          </div>
+                        )}
+                        {stats.magazineSize !== undefined && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Capacity</span>
+                            <span className="font-semibold text-zinc-100">{stats.magazineSize} rds</span>
+                          </div>
+                        )}
+                        {stats.reloadTime && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Reload</span>
+                            <span className="font-semibold text-zinc-100">{stats.reloadTime}</span>
+                          </div>
+                        )}
+                        {stats.recoil && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Recoil</span>
+                            <span className="font-semibold text-zinc-100">{stats.recoil}</span>
+                          </div>
+                        )}
+                        {stats.projectileProtection && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Projectile</span>
+                            <span className="font-semibold text-emerald-400">{stats.projectileProtection}</span>
+                          </div>
+                        )}
+                        {stats.meleeProtection && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Melee</span>
+                            <span className="font-semibold text-emerald-400">{stats.meleeProtection}</span>
+                          </div>
+                        )}
+                        {stats.biteProtection && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Bite</span>
+                            <span className="font-semibold text-zinc-200">{stats.biteProtection}</span>
+                          </div>
+                        )}
+                        {stats.radiationProtection && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Radiation</span>
+                            <span className="font-semibold text-amber-400">{stats.radiationProtection}</span>
+                          </div>
+                        )}
+                        {stats.coldProtection && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Cold</span>
+                            <span className="font-semibold text-cyan-400">{stats.coldProtection}</span>
+                          </div>
+                        )}
+                        {stats.explosionProtection && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Explosion</span>
+                            <span className="font-semibold text-rose-400">{stats.explosionProtection}</span>
+                          </div>
+                        )}
+                        {stats.instantHealth !== undefined && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Instant Heal</span>
+                            <span className="font-semibold text-emerald-400">+{stats.instantHealth} HP</span>
+                          </div>
+                        )}
+                        {stats.healthOverTime !== undefined && (
+                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                            <span className="text-zinc-400">Heal Over Time</span>
+                            <span className="font-semibold text-emerald-400">+{stats.healthOverTime} HP</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {!stats && (
+                    <div className="flex items-center justify-between px-3 py-2 bg-zinc-950/50 border border-zinc-800/60 rounded-lg text-xs">
+                      <span className="text-zinc-400">Detailed item metrics:</span>
+                      <a
+                        href={wikiUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center space-x-1 text-rust-400 hover:text-rust-300 font-medium hover:underline"
+                      >
+                        <span>View on RustClash Wiki</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             <form onSubmit={handleGive} className="space-y-3">
               {/* Target Selector */}
