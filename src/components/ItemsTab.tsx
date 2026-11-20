@@ -34,7 +34,12 @@ export const ItemsTab: React.FC = () => {
   const [displayLimit, setDisplayLimit] = useState<number>(96);
 
   useEffect(() => {
-    const unsub = rconService.onPlayers(setPlayers);
+    const unsub = rconService.onPlayers((newPlayers) => {
+      setPlayers(newPlayers);
+      if (newPlayers.length > 0) {
+        setTargetPlayerId((prev) => (prev === 'self' || !prev ? newPlayers[0].id : prev));
+      }
+    });
     rconService.sendCommand('status');
     return () => unsub();
   }, []);
@@ -95,12 +100,15 @@ export const ItemsTab: React.FC = () => {
     if (!selectedItem) return;
 
     try {
-      if (targetPlayerId === 'self') {
+      if (targetPlayerId === 'all') {
+        await rconService.sendCommand(`inventory.giveall "${selectedItem.shortname}" ${amount}`);
+        setToast(`Gave ${amount}x ${selectedItem.name} to all online players`);
+      } else if (targetPlayerId === 'self') {
         await rconService.sendCommand(`inventory.give "${selectedItem.shortname}" ${amount}`);
         setToast(`Gave ${amount}x ${selectedItem.name} to Console`);
       } else {
         const player = players.find((p) => p.id === targetPlayerId);
-        await rconService.sendCommand(`inventory.giveid "${targetPlayerId}" "${selectedItem.shortname}" ${amount}`);
+        await rconService.sendCommand(`inventory.giveto "${targetPlayerId}" "${selectedItem.shortname}" ${amount}`);
         setToast(`Gave ${amount}x ${selectedItem.name} to ${player ? player.name : targetPlayerId}`);
       }
     } catch (err: any) {
@@ -357,12 +365,19 @@ export const ItemsTab: React.FC = () => {
                   onChange={(e) => setTargetPlayerId(e.target.value)}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-rust-500"
                 >
-                  <option value="self">Console / Self (inventory.give)</option>
-                  {players.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.id})
-                    </option>
-                  ))}
+                  {players.length > 0 ? (
+                    <>
+                      {players.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} ({p.id})
+                        </option>
+                      ))}
+                      <option value="all">All Online Players ({players.length})</option>
+                      <option value="self">Console / Self (in-game admin only)</option>
+                    </>
+                  ) : (
+                    <option value="self">No players online (Console / Self)</option>
+                  )}
                 </select>
               </div>
 

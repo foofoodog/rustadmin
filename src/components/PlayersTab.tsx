@@ -48,7 +48,7 @@ export const PlayersTab: React.FC = () => {
       const reason = actionReason.trim() || 'Banned by administrator';
       await rconService.sendCommand(`ban "${selectedPlayer.id}" "${reason}"`);
     } else if (actionModal === 'give') {
-      await rconService.sendCommand(`inventory.giveid "${selectedPlayer.id}" "${giveItem}" ${giveAmount}`);
+      await rconService.sendCommand(`inventory.giveto "${selectedPlayer.id}" "${giveItem}" ${giveAmount}`);
     }
 
     setActionModal(null);
