@@ -1,5 +1,5 @@
 // RustAdmin WebRCON Service Worker - Offline PWA
-const CACHE_NAME = 'rustadmin-v1';
+const CACHE_NAME = 'rustadmin-v2';
 
 // Base scope helper (handles both root '/' and subpath '/rustadmin/' on GitHub Pages)
 const getBase = () => {
@@ -9,6 +9,13 @@ const getBase = () => {
     return './';
   }
 };
+
+// Message listener for manual update triggers from the app UI
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
 
 // Install event: Pre-cache essential application shell and heavy assets
 self.addEventListener('install', (event) => {
@@ -36,7 +43,12 @@ self.addEventListener('install', (event) => {
             .catch((err) => console.warn('[SW] Pre-cache skip:', url, err))
         )
       );
-    }).then(() => self.skipWaiting())
+    }).then(() => {
+      // If this is the very first install, activate immediately without waiting for user prompt
+      if (!self.registration.active) {
+        self.skipWaiting();
+      }
+    })
   );
 });
 

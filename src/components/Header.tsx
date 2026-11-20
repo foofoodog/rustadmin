@@ -21,9 +21,12 @@ import {
   Plus,
   Check,
   Settings,
-  Download
+  Download,
+  RotateCw,
+  Sparkles
 } from 'lucide-react';
 import { rconService } from '../services/rconService';
+import { pwaService } from '../services/pwaService';
 import { ServerStatus } from '../types/rcon';
 import { 
   getSavedProfiles, 
@@ -61,43 +64,41 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenC
   const [profiles, setProfiles] = useState<ServerProfile[]>(getSavedProfiles());
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // PWA Install prompt listener
-    const handleBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    };
+    // PWA Service update and installation listeners
+    const unsubUpdate = pwaService.onUpdateAvailable(() => {
+      console.log('[PWA] New update available!');
+      setIsUpdateAvailable(true);
+    });
 
-    const handleAppInstalled = () => {
-      setInstallPrompt(null);
-    };
+    const unsubInstall = pwaService.onInstallPrompt((prompt) => {
+      setInstallPrompt(prompt);
+    });
 
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-    window.addEventListener('appinstalled', handleAppInstalled);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      unsubUpdate();
+      unsubInstall();
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
 
   const handleInstallClick = async () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const choice = await installPrompt.userChoice;
-    if (choice?.outcome === 'accepted') {
-      setInstallPrompt(null);
-    }
+    await pwaService.promptInstall();
+  };
+
+  const handleApplyUpdate = () => {
+    pwaService.applyUpdate();
   };
 
   useEffect(() => {
@@ -287,8 +288,21 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenC
             })}
           </nav>
 
-          {/* Right Header Actions: PWA Install, Offline Status & Connection */}
+          {/* Right Header Actions: PWA Install, Update, Offline Status & Connection */}
           <div className="flex items-center space-x-2">
+            {/* PWA Update Ready Button */}
+            {isUpdateAvailable && (
+              <button
+                onClick={handleApplyUpdate}
+                className="flex items-center space-x-1.5 px-2.5 py-1 bg-gradient-to-r from-rust-600 via-amber-600 to-rust-600 hover:from-rust-500 hover:to-amber-500 text-white rounded-lg text-xs font-bold shadow-md shadow-rust-950/80 animate-pulse transition-all border border-amber-500/50"
+                title="A new version of RustAdmin is ready. Click to reload and apply now."
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+                <span className="hidden sm:inline">Update Ready</span>
+                <span className="sm:hidden">Update</span>
+              </button>
+            )}
+
             {/* Install PWA Button (appears when browser triggers beforeinstallprompt) */}
             {installPrompt && (
               <button
