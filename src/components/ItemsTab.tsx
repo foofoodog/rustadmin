@@ -169,7 +169,7 @@ export const ItemsTab: React.FC = () => {
       </div>
 
       {/* Category Tabs */}
-      <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-zinc-800">
+      <div className="flex flex-wrap items-center gap-1.5">
         {RUST_CATEGORIES.map((cat) => {
           const count = categoryCounts[cat] || 0;
           const isSelected = selectedCategory === cat;
