@@ -58,7 +58,7 @@ export function App() {
         onOpenConnect={() => setIsConnectOpen(true)}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 max-w-7xl 2xl:max-w-[1536px] w-full mx-auto p-3 sm:p-5 lg:p-6">
         {/* Server Section */}
         <div className={activeTab === 'dashboard' ? 'block' : 'hidden'}><DashboardTab /></div>
         <div className={activeTab === 'convars' ? 'block' : 'hidden'}><ConvarsTab /></div>

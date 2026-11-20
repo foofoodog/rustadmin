@@ -26,7 +26,8 @@ import {
   Radio,
   Warehouse,
   CircleDot,
-  Skull
+  Skull,
+  Grid
 } from 'lucide-react';
 import { rconService } from '../services/rconService';
 import { ServerStatus } from '../types/rcon';
@@ -586,7 +587,7 @@ export const MapTab: React.FC = () => {
   }, {});
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2.5 sm:space-y-3">
       {/* Toast Alert */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 bg-zinc-800 border border-rust-500/50 text-white px-4 py-2.5 rounded-lg shadow-xl text-sm flex items-center space-x-2 animate-bounce">
@@ -596,17 +597,17 @@ export const MapTab: React.FC = () => {
       )}
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-900 border border-zinc-800 p-4 rounded-xl">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-900 border border-zinc-800 py-2 px-3 sm:px-4 rounded-xl">
         <div className="flex items-center space-x-3">
-          <MapIcon className="w-5 h-5 text-rust-500" />
-          <div>
-            <h2 className="text-base font-bold text-zinc-100 flex items-center space-x-2">
+          <MapIcon className="w-5 h-5 text-rust-500 shrink-0" />
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+            <h2 className="text-sm font-bold text-zinc-100 flex items-center space-x-2">
               <span>Interactive Map Browser</span>
               <span className="px-2 py-0.5 bg-zinc-800 text-rust-400 font-mono text-xs rounded">
                 Size: {mapSize} • Seed: {mapSeed}
               </span>
             </h2>
-            <p className="text-xs text-zinc-400">
+            <p className="text-[11px] text-zinc-400 hidden sm:block">
               Scroll wheel to zoom • Drag to pan • Click map to select • Click POI to center
             </p>
           </div>
@@ -668,92 +669,119 @@ export const MapTab: React.FC = () => {
         </div>
       </div>
 
-      {/* POI Category Filter Badges */}
-      <div className="bg-zinc-900 border border-zinc-800 p-3 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-zinc-400 font-semibold text-[11px] mr-1 flex items-center space-x-1">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-rust-500" />
-            <span>POIs:</span>
-          </span>
+      {/* Main Map Viewer Layout: Left Vertical Filters, Center Map, Right Coordinates & POIs */}
+      <div className="flex flex-col lg:flex-row gap-3 items-stretch">
+        {/* Left Column: POI Category Filter Badges (Vertical) */}
+        <div className="w-full lg:w-48 xl:w-52 shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl p-3 flex flex-col justify-between space-y-3">
+          <div className="space-y-2.5">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+              <span className="text-zinc-200 font-bold text-xs flex items-center space-x-1.5">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-rust-500" />
+                <span>POI Filters</span>
+              </span>
+              <span className="text-[10px] text-zinc-500 font-mono">
+                {filteredMonuments.length}
+              </span>
+            </div>
 
-          {(Object.keys(categoryConfigs) as MonumentCategory[]).map((cat) => {
-            const cfg = categoryConfigs[cat];
-            const active = visibleCategories[cat];
-            const count = categoryCounts[cat] || 0;
-            return (
-              <button
-                key={cat}
-                onClick={() => toggleCategory(cat)}
-                className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border font-medium transition-all ${
-                  active
-                    ? `${cfg.badgeBg} border-opacity-60 shadow-sm`
-                    : 'bg-zinc-950/70 border-zinc-800/80 text-zinc-500 hover:text-zinc-300'
-                }`}
-                title={`Toggle ${cfg.label}`}
-              >
-                <div className={`w-2 h-2 rounded-full ${active ? cfg.dot : 'bg-zinc-600'}`} />
-                <span>{cfg.label}</span>
-                <span className={`text-[10px] font-mono ${active ? 'opacity-90' : 'opacity-40'}`}>
-                  ({count})
-                </span>
-              </button>
-            );
-          })}
+            {/* Vertical Category Buttons */}
+            <div className="space-y-1">
+              {(Object.keys(categoryConfigs) as MonumentCategory[]).map((cat) => {
+                const cfg = categoryConfigs[cat];
+                const active = visibleCategories[cat];
+                const count = categoryCounts[cat] || 0;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => toggleCategory(cat)}
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                      active
+                        ? `${cfg.badgeBg} border-opacity-60 shadow-sm`
+                        : 'bg-zinc-950/70 border-zinc-800/80 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
+                    }`}
+                    title={`Toggle ${cfg.label}`}
+                  >
+                    <div className="flex items-center space-x-2 truncate">
+                      <div className={`w-2 h-2 rounded-full shrink-0 ${active ? cfg.dot : 'bg-zinc-600'}`} />
+                      <span className="truncate">{cfg.label}</span>
+                    </div>
+                    <span className={`text-[10px] font-mono ml-1.5 shrink-0 ${active ? 'opacity-90' : 'opacity-40'}`}>
+                      ({count})
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* Players Toggle */}
-          <button
-            onClick={() => toggleCategory('players')}
-            className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border font-medium transition-all ${
-              visibleCategories.players
-                ? 'bg-cyan-500/10 border-cyan-500/40 text-cyan-300'
-                : 'bg-zinc-950/70 border-zinc-800/80 text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
-            <div className={`w-2 h-2 rounded-full ${visibleCategories.players ? 'bg-cyan-400' : 'bg-zinc-600'}`} />
-            <span>Players</span>
-            <span className="text-[10px] font-mono">({players.length})</span>
-          </button>
+            {/* Overlays / Layers */}
+            <div className="pt-2 border-t border-zinc-800">
+              <span className="text-[10px] uppercase font-semibold tracking-wider text-zinc-500 block mb-1.5">
+                Layers
+              </span>
+              <div className="space-y-1">
+                {/* Players Toggle */}
+                <button
+                  onClick={() => toggleCategory('players')}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                    visibleCategories.players
+                      ? 'bg-cyan-500/10 border-cyan-500/40 text-cyan-300'
+                      : 'bg-zinc-950/70 border-zinc-800/80 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
+                  }`}
+                  title="Toggle Online Players Marker Overlay"
+                >
+                  <div className="flex items-center space-x-2 truncate">
+                    <div className={`w-2 h-2 rounded-full shrink-0 ${visibleCategories.players ? 'bg-cyan-400' : 'bg-zinc-600'}`} />
+                    <span>Players</span>
+                  </div>
+                  <span className="text-[10px] font-mono">({players.length})</span>
+                </button>
 
-          {/* Grid Toggle */}
-          <button
-            onClick={() => toggleCategory('grid')}
-            className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border font-medium transition-all ${
-              visibleCategories.grid
-                ? 'bg-zinc-800 border-zinc-700 text-zinc-200'
-                : 'bg-zinc-950/70 border-zinc-800/80 text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
-            <span>Grid</span>
-          </button>
+                {/* Grid Toggle */}
+                <button
+                  onClick={() => toggleCategory('grid')}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                    visibleCategories.grid
+                      ? 'bg-zinc-800 border-zinc-700 text-zinc-200'
+                      : 'bg-zinc-950/70 border-zinc-800/80 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
+                  }`}
+                  title="Toggle 7x7 Grid Overlay (A-G, 1-7)"
+                >
+                  <div className="flex items-center space-x-2 truncate">
+                    <Grid className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                    <span>Grid (A-G)</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">7x7</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions: Show All / Hide All */}
+          <div className="pt-2 border-t border-zinc-800 flex items-center gap-1.5">
+            <button
+              onClick={() => setAllCategories(true)}
+              className="flex-1 py-1 text-[11px] bg-zinc-950 hover:bg-zinc-800 text-zinc-300 rounded border border-zinc-800/80 transition-colors text-center"
+            >
+              Show All
+            </button>
+            <button
+              onClick={() => setAllCategories(false)}
+              className="flex-1 py-1 text-[11px] bg-zinc-950 hover:bg-zinc-800 text-zinc-400 rounded border border-zinc-800/80 transition-colors text-center"
+            >
+              Hide All
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center space-x-1.5">
-          <button
-            onClick={() => setAllCategories(true)}
-            className="text-[11px] text-zinc-400 hover:text-zinc-200 px-2 py-0.5 rounded hover:bg-zinc-800 transition-colors"
-          >
-            Show All
-          </button>
-          <span className="text-zinc-700">•</span>
-          <button
-            onClick={() => setAllCategories(false)}
-            className="text-[11px] text-zinc-400 hover:text-zinc-200 px-2 py-0.5 rounded hover:bg-zinc-800 transition-colors"
-          >
-            Hide All
-          </button>
-        </div>
-      </div>
-
-      {/* Main Map Viewer */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        {/* Map Canvas Viewport with Wheel Zoom and Pan Drag */}
+        {/* Center: Map Canvas Viewport with Wheel Zoom and Pan Drag */}
         <div
           ref={viewportRef}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={() => isDragging && setIsDragging(false)}
-          className={`lg:col-span-3 bg-zinc-950 border border-zinc-800 rounded-xl p-4 overflow-hidden shadow-inner flex items-center justify-center min-h-[620px] relative select-none ${
+          className={`flex-1 min-w-0 bg-zinc-950 border border-zinc-800 rounded-xl p-2 sm:p-4 overflow-hidden shadow-inner flex items-center justify-center min-h-[540px] lg:min-h-[580px] h-[calc(100vh-210px)] max-h-[660px] relative select-none ${
             isDragging ? 'cursor-grabbing' : 'cursor-grab'
           }`}
         >
@@ -945,7 +973,7 @@ export const MapTab: React.FC = () => {
         </div>
 
         {/* Map Sidebar: POI List & Coordinates */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col justify-between space-y-4">
+        <div className="w-full lg:w-72 xl:w-80 shrink-0 bg-zinc-900 border border-zinc-800 rounded-xl p-3 sm:p-4 flex flex-col justify-between space-y-3">
           <div className="space-y-4">
             {/* Coordinates & Teleport Section */}
             <div className="border-b border-zinc-800 pb-3">
@@ -1028,7 +1056,7 @@ export const MapTab: React.FC = () => {
               </div>
 
               {/* Scrollable Monuments List with Glyphs */}
-              <div className="max-h-[280px] overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
+              <div className="max-h-[220px] xl:max-h-[250px] overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
                 {filteredMonuments.map((m) => {
                   const svgUrl = getMonumentSvg(m);
                   const isSelected = selectedCoord && selectedCoord.x === Math.round(m.x) && selectedCoord.z === Math.round(m.z);
