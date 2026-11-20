@@ -1,0 +1,14 @@
+services:
+  rustadmin-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: rustadmin-dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    restart: unless-stopped

@@ -118,7 +118,23 @@ npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) (or the port indicated in terminal) in your browser.
 
-### 3. Build for Production
+### 3. Docker Deployment
+
+#### A. Live Development with Hot-Reload (Recommended for local dev)
+Runs Vite inside Docker and mounts your local folder. Any code edits you make in `src/` are picked up instantly without restarting:
+```bash
+docker compose -f docker-compose.dev.yml up -d
+```
+Open [http://localhost:3001](http://localhost:3001).
+
+#### B. Production Nginx Container
+Compiles an optimized static production build served by a minimal Alpine Nginx image:
+```bash
+docker compose up -d --build
+```
+Open [http://localhost:3001](http://localhost:3001).
+
+### 4. Build for Production (Static Files)
 ```bash
 npm run build
 ```
