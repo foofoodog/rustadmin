@@ -20,7 +20,8 @@ import {
   ChevronRight,
   Plus,
   Check,
-  Settings
+  Settings,
+  Download
 } from 'lucide-react';
 import { rconService } from '../services/rconService';
 import { ServerStatus } from '../types/rcon';
@@ -59,7 +60,45 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenC
   const [activeProfile, setActiveProfile] = useState<ServerProfile>(getActiveProfile());
   const [profiles, setProfiles] = useState<ServerProfile[]>(getSavedProfiles());
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // PWA Install prompt listener
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setInstallPrompt(null);
+    };
+
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const choice = await installPrompt.userChoice;
+    if (choice?.outcome === 'accepted') {
+      setInstallPrompt(null);
+    }
+  };
 
   useEffect(() => {
     const unsubState = rconService.onStateChange(setConnectionState);
@@ -248,8 +287,31 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenC
             })}
           </nav>
 
-          {/* Connection Status Button */}
+          {/* Right Header Actions: PWA Install, Offline Status & Connection */}
           <div className="flex items-center space-x-2">
+            {/* Install PWA Button (appears when browser triggers beforeinstallprompt) */}
+            {installPrompt && (
+              <button
+                onClick={handleInstallClick}
+                className="flex items-center space-x-1.5 px-2.5 py-1 bg-rust-600 hover:bg-rust-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-all border border-rust-500/50 animate-pulse hover:animate-none"
+                title="Install RustAdmin as a desktop/mobile app"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">Install App</span>
+              </button>
+            )}
+
+            {/* Offline Badge */}
+            {isOffline && (
+              <span
+                className="flex items-center space-x-1 px-2 py-1 bg-amber-950/60 border border-amber-800/80 text-amber-300 text-xs rounded-lg font-medium"
+                title="Running in offline mode from Service Worker cache"
+              >
+                <WifiOff className="w-3 h-3 text-amber-400" />
+                <span className="hidden sm:inline">Offline</span>
+              </span>
+            )}
+
             <button
               onClick={onOpenConnect}
               title="Click to open RCON connection settings"

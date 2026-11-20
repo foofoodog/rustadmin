@@ -21,6 +21,14 @@ Organized into 4 primary sections with an active contextual **Sub-Nav Bar**:
 
 ---
 
+### 📱 100% Offline Progressive Web App (PWA)
+* **Installable as a Native Desktop / Mobile App:** Install RustAdmin directly from Chrome, Edge, Safari, or mobile browsers as a standalone application with taskbar icon, window controls, and quick launch shortcuts.
+* **Full Offline Operation:** Service Worker pre-caches the application shell, scripts, styles, 2.57 MB item sprite sheet, and monument POI SVGs.
+* **LAN & Air-Gapped Ready:** Connect directly to local dedicated servers (`127.0.0.1`), local LAN servers (`192.168.x.x`), or browse items, kits, and convars without an active internet connection.
+* **In-App Install Trigger & Offline Badge:** Features an "Install App" prompt button in the header when available and displays an offline status indicator when running disconnected from the web.
+
+---
+
 ### 📦 Ultra-Fast Item Browser (1,317 Items)
 * **Single WebP Sprite Sheet:** All 1,317 official Rust items packed into a single 2.57 MB WebP sprite sheet (a 99.3% reduction from raw game assets) with zero individual HTTP requests.
 * **Instant Rendering:** Pixel-perfect CSS background offsets with dynamic scaling (72px in grid, 56px in modals).
