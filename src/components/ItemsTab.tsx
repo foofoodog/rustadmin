@@ -27,6 +27,7 @@ import { Player } from '../types/rcon';
 export const ItemsTab: React.FC = () => {
   const [items] = useState<RustItem[]>(RUST_ITEMS);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedDlcPack, setSelectedDlcPack] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedItem, setSelectedItem] = useState<RustItem | null>(null);
@@ -46,10 +47,10 @@ export const ItemsTab: React.FC = () => {
     return () => unsub();
   }, []);
 
-  // Reset pagination limit when category or search changes
+  // Reset pagination limit when category, dlc pack, or search changes
   useEffect(() => {
     setDisplayLimit(96);
-  }, [selectedCategory, search]);
+  }, [selectedCategory, selectedDlcPack, search]);
 
   // Compute category counts
   const categoryCounts = useMemo(() => {
@@ -66,8 +67,26 @@ export const ItemsTab: React.FC = () => {
     return counts;
   }, [items]);
 
+  // Compute available DLC packs with item counts
+  const availableDlcPacks = useMemo(() => {
+    const packsMap: Record<string, number> = {};
+    for (const item of items) {
+      if (item.dlcPack) {
+        packsMap[item.dlcPack] = (packsMap[item.dlcPack] || 0) + 1;
+      }
+    }
+    return Object.entries(packsMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, count]) => ({ name, count }));
+  }, [items]);
+
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
+      // DLC Pack specific filter
+      if (selectedDlcPack !== 'all' && item.dlcPack !== selectedDlcPack) {
+        return false;
+      }
+
       if (selectedCategory === 'Vehicles') {
         if (!item.isVehicle && item.category !== 'Vehicles') return false;
       } else if (selectedCategory === 'DLC / Packs') {
@@ -86,7 +105,7 @@ export const ItemsTab: React.FC = () => {
       }
       return true;
     });
-  }, [items, selectedCategory, search]);
+  }, [items, selectedCategory, selectedDlcPack, search]);
 
   const visibleItems = useMemo(() => {
     return filteredItems.slice(0, displayLimit);
@@ -146,25 +165,60 @@ export const ItemsTab: React.FC = () => {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-500" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search item name or shortname (e.g. salvaged, ak)..."
-            className="pl-9 pr-8 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-rust-500 w-full sm:w-80 transition-colors"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-2.5 top-2.5 text-zinc-500 hover:text-zinc-300"
-              title="Clear search"
+        {/* Controls: DLC Dropdown & Search */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          {/* DLC Filter Dropdown */}
+          <div className="relative flex items-center">
+            <Sparkles className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-purple-400 pointer-events-none" />
+            <select
+              value={selectedDlcPack}
+              onChange={(e) => setSelectedDlcPack(e.target.value)}
+              className={`pl-8 pr-7 py-1.5 bg-zinc-950 border rounded-lg text-xs font-medium focus:outline-none focus:border-rust-500 transition-colors appearance-none cursor-pointer w-full sm:w-auto ${
+                selectedDlcPack !== 'all'
+                  ? 'border-purple-500/70 text-purple-200 bg-purple-950/25 ring-1 ring-purple-500/20'
+                  : 'border-zinc-800 text-zinc-300 hover:border-zinc-700'
+              }`}
+              title="Filter items by DLC or expansion pack"
             >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
+              <option value="all">All DLC Packs ({categoryCounts['DLC / Packs'] || 0})</option>
+              {availableDlcPacks.map((pack) => (
+                <option key={pack.name} value={pack.name} className="bg-zinc-900 text-zinc-100">
+                  {pack.name} ({pack.count})
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-2.5 w-3 h-3 text-zinc-500 pointer-events-none" />
+            {selectedDlcPack !== 'all' && (
+              <button
+                onClick={() => setSelectedDlcPack('all')}
+                className="ml-1 p-1 text-zinc-500 hover:text-zinc-300 rounded hover:bg-zinc-800 transition-colors"
+                title="Clear DLC filter"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-500" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search item name or shortname (e.g. salvaged, ak)..."
+              className="pl-9 pr-8 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-rust-500 w-full sm:w-72 transition-colors"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-2.5 top-2.5 text-zinc-500 hover:text-zinc-300"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -206,6 +260,7 @@ export const ItemsTab: React.FC = () => {
             onClick={() => {
               setSearch('');
               setSelectedCategory('All');
+              setSelectedDlcPack('all');
             }}
             className="mt-4 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-300 rounded-lg transition-colors"
           >
@@ -228,15 +283,20 @@ export const ItemsTab: React.FC = () => {
                   </span>
                 )}
 
-                {/* DLC Pack Badge on top-left */}
+                {/* DLC Pack Badge on top-left (clickable to quick-filter) */}
                 {item.isDlc && (
-                  <span
-                    className="absolute top-2 left-2 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-purple-950/90 text-purple-300 border border-purple-800/70 shadow-sm flex items-center space-x-1 max-w-[110px]"
-                    title={item.dlcPack || 'DLC Content'}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (item.dlcPack) setSelectedDlcPack(item.dlcPack);
+                    }}
+                    className="absolute top-2 left-2 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-purple-950/90 hover:bg-purple-900 text-purple-300 border border-purple-800/70 shadow-sm flex items-center space-x-1 max-w-[110px] cursor-pointer transition-colors"
+                    title={`Filter by ${item.dlcPack || 'DLC Content'}`}
                   >
                     <Sparkles className="w-2.5 h-2.5 text-purple-400 shrink-0" />
                     <span className="truncate">{item.dlcPack || 'DLC'}</span>
-                  </span>
+                  </button>
                 )}
 
                 <div className="w-20 h-20 flex items-center justify-center p-1 relative mb-2">
