@@ -1,5 +1,5 @@
-// Comprehensive In-Game Item Statistics Catalog & RustClash Wiki Link Generator
-// Accurately mirrors Rust game constants and wiki.rustclash.com database entries
+// Comprehensive In-Game Item Statistics Catalog & Facepunch Official Wiki Link Generator
+// Accurately mirrors Rust game constants and wiki.facepunch.com database entries
 
 export interface ItemStats {
   // Weapon & Tool combat/harvesting stats
@@ -43,16 +43,22 @@ export const BASE_ITEM_ALIASES: Record<string, string> = {
   // Arctic Pack
   'rifle.ak.ice': 'rifle.ak',
   arcticsuit: 'hazmatsuit',
+  'hazmatsuit.arcticsuit': 'hazmatsuit',
   tomaha: 'hatchet',
 
   // Lumberjack Pack
   'lumberjack.hatchet': 'hatchet',
   'lumberjack.pickaxe': 'pickaxe',
   'lumberjack.hoodie': 'hoodie',
+  'lumberjack hoodie': 'hoodie',
+  'hazmatsuit.lumberjack': 'hazmatsuit',
 
   // Frontier Pack
   'frontier.hatchet': 'hatchet',
+  frontier_hatchet: 'hatchet',
   'frontier.shotgun': 'shotgun.pump',
+  'hazmatsuit.frontier': 'hazmatsuit',
+  'door.double.hinged.bardoors': 'door.double.hinged.metal',
 
   // Sunburn DLC
   'gun.water': 'pistol.semiauto',
@@ -60,9 +66,20 @@ export const BASE_ITEM_ALIASES: Record<string, string> = {
 
   // Special Suits
   nomadsuit: 'hazmatsuit',
+  'hazmatsuit.nomadsuit': 'hazmatsuit',
   spacesuit: 'hazmatsuit',
+  'hazmatsuit.spacesuit': 'hazmatsuit',
   'hazmat.krieg': 'hazmatsuit',
   'hazmat.plague': 'hazmatsuit',
+  'hazmatsuit.pilot': 'hazmatsuit',
+  'hazmatsuit.kick': 'hazmatsuit',
+  hazmatsuittwitch: 'hazmatsuit',
+
+  // Ice & Special Skins
+  'metal.plate.torso.icevest': 'metal.plate.torso',
+  'metal.facemask.icemask': 'metal.facemask',
+  'cupboard.tool.retro': 'cupboard.tool',
+  'torch.torch.skull': 'torch',
 };
 
 // RustClash Wiki URL Slug Overrides
@@ -641,19 +658,16 @@ export function getItemStats(shortname: string): ItemStats | null {
   return null;
 }
 
-// Generate the direct wiki.rustclash.com URL for any item
-export function getRustClashWikiUrl(shortname: string, name: string): string {
+// Generate the direct wiki.facepunch.com URL for any item (resolving DLC reskins to base items)
+export function getFacepunchWikiUrl(shortname: string, name?: string): string {
   const cleanShortname = shortname.toLowerCase();
 
   // Resolve DLC variants to their base item if needed
   const resolvedShortname = BASE_ITEM_ALIASES[cleanShortname] || cleanShortname;
 
-  // Check override slug
-  if (WIKI_SLUG_OVERRIDES[resolvedShortname]) {
-    return `https://wiki.rustclash.com/item/${WIKI_SLUG_OVERRIDES[resolvedShortname]}`;
-  }
-
-  // Default clean slug: convert dots/underscores to hyphens
-  const slug = resolvedShortname.replace(/[\._]/g, '-');
-  return `https://wiki.rustclash.com/item/${slug}`;
+  return `https://wiki.facepunch.com/rust/item/${encodeURIComponent(resolvedShortname)}`;
 }
+
+// Aliases for clean importing
+export const getItemWikiUrl = getFacepunchWikiUrl;
+export const getRustClashWikiUrl = getFacepunchWikiUrl;

@@ -19,7 +19,7 @@ import {
   RustItem, 
   RUST_CATEGORIES 
 } from '../data/rustItems';
-import { getItemStats, getRustClashWikiUrl } from '../data/itemStats';
+import { getItemStats, getItemWikiUrl } from '../data/itemStats';
 import { ItemSprite } from './ItemSprite';
 import { rconService } from '../services/rconService';
 import { Player } from '../types/rcon';
@@ -377,7 +377,7 @@ export const ItemsTab: React.FC = () => {
             {/* Item Statistics Card (Mirrors RustClash Wiki layout) */}
             {(() => {
               const stats = getItemStats(selectedItem.shortname);
-              const wikiUrl = getRustClashWikiUrl(selectedItem.shortname, selectedItem.name);
+              const wikiUrl = getItemWikiUrl(selectedItem.shortname, selectedItem.name);
 
               return (
                 <div className="space-y-2">
@@ -392,9 +392,9 @@ export const ItemsTab: React.FC = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center space-x-1 text-[11px] text-rust-400 hover:text-rust-300 transition-colors font-medium hover:underline"
-                          title="Open item page on wiki.rustclash.com"
+                          title="Open item page on wiki.facepunch.com"
                         >
-                          <span>RustClash Wiki</span>
+                          <span>Facepunch Wiki</span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       </div>
@@ -508,8 +508,9 @@ export const ItemsTab: React.FC = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center space-x-1 text-rust-400 hover:text-rust-300 font-medium hover:underline"
+                        title="Open item page on wiki.facepunch.com"
                       >
-                        <span>View on RustClash Wiki</span>
+                        <span>View on Facepunch Wiki</span>
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     </div>
