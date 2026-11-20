@@ -124,7 +124,7 @@ npm install
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) (or the port indicated in terminal) in your browser.
+Open [http://localhost:5000](http://localhost:5000) in your browser.
 
 ### 3. Docker Deployment
 
@@ -133,14 +133,14 @@ Runs Vite inside Docker and mounts your local folder. Any code edits you make in
 ```bash
 docker compose -f docker-compose.dev.yml up -d
 ```
-Open [http://localhost:3001](http://localhost:3001).
+Open [http://localhost:5000](http://localhost:5000).
 
 #### B. Production Nginx Container
 Compiles an optimized static production build served by a minimal Alpine Nginx image:
 ```bash
 docker compose up -d --build
 ```
-Open [http://localhost:3001](http://localhost:3001).
+Open [http://localhost:5000](http://localhost:5000).
 
 ### 4. Build for Production (Static Files)
 ```bash

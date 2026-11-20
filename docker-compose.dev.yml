@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: rustadmin-dev
     ports:
-      - "3001:3001"
+      - "5000:5000"
     volumes:
       - .:/app
       - /app/node_modules

@@ -6,4 +6,4 @@ services:
     container_name: rustadmin
     restart: unless-stopped
     ports:
-      - "3001:80"
+      - "5000:80"

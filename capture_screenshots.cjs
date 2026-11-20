@@ -112,11 +112,11 @@ const PAGES = [
   const page = await browser.newPage();
 
   // First open root to allow auto-connect
-  await page.goto('http://localhost:3001/#dashboard', { waitUntil: 'networkidle2' });
+  await page.goto('http://localhost:5000/#dashboard', { waitUntil: 'networkidle2' });
   await new Promise((r) => setTimeout(r, 2000));
 
   for (const item of PAGES) {
-    const targetUrl = `http://localhost:3001/#${item.id}`;
+    const targetUrl = `http://localhost:5000/#${item.id}`;
     console.log(`Navigating to ${item.title} (${targetUrl})...`);
     await page.goto(targetUrl, { waitUntil: 'networkidle2' });
     await new Promise((r) => setTimeout(r, item.waitMs));
