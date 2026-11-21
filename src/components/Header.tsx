@@ -23,7 +23,9 @@ import {
   Settings,
   Download,
   RotateCw,
-  Sparkles
+  Sparkles,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { rconService } from '../services/rconService';
 import { pwaService } from '../services/pwaService';
@@ -34,6 +36,7 @@ import {
   setActiveProfileId, 
   ServerProfile 
 } from '../services/serverProfiles';
+import { getTheme, toggleTheme, onThemeChange, Theme } from '../services/themeService';
 
 export type NavSection = 'server' | 'monitoring' | 'players' | 'arsenal';
 
@@ -66,7 +69,12 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenC
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [theme, setThemeState] = useState<Theme>(getTheme());
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    return onThemeChange(setThemeState);
+  }, []);
 
   useEffect(() => {
     // PWA Service update and installation listeners
@@ -325,6 +333,21 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenC
                 <span className="hidden sm:inline">Offline</span>
               </span>
             )}
+
+            {/* Theme Toggle (Dark / Light) */}
+            <button
+              type="button"
+              onClick={() => toggleTheme()}
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 border border-zinc-800 transition-colors flex items-center justify-center"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-400 hover:rotate-45 transition-transform duration-200" />
+              ) : (
+                <Moon className="w-4 h-4 text-indigo-500 hover:-rotate-12 transition-transform duration-200" />
+              )}
+            </button>
 
             <button
               onClick={onOpenConnect}
