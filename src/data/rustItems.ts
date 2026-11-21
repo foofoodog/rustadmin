@@ -13,6 +13,12 @@ export interface RustItem {
   isVehicle?: boolean;
   dlcPack?: string;
   isDlc?: boolean;
+  despawnTime?: string;
+  workbench?: string;
+  craftable?: boolean;
+  repairable?: boolean;
+  recyclable?: boolean;
+  researchable?: boolean;
 }
 
 export function getDlcPack(shortname: string, name: string): string | null {
@@ -300,7 +306,13 @@ export const RUST_ITEMS: RustItem[] = (allItemsData as any[]).map((item) => {
     icon: item.icon || `${item.shortname}.webp`,
     isVehicle: VEHICLE_SHORTNAMES.has(item.shortname),
     dlcPack: dlc || undefined,
-    isDlc: !!dlc
+    isDlc: !!dlc,
+    despawnTime: item.despawnTime,
+    workbench: item.workbench,
+    craftable: item.craftable,
+    repairable: item.repairable,
+    recyclable: item.recyclable,
+    researchable: item.researchable
   };
 });
 

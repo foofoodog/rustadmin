@@ -444,6 +444,16 @@ export const ItemsTab: React.FC = () => {
                       {selectedItem.rarity}
                     </span>
                   )}
+                  {selectedItem.workbench && (
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/60 shrink-0" title="Workbench Tier Required to Craft">
+                      {selectedItem.workbench}
+                    </span>
+                  )}
+                  {selectedItem.craftable === false && (
+                    <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-amber-950/40 text-amber-400 border border-amber-800/60 shrink-0" title="Cannot be crafted by players">
+                      Uncraftable / Military
+                    </span>
+                  )}
                   {selectedItem.isDlc && (
                     <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950/90 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-800/70 text-[10px] font-bold uppercase shadow-xs whitespace-nowrap shrink-0">
                       <Sparkles className="w-2.5 h-2.5 text-purple-600 dark:text-purple-400 shrink-0" />
@@ -452,10 +462,16 @@ export const ItemsTab: React.FC = () => {
                   )}
                 </div>
                 <span className="text-xs font-mono text-rust-400 block truncate mt-0.5">{selectedItem.shortname}</span>
-                <div className="flex items-center space-x-3 text-[11px] text-zinc-500 mt-1">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-500 mt-1">
                   <span>Category: <strong className="text-zinc-400">{selectedItem.category}</strong></span>
                   {selectedItem.stackable && (
                     <span>Stack: <strong className="text-zinc-400">{selectedItem.stackable}</strong></span>
+                  )}
+                  {selectedItem.despawnTime && (
+                    <span>Despawn: <strong className="text-zinc-400">{selectedItem.despawnTime}</strong></span>
+                  )}
+                  {selectedItem.recyclable !== undefined && (
+                    <span>Recyclable: <strong className={selectedItem.recyclable ? 'text-emerald-400' : 'text-zinc-500'}>{selectedItem.recyclable ? 'Yes' : 'No'}</strong></span>
                   )}
                 </div>
               </div>
