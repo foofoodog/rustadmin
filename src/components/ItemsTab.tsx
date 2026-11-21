@@ -131,7 +131,7 @@ export const ItemsTab: React.FC = () => {
 
   const handleOpenGive = (item: RustItem) => {
     setSelectedItem(item);
-    setAmount(1);
+    setAmount(item.defaultAmount || (item.stackable && item.stackable > 1 ? item.stackable : 1));
   };
 
   const handleGive = async (e: React.FormEvent) => {

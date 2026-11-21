@@ -279,18 +279,11 @@ export const VEHICLE_SHORTNAMES = new Set([
   'pedaltrike'
 ]);
 
-// Determine intelligent default give amounts based on item category and stack size
+// Determine intelligent default give amounts: full stack for stackable items, 1 for non-stackables
 function computeDefaultAmount(item: any): number {
   const stack = item.stackable || 1;
-  const cat = item.category?.toLowerCase() || '';
-
-  if (stack === 1) return 1;
-  if (cat === 'ammo' || cat === 'ammunition') return Math.min(stack, 128);
-  if (cat === 'resources') return Math.min(stack, 1000);
-  if (cat === 'medical') return Math.min(stack, 10);
-  if (cat === 'food') return Math.min(stack, 20);
-  if (cat === 'components') return Math.min(stack, 20);
-  return Math.min(stack, 10);
+  if (stack <= 1) return 1;
+  return stack;
 }
 
 export const RUST_ITEMS: RustItem[] = (allItemsData as any[]).map((item) => {
