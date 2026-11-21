@@ -401,7 +401,39 @@
   "3module.car.chassis": false,
   "4module.car": false,
   "4module.car.chassis": false,
-  "ammo.grenadelauncher.he": false,
+  "ammo.grenadelauncher.he": {
+    "ammoFor": [
+      {
+        "weapon": "Multiple Grenade Launcher",
+        "damage": 150,
+        "dps": 375,
+        "velocity": 100,
+        "headshot": "Direct Impact (75) + Splash (150)"
+      }
+    ],
+    "loot": [
+      {
+        "source": "heavy scientist",
+        "amount": "1-2",
+        "chance": 15
+      },
+      {
+        "source": "Bradley Heavy Scientist",
+        "amount": "1-2",
+        "chance": 15
+      },
+      {
+        "source": "Locked Crate (Oil Rig)",
+        "amount": "2-4",
+        "chance": 10
+      },
+      {
+        "source": "Elite Crate",
+        "amount": "1-2",
+        "chance": 5
+      }
+    ]
+  },
   "ammo.grenadelauncher.buckshot": {
     "recycle": [
       {
@@ -457,7 +489,29 @@
       }
     ]
   },
-  "ammo.grenadelauncher.smoke": false,
+  "ammo.grenadelauncher.smoke": {
+    "ammoFor": [
+      {
+        "weapon": "Multiple Grenade Launcher",
+        "damage": 0,
+        "dps": 0,
+        "velocity": 100,
+        "headshot": "Smoke Screen (No direct dmg)"
+      }
+    ],
+    "loot": [
+      {
+        "source": "heavy scientist",
+        "amount": "2-6",
+        "chance": 15
+      },
+      {
+        "source": "Bradley Heavy Scientist",
+        "amount": "2-6",
+        "chance": 15
+      }
+    ]
+  },
   "ammo.rifle": {
     "craft": {
       "ingredients": [
