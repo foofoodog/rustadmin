@@ -36,6 +36,7 @@ export interface AmmoForDetail {
 export interface WikiItemDetail {
   craft?: CraftDetail;
   recycle?: RecycleDetail[];
+  recycleSafeZone?: RecycleDetail[];
   loot?: LootSourceDetail[];
   ammoFor?: AmmoForDetail[];
 }

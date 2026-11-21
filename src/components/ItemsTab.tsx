@@ -40,6 +40,7 @@ export const ItemsTab: React.FC = () => {
   const [toast, setToast] = useState<string | null>(null);
   const [displayLimit, setDisplayLimit] = useState<number>(96);
   const [openTwisties, setOpenTwisties] = useState<Record<string, boolean>>({});
+  const [recyclerMode, setRecyclerMode] = useState<'standard' | 'safezone'>('standard');
 
   const toggleTwisty = (key: string) => {
     setOpenTwisties((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -154,6 +155,7 @@ export const ItemsTab: React.FC = () => {
     setSelectedItem(item);
     setAmount(item.defaultAmount || (item.stackable && item.stackable > 1 ? item.stackable : 1));
     setOpenTwisties({});
+    setRecyclerMode('standard');
   };
 
   const handleGive = async (e: React.FormEvent) => {
@@ -801,7 +803,7 @@ export const ItemsTab: React.FC = () => {
                         </div>
                         <div className="flex items-center space-x-2">
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            {details?.recycle?.length} items
+                            {details?.recycle?.length} materials
                           </span>
                           <ChevronDown
                             className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
@@ -812,23 +814,63 @@ export const ItemsTab: React.FC = () => {
                       </button>
 
                       {openTwisties['recycling'] && (
-                        <div className="p-3 border-t border-zinc-800/70 space-y-2 text-xs">
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {details?.recycle?.map((rec, idx) => (
-                              <div
-                                key={idx}
-                                className="flex items-center justify-between px-2.5 py-1.5 bg-zinc-900/70 border border-zinc-800/70 rounded-md"
+                        <div className="p-3 border-t border-zinc-800/70 space-y-2.5 text-xs">
+                          {/* Location Selector Tabs if Safe Zone data exists */}
+                          {details?.recycleSafeZone && details.recycleSafeZone.length > 0 && (
+                            <div className="flex items-center space-x-1 p-0.5 bg-zinc-900 border border-zinc-800 rounded-lg">
+                              <button
+                                type="button"
+                                onClick={() => setRecyclerMode('standard')}
+                                className={`flex-1 py-1 px-2 rounded-md text-[11px] font-medium transition-all ${
+                                  recyclerMode === 'standard'
+                                    ? 'bg-zinc-800 text-emerald-400 shadow-xs'
+                                    : 'text-zinc-400 hover:text-zinc-200'
+                                }`}
                               >
-                                <span className="text-zinc-300 truncate pr-2">{rec.item}</span>
-                                <div className="flex items-center space-x-1.5 shrink-0">
-                                  <span className="font-mono font-bold text-emerald-400">×{rec.quantity}</span>
-                                  <span className="text-[10px] text-zinc-500 font-mono">({rec.chance})</span>
-                                </div>
+                                Monument / Standard (100%)
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setRecyclerMode('safezone')}
+                                className={`flex-1 py-1 px-2 rounded-md text-[11px] font-medium transition-all ${
+                                  recyclerMode === 'safezone'
+                                    ? 'bg-zinc-800 text-amber-400 shadow-xs'
+                                    : 'text-zinc-400 hover:text-zinc-200'
+                                }`}
+                              >
+                                Safe Zone (-20% Penalty)
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Recycler Items Grid */}
+                          {(() => {
+                            const activeRecycleList = (recyclerMode === 'safezone' && details?.recycleSafeZone) 
+                              ? details.recycleSafeZone 
+                              : details?.recycle;
+
+                            return (
+                              <div className="grid grid-cols-2 gap-1.5">
+                                {activeRecycleList?.map((rec, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="flex items-center justify-between px-2.5 py-1.5 bg-zinc-900/70 border border-zinc-800/70 rounded-md"
+                                  >
+                                    <span className="text-zinc-300 truncate pr-2">{rec.item}</span>
+                                    <div className="flex items-center space-x-1.5 shrink-0">
+                                      <span className="font-mono font-bold text-emerald-400">×{rec.quantity}</span>
+                                      <span className="text-[10px] text-zinc-500 font-mono">({rec.chance})</span>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
+                            );
+                          })()}
+
                           <p className="text-[10px] text-zinc-500 italic">
-                            Output from recycling 1 item in standard recycler (Safe Zone recycler yields slightly less, monument recyclers yield 20% bonus).
+                            {recyclerMode === 'safezone'
+                              ? 'Safe Zone recyclers impose a 20% penalty on material outputs and operate slower.'
+                              : 'Standard recycler output. Monument recyclers also provide a 20% speed bonus.'}
                           </p>
                         </div>
                       )}
