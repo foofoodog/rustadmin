@@ -12,14 +12,18 @@ import {
   ChevronDown, 
   Info,
   Sparkles,
-  ExternalLink
+  Crosshair,
+  Hammer,
+  Recycle,
+  Boxes
 } from 'lucide-react';
 import { 
   RUST_ITEMS, 
   RustItem, 
   RUST_CATEGORIES 
 } from '../data/rustItems';
-import { getItemStats, getItemWikiUrl } from '../data/itemStats';
+import { getItemStats } from '../data/itemStats';
+import { getItemDetails } from '../data/itemDetails';
 import { ItemSprite } from './ItemSprite';
 import { rconService } from '../services/rconService';
 import { Player } from '../types/rcon';
@@ -35,6 +39,11 @@ export const ItemsTab: React.FC = () => {
   const [amount, setAmount] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);
   const [displayLimit, setDisplayLimit] = useState<number>(96);
+  const [openTwisties, setOpenTwisties] = useState<Record<string, boolean>>({});
+
+  const toggleTwisty = (key: string) => {
+    setOpenTwisties((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   useEffect(() => {
     const unsub = rconService.onPlayers((newPlayers) => {
@@ -132,6 +141,7 @@ export const ItemsTab: React.FC = () => {
   const handleOpenGive = (item: RustItem) => {
     setSelectedItem(item);
     setAmount(item.defaultAmount || (item.stackable && item.stackable > 1 ? item.stackable : 1));
+    setOpenTwisties({});
   };
 
   const handleGive = async (e: React.FormEvent) => {
@@ -484,145 +494,379 @@ export const ItemsTab: React.FC = () => {
               </div>
             )}
 
-            {/* Item Statistics Card (Mirrors RustClash Wiki layout) */}
+            {/* Collapsible Accordion Sections (Damage/Combat, Crafting, Recycling, Loot Drops) */}
             {(() => {
               const stats = getItemStats(selectedItem.shortname);
-              const wikiUrl = getItemWikiUrl(selectedItem.shortname, selectedItem.name);
+              const details = getItemDetails(selectedItem.shortname);
+
+              const hasCombat = !!stats || (!!details?.ammoFor && details.ammoFor.length > 0);
+              const hasCraft = !!details?.craft && (
+                (!!details.craft.ingredients && details.craft.ingredients.length > 0) ||
+                details.craft.researchCost !== undefined ||
+                details.craft.techTreeCost !== undefined
+              );
+              const hasRecycle = !!details?.recycle && details.recycle.length > 0;
+              const hasLoot = !!details?.loot && details.loot.length > 0;
+
+              if (!hasCombat && !hasCraft && !hasRecycle && !hasLoot) {
+                return null;
+              }
 
               return (
                 <div className="space-y-2">
-                  {stats && (
-                    <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-lg p-3 text-xs shadow-inner space-y-2">
-                      <div className="flex items-center justify-between pb-1.5 border-b border-zinc-800/80">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-                          Item Statistics
-                        </span>
-                        <a
-                          href={wikiUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center space-x-1 text-[11px] text-rust-400 hover:text-rust-300 transition-colors font-medium hover:underline"
-                          title="Open item page on wiki.facepunch.com"
-                        >
-                          <span>Facepunch Wiki</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </div>
+                  {/* 1. Combat & Damage Stats */}
+                  {hasCombat && (
+                    <div className="border border-zinc-800/90 rounded-lg overflow-hidden bg-zinc-950/60">
+                      <button
+                        type="button"
+                        onClick={() => toggleTwisty('combat')}
+                        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-zinc-900/80 hover:bg-zinc-800/60 text-left transition-colors"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <Crosshair className="w-3.5 h-3.5 text-rust-400 shrink-0" />
+                          <span className="text-xs font-semibold text-zinc-200">
+                            {stats?.damage !== undefined || (details?.ammoFor && details.ammoFor.length > 0)
+                              ? 'Combat & Damage Stats'
+                              : 'Item Performance & Protection'}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {stats?.damage !== undefined && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rust-500/10 text-rust-400 border border-rust-500/20">
+                              {stats.damage} dmg
+                            </span>
+                          )}
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
+                              openTwisties['combat'] ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </div>
+                      </button>
 
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-0.5 font-sans">
-                        {stats.damage !== undefined && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Damage</span>
-                            <span className="font-semibold text-zinc-100">{stats.damage}</span>
-                          </div>
-                        )}
-                        {stats.attackSpeed && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Attack Speed</span>
-                            <span className="font-semibold text-zinc-100">{stats.attackSpeed}</span>
-                          </div>
-                        )}
-                        {stats.range && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Range</span>
-                            <span className="font-semibold text-zinc-100">{stats.range}</span>
-                          </div>
-                        )}
-                        {stats.drawTime && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Draw</span>
-                            <span className="font-semibold text-zinc-100">{stats.drawTime}</span>
-                          </div>
-                        )}
-                        {stats.throwable && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Throw</span>
-                            <span className="font-semibold text-zinc-100">{stats.throwable}</span>
-                          </div>
-                        )}
-                        {stats.magazineSize !== undefined && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Capacity</span>
-                            <span className="font-semibold text-zinc-100">{stats.magazineSize} rds</span>
-                          </div>
-                        )}
-                        {stats.reloadTime && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Reload</span>
-                            <span className="font-semibold text-zinc-100">{stats.reloadTime}</span>
-                          </div>
-                        )}
-                        {stats.recoil && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Recoil</span>
-                            <span className="font-semibold text-zinc-100">{stats.recoil}</span>
-                          </div>
-                        )}
-                        {stats.projectileProtection && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Projectile</span>
-                            <span className="font-semibold text-emerald-400">{stats.projectileProtection}</span>
-                          </div>
-                        )}
-                        {stats.meleeProtection && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Melee</span>
-                            <span className="font-semibold text-emerald-400">{stats.meleeProtection}</span>
-                          </div>
-                        )}
-                        {stats.biteProtection && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Bite</span>
-                            <span className="font-semibold text-zinc-200">{stats.biteProtection}</span>
-                          </div>
-                        )}
-                        {stats.radiationProtection && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Radiation</span>
-                            <span className="font-semibold text-amber-400">{stats.radiationProtection}</span>
-                          </div>
-                        )}
-                        {stats.coldProtection && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Cold</span>
-                            <span className="font-semibold text-cyan-400">{stats.coldProtection}</span>
-                          </div>
-                        )}
-                        {stats.explosionProtection && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Explosion</span>
-                            <span className="font-semibold text-rose-400">{stats.explosionProtection}</span>
-                          </div>
-                        )}
-                        {stats.instantHealth !== undefined && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Instant Heal</span>
-                            <span className="font-semibold text-emerald-400">+{stats.instantHealth} HP</span>
-                          </div>
-                        )}
-                        {stats.healthOverTime !== undefined && (
-                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                            <span className="text-zinc-400">Heal Over Time</span>
-                            <span className="font-semibold text-emerald-400">+{stats.healthOverTime} HP</span>
-                          </div>
-                        )}
-                      </div>
+                      {openTwisties['combat'] && (
+                        <div className="p-3 border-t border-zinc-800/70 space-y-3 text-xs">
+                          {/* Weapon / Attire / Food Stats Grid */}
+                          {stats && (
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 font-sans">
+                              {stats.damage !== undefined && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Damage</span>
+                                  <span className="font-semibold text-zinc-100">{stats.damage}</span>
+                                </div>
+                              )}
+                              {stats.attackSpeed && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Attack Speed</span>
+                                  <span className="font-semibold text-zinc-100">{stats.attackSpeed}</span>
+                                </div>
+                              )}
+                              {stats.range && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Range</span>
+                                  <span className="font-semibold text-zinc-100">{stats.range}</span>
+                                </div>
+                              )}
+                              {stats.drawTime && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Draw</span>
+                                  <span className="font-semibold text-zinc-100">{stats.drawTime}</span>
+                                </div>
+                              )}
+                              {stats.throwable && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Throw</span>
+                                  <span className="font-semibold text-zinc-100">{stats.throwable}</span>
+                                </div>
+                              )}
+                              {stats.magazineSize !== undefined && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Capacity</span>
+                                  <span className="font-semibold text-zinc-100">{stats.magazineSize} rds</span>
+                                </div>
+                              )}
+                              {stats.reloadTime && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Reload</span>
+                                  <span className="font-semibold text-zinc-100">{stats.reloadTime}</span>
+                                </div>
+                              )}
+                              {stats.recoil && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Recoil</span>
+                                  <span className="font-semibold text-zinc-100">{stats.recoil}</span>
+                                </div>
+                              )}
+                              {stats.projectileProtection && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Projectile</span>
+                                  <span className="font-semibold text-emerald-400">{stats.projectileProtection}</span>
+                                </div>
+                              )}
+                              {stats.meleeProtection && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Melee</span>
+                                  <span className="font-semibold text-emerald-400">{stats.meleeProtection}</span>
+                                </div>
+                              )}
+                              {stats.biteProtection && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Bite</span>
+                                  <span className="font-semibold text-zinc-200">{stats.biteProtection}</span>
+                                </div>
+                              )}
+                              {stats.radiationProtection && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Radiation</span>
+                                  <span className="font-semibold text-amber-400">{stats.radiationProtection}</span>
+                                </div>
+                              )}
+                              {stats.coldProtection && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Cold</span>
+                                  <span className="font-semibold text-cyan-400">{stats.coldProtection}</span>
+                                </div>
+                              )}
+                              {stats.explosionProtection && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Explosion</span>
+                                  <span className="font-semibold text-rose-400">{stats.explosionProtection}</span>
+                                </div>
+                              )}
+                              {stats.instantHealth !== undefined && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Instant Heal</span>
+                                  <span className="font-semibold text-emerald-400">+{stats.instantHealth} HP</span>
+                                </div>
+                              )}
+                              {stats.healthOverTime !== undefined && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Heal Over Time</span>
+                                  <span className="font-semibold text-emerald-400">+{stats.healthOverTime} HP</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Compatible Weapons / Ballistics Table (for Ammo) */}
+                          {details?.ammoFor && details.ammoFor.length > 0 && (
+                            <div className="space-y-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                                Compatible Weapons & Ballistics
+                              </span>
+                              <div className="overflow-x-auto rounded border border-zinc-800/80">
+                                <table className="w-full text-left text-[11px]">
+                                  <thead className="bg-zinc-900/90 text-zinc-400 border-b border-zinc-800/80 font-medium">
+                                    <tr>
+                                      <th className="px-2 py-1.5">Weapon</th>
+                                      <th className="px-2 py-1.5 text-right">Damage</th>
+                                      <th className="px-2 py-1.5 text-right">DPS</th>
+                                      <th className="px-2 py-1.5 text-right">Velocity</th>
+                                      <th className="px-2 py-1.5 text-right">Headshot</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-zinc-800/50 font-mono text-zinc-300">
+                                    {details.ammoFor.map((af, idx) => (
+                                      <tr key={idx} className="hover:bg-zinc-900/40">
+                                        <td className="px-2 py-1 font-sans text-zinc-200">{af.weapon}</td>
+                                        <td className="px-2 py-1 text-right text-rust-300 font-semibold">{af.damage}</td>
+                                        <td className="px-2 py-1 text-right">{af.dps}</td>
+                                        <td className="px-2 py-1 text-right">{af.velocity}m/s</td>
+                                        <td className="px-2 py-1 text-right text-amber-300">{af.headshot}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {!stats && (
-                    <div className="flex items-center justify-between px-3 py-2 bg-zinc-950/50 border border-zinc-800/60 rounded-lg text-xs">
-                      <span className="text-zinc-400">Detailed item metrics:</span>
-                      <a
-                        href={wikiUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center space-x-1 text-rust-400 hover:text-rust-300 font-medium hover:underline"
-                        title="Open item page on wiki.facepunch.com"
+                  {/* 2. Crafting & Recipe */}
+                  {hasCraft && (
+                    <div className="border border-zinc-800/90 rounded-lg overflow-hidden bg-zinc-950/60">
+                      <button
+                        type="button"
+                        onClick={() => toggleTwisty('crafting')}
+                        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-zinc-900/80 hover:bg-zinc-800/60 text-left transition-colors"
                       >
-                        <span>View on Facepunch Wiki</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
+                        <div className="flex items-center space-x-2">
+                          <Hammer className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                          <span className="text-xs font-semibold text-zinc-200">Crafting & Recipe</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {details?.craft?.yield && details.craft.yield > 1 && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                              Yield {details.craft.yield}x
+                            </span>
+                          )}
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
+                              openTwisties['crafting'] ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </div>
+                      </button>
+
+                      {openTwisties['crafting'] && (
+                        <div className="p-3 border-t border-zinc-800/70 space-y-2.5 text-xs">
+                          {/* Recipe Meta Badges (Workbench, Yield, Scrap) */}
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {selectedItem.workbench && (
+                              <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700/80 text-zinc-300 font-medium">
+                                {selectedItem.workbench}
+                              </span>
+                            )}
+                            {details?.craft?.craftTime && (
+                              <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700/80 text-zinc-300 font-medium">
+                                Craft: {details.craft.craftTime}
+                              </span>
+                            )}
+                            {details?.craft?.researchCost !== undefined && (
+                              <span className="text-[10px] px-2 py-0.5 rounded bg-amber-950/40 border border-amber-800/50 text-amber-300 font-medium">
+                                Research: {details.craft.researchCost} Scrap
+                              </span>
+                            )}
+                            {details?.craft?.techTreeCost !== undefined && (
+                              <span className="text-[10px] px-2 py-0.5 rounded bg-blue-950/40 border border-blue-800/50 text-blue-300 font-medium">
+                                Tech Tree: {details.craft.techTreeCost} Scrap
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Ingredients List */}
+                          {details?.craft?.ingredients && details.craft.ingredients.length > 0 && (
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                                Required Ingredients
+                              </span>
+                              <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                                {details.craft.ingredients.map((ing, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="flex items-center justify-between px-2.5 py-1.5 bg-zinc-900/70 border border-zinc-800/70 rounded-md"
+                                  >
+                                    <span className="text-zinc-300 truncate pr-2">{ing.item}</span>
+                                    <span className="font-mono font-bold text-amber-400 shrink-0">
+                                      ×{ing.quantity.toLocaleString()}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 3. Recycler Yields */}
+                  {hasRecycle && (
+                    <div className="border border-zinc-800/90 rounded-lg overflow-hidden bg-zinc-950/60">
+                      <button
+                        type="button"
+                        onClick={() => toggleTwisty('recycling')}
+                        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-zinc-900/80 hover:bg-zinc-800/60 text-left transition-colors"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <Recycle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span className="text-xs font-semibold text-zinc-200">Recycler Yields</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            {details?.recycle?.length} items
+                          </span>
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
+                              openTwisties['recycling'] ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </div>
+                      </button>
+
+                      {openTwisties['recycling'] && (
+                        <div className="p-3 border-t border-zinc-800/70 space-y-2 text-xs">
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {details?.recycle?.map((rec, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between px-2.5 py-1.5 bg-zinc-900/70 border border-zinc-800/70 rounded-md"
+                              >
+                                <span className="text-zinc-300 truncate pr-2">{rec.item}</span>
+                                <div className="flex items-center space-x-1.5 shrink-0">
+                                  <span className="font-mono font-bold text-emerald-400">×{rec.quantity}</span>
+                                  <span className="text-[10px] text-zinc-500 font-mono">({rec.chance})</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-[10px] text-zinc-500 italic">
+                            Output from recycling 1 item in standard recycler (Safe Zone recycler yields slightly less, monument recyclers yield 20% bonus).
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 4. World Loot Drops */}
+                  {hasLoot && (
+                    <div className="border border-zinc-800/90 rounded-lg overflow-hidden bg-zinc-950/60">
+                      <button
+                        type="button"
+                        onClick={() => toggleTwisty('loot')}
+                        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-zinc-900/80 hover:bg-zinc-800/60 text-left transition-colors"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <Boxes className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                          <span className="text-xs font-semibold text-zinc-200">World Loot Drops</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                            {details?.loot?.length} sources
+                          </span>
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
+                              openTwisties['loot'] ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </div>
+                      </button>
+
+                      {openTwisties['loot'] && (
+                        <div className="p-3 border-t border-zinc-800/70 space-y-2 text-xs">
+                          <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-zinc-800">
+                            {details?.loot?.map((lt, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between px-2.5 py-1.5 bg-zinc-900/60 border border-zinc-800/70 rounded-md"
+                              >
+                                <div className="min-w-0 pr-2">
+                                  <div className="text-zinc-200 text-[11px] font-medium truncate capitalize">
+                                    {lt.source}
+                                  </div>
+                                  <div className="text-[10px] text-zinc-400 font-mono">
+                                    Amount: <span className="text-zinc-300 font-semibold">{lt.amount}</span>
+                                  </div>
+                                </div>
+                                <div className="text-right shrink-0">
+                                  <span className="font-mono font-bold text-blue-400 text-xs">
+                                    {lt.chance}%
+                                  </span>
+                                  <div className="w-16 h-1 bg-zinc-800 rounded-full mt-1 overflow-hidden">
+                                    <div
+                                      className="h-full bg-blue-500 rounded-full"
+                                      style={{ width: `${Math.min(100, lt.chance)}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
