@@ -315,7 +315,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onOpenC
             {installPrompt && (
               <button
                 onClick={handleInstallClick}
-                className="flex items-center space-x-1.5 px-2.5 py-1 bg-rust-600 hover:bg-rust-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-all border border-rust-500/50 animate-pulse hover:animate-none"
+                className="flex items-center space-x-1.5 px-2.5 py-1 bg-rust-600 hover:bg-rust-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-all border border-rust-500/50"
                 title="Install RustAdmin as a desktop/mobile app"
               >
                 <Download className="w-3.5 h-3.5" />
