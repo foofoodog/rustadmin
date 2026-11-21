@@ -17,7 +17,8 @@ import {
   Recycle,
   Boxes,
   Utensils,
-  Egg
+  Egg,
+  Wheat
 } from 'lucide-react';
 import { 
   RUST_ITEMS, 
@@ -33,6 +34,7 @@ import { Player } from '../types/rcon';
 export const ItemsTab: React.FC = () => {
   const [items] = useState<RustItem[]>(RUST_ITEMS);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [foodSubFilter, setFoodSubFilter] = useState<'all' | 'nutrition' | 'feed' | 'buffs'>('all');
   const [selectedDlcPack, setSelectedDlcPack] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [players, setPlayers] = useState<Player[]>([]);
@@ -59,10 +61,10 @@ export const ItemsTab: React.FC = () => {
     return () => unsub();
   }, []);
 
-  // Reset pagination limit when category, dlc pack, or search changes
+  // Reset pagination limit when category, dlc pack, search, or food sub-filter changes
   useEffect(() => {
     setDisplayLimit(96);
-  }, [selectedCategory, selectedDlcPack, search]);
+  }, [selectedCategory, foodSubFilter, selectedDlcPack, search]);
 
   // Handle Escape key to close Give Item modal
   useEffect(() => {
@@ -105,14 +107,32 @@ export const ItemsTab: React.FC = () => {
       if (item.isDlc) {
         counts['DLC / Packs'] = (counts['DLC / Packs'] || 0) + 1;
       }
-      if (item.hasNutrition) {
-        counts['Food (Nutritional)'] = (counts['Food (Nutritional)'] || 0) + 1;
-      }
-      if (item.isFeed) {
-        counts['Chicken & Animal Feed'] = (counts['Chicken & Animal Feed'] || 0) + 1;
-      }
     }
     return counts;
+  }, [items, isDlcFilterActive, selectedDlcPack, search]);
+
+  // Compute Food sub-filter counts (scoped to search and DLC filter)
+  const foodSubCounts = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    const foodItems = items.filter((item) => {
+      if (item.category !== 'Food') return false;
+      if (isDlcFilterActive && item.dlcPack !== selectedDlcPack) return false;
+      if (q) {
+        return (
+          item.name.toLowerCase().includes(q) ||
+          item.shortname.toLowerCase().includes(q) ||
+          (item.description && item.description.toLowerCase().includes(q))
+        );
+      }
+      return true;
+    });
+
+    return {
+      all: foodItems.length,
+      nutrition: foodItems.filter((i) => i.hasNutrition).length,
+      feed: foodItems.filter((i) => i.isFeed).length,
+      buffs: foodItems.filter((i) => i.hasBuffs).length
+    };
   }, [items, isDlcFilterActive, selectedDlcPack, search]);
 
   // Compute available DLC packs with item counts
@@ -139,10 +159,11 @@ export const ItemsTab: React.FC = () => {
         if (!item.isVehicle && item.category !== 'Vehicles') return false;
       } else if (selectedCategory === 'DLC / Packs') {
         if (!item.isDlc) return false;
-      } else if (selectedCategory === 'Food (Nutritional)') {
-        if (!item.hasNutrition) return false;
-      } else if (selectedCategory === 'Chicken & Animal Feed') {
-        if (!item.isFeed) return false;
+      } else if (selectedCategory === 'Food') {
+        if (item.category !== 'Food') return false;
+        if (foodSubFilter === 'nutrition' && !item.hasNutrition) return false;
+        if (foodSubFilter === 'feed' && !item.isFeed) return false;
+        if (foodSubFilter === 'buffs' && !item.hasBuffs) return false;
       } else if (selectedCategory !== 'All' && item.category !== selectedCategory) {
         return false;
       }
@@ -157,7 +178,7 @@ export const ItemsTab: React.FC = () => {
       }
       return true;
     });
-  }, [items, selectedCategory, selectedDlcPack, search]);
+  }, [items, selectedCategory, foodSubFilter, selectedDlcPack, search]);
 
   const visibleItems = useMemo(() => {
     return filteredItems.slice(0, displayLimit);
@@ -306,11 +327,12 @@ export const ItemsTab: React.FC = () => {
           return (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => {
+                setSelectedCategory(cat);
+                if (cat === 'Food') setFoodSubFilter('all');
+              }}
               className={`px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all flex items-center space-x-1.5 ${buttonClass}`}
             >
-              {cat === 'Food (Nutritional)' && <Utensils className="w-3 h-3 text-amber-400 shrink-0" />}
-              {cat === 'Chicken & Animal Feed' && <Egg className="w-3 h-3 text-amber-400 shrink-0" />}
               {cat === 'DLC / Packs' && <Sparkles className="w-3 h-3 text-purple-400 shrink-0" />}
               <span>{cat}</span>
               <span
@@ -323,52 +345,66 @@ export const ItemsTab: React.FC = () => {
         })}
       </div>
 
-      {/* Contextual Food / Feed Sub-filters Row */}
-      {(selectedCategory === 'Food' || selectedCategory === 'Food (Nutritional)' || selectedCategory === 'Chicken & Animal Feed') && (
+      {/* Contextual Food Sub-filters Bar (One-word captions: All, Nutrition, Feed, Buffs) */}
+      {selectedCategory === 'Food' && (
         <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-zinc-900/70 border border-zinc-800 rounded-xl text-xs">
-          <span className="text-zinc-400 font-medium flex items-center gap-1.5">
+          <span className="text-zinc-400 font-medium flex items-center gap-1.5 mr-1">
             <Filter className="w-3.5 h-3.5 text-rust-500" />
-            <span>Food Filter:</span>
+            <span>Food:</span>
           </span>
           <button
-            onClick={() => setSelectedCategory('Food')}
-            className={`px-2.5 py-1 rounded-lg text-xs transition-all flex items-center space-x-1.5 ${
-              selectedCategory === 'Food'
-                ? 'bg-rust-600 text-white font-semibold shadow-xs'
+            onClick={() => setFoodSubFilter('all')}
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all flex items-center space-x-1.5 ${
+              foodSubFilter === 'all'
+                ? 'bg-rust-600 text-white font-semibold shadow-xs ring-1 ring-rust-500/50'
                 : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300'
             }`}
           >
-            <span>All Food Items</span>
+            <span>All</span>
             <span className="text-[10px] px-1.5 py-0.2 rounded-full font-mono bg-black/25">
-              {categoryCounts['Food'] || 0}
+              {foodSubCounts.all}
             </span>
           </button>
           <button
-            onClick={() => setSelectedCategory('Food (Nutritional)')}
-            className={`px-2.5 py-1 rounded-lg text-xs transition-all flex items-center space-x-1.5 ${
-              selectedCategory === 'Food (Nutritional)'
-                ? 'bg-rust-600 text-white font-semibold shadow-xs'
+            onClick={() => setFoodSubFilter('nutrition')}
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all flex items-center space-x-1.5 ${
+              foodSubFilter === 'nutrition'
+                ? 'bg-rust-600 text-white font-semibold shadow-xs ring-1 ring-rust-500/50'
                 : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300'
             }`}
           >
             <Utensils className="w-3 h-3 text-amber-400" />
-            <span>Nutritional Value Only</span>
+            <span>Nutrition</span>
             <span className="text-[10px] px-1.5 py-0.2 rounded-full font-mono bg-black/25">
-              {categoryCounts['Food (Nutritional)'] || 0}
+              {foodSubCounts.nutrition}
             </span>
           </button>
           <button
-            onClick={() => setSelectedCategory('Chicken & Animal Feed')}
-            className={`px-2.5 py-1 rounded-lg text-xs transition-all flex items-center space-x-1.5 ${
-              selectedCategory === 'Chicken & Animal Feed'
-                ? 'bg-rust-600 text-white font-semibold shadow-xs'
+            onClick={() => setFoodSubFilter('feed')}
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all flex items-center space-x-1.5 ${
+              foodSubFilter === 'feed'
+                ? 'bg-rust-600 text-white font-semibold shadow-xs ring-1 ring-rust-500/50'
                 : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300'
             }`}
           >
-            <Egg className="w-3 h-3 text-amber-400" />
-            <span>Chicken & Animal Feed (Seeds)</span>
+            <Wheat className="w-3 h-3 text-amber-400" />
+            <span>Feed</span>
             <span className="text-[10px] px-1.5 py-0.2 rounded-full font-mono bg-black/25">
-              {categoryCounts['Chicken & Animal Feed'] || 0}
+              {foodSubCounts.feed}
+            </span>
+          </button>
+          <button
+            onClick={() => setFoodSubFilter('buffs')}
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all flex items-center space-x-1.5 ${
+              foodSubFilter === 'buffs'
+                ? 'bg-rust-600 text-white font-semibold shadow-xs ring-1 ring-rust-500/50'
+                : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300'
+            }`}
+          >
+            <Zap className="w-3 h-3 text-purple-400" />
+            <span>Buffs</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full font-mono bg-black/25">
+              {foodSubCounts.buffs}
             </span>
           </button>
         </div>
@@ -559,10 +595,16 @@ export const ItemsTab: React.FC = () => {
                         <span>{selectedItem.dlcPack || 'DLC Content'}</span>
                       </span>
                     )}
+                    {selectedItem.hasBuffs && (
+                      <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950/90 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-800/70 text-[10px] font-bold uppercase shadow-xs whitespace-nowrap shrink-0">
+                        <Zap className="w-2.5 h-2.5 text-purple-500 shrink-0" />
+                        <span>Buff Active</span>
+                      </span>
+                    )}
                     {selectedItem.isFeed && (
                       <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800/70 text-[10px] font-bold uppercase shadow-xs whitespace-nowrap shrink-0" title="Animal Feed (Chicken Coop & Livestock Trough)">
-                        <Egg className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                        <span>Chicken & Animal Feed</span>
+                        <Wheat className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                        <span>Animal Feed</span>
                       </span>
                     )}
                   </div>
@@ -596,9 +638,11 @@ export const ItemsTab: React.FC = () => {
             {(() => {
               const stats = getItemStats(selectedItem.shortname);
               const details = getItemDetails(selectedItem.shortname);
+              const hasBuffs = !!details?.buffs && details.buffs.length > 0;
 
               const isFoodOrConsumable =
                 !!details?.nutrition ||
+                hasBuffs ||
                 stats?.calories !== undefined ||
                 stats?.hydration !== undefined ||
                 (selectedItem.category === 'Food' && !selectedItem.isFeed && !selectedItem.shortname.startsWith('clone.'));
@@ -606,7 +650,8 @@ export const ItemsTab: React.FC = () => {
               const hasCombat =
                 !!stats ||
                 (!!details?.ammoFor && details.ammoFor.length > 0) ||
-                !!details?.nutrition;
+                !!details?.nutrition ||
+                hasBuffs;
 
               const hasCraft = !!details?.craft && (
                 (!!details.craft.ingredients && details.craft.ingredients.length > 0) ||
@@ -649,6 +694,11 @@ export const ItemsTab: React.FC = () => {
                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rust-500/10 text-rust-400 border border-rust-500/20">
                               {stats.damage} dmg
                             </span>
+                          ) : hasBuffs && details?.buffs ? (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center gap-1">
+                              <Zap className="w-2.5 h-2.5 text-purple-400" />
+                              <span>{details.buffs[0].effect} {details.buffs[0].value}</span>
+                            </span>
                           ) : details?.nutrition?.calories ? (
                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
                               {details.nutrition.calories} cal
@@ -672,6 +722,40 @@ export const ItemsTab: React.FC = () => {
 
                       {openTwisties['combat'] && (
                         <div className="p-3 border-t border-zinc-800/70 space-y-3 text-xs">
+                          {/* Active Buffs & Status Effects Card */}
+                          {hasBuffs && details?.buffs && (
+                            <div className="bg-purple-950/20 border border-purple-800/40 rounded-lg p-3 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-1.5 text-xs font-bold text-purple-300">
+                                  <Zap className="w-3.5 h-3.5 text-purple-400" />
+                                  <span>Active Buffs & Status Effects</span>
+                                </div>
+                                <span className="text-[10px] font-mono text-purple-400 bg-purple-900/40 px-1.5 py-0.5 rounded border border-purple-700/50">
+                                  {details.buffs.length} {details.buffs.length === 1 ? 'buff' : 'buffs'}
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                {details.buffs.map((buff, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="flex items-center justify-between p-2 rounded-md bg-zinc-900/80 border border-purple-900/40"
+                                  >
+                                    <div className="flex items-center space-x-2">
+                                      <Sparkles className="w-3 h-3 text-purple-400 shrink-0" />
+                                      <span className="font-semibold text-zinc-200">{buff.effect}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <span className="font-bold text-emerald-400">{buff.value}</span>
+                                      <span className="text-[10px] font-mono text-cyan-300 bg-cyan-950/80 border border-cyan-800/60 px-1.5 py-0.5 rounded">
+                                        ⏱ {buff.duration}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           {/* Weapon / Attire / Food Stats Grid */}
                           {(stats || details?.nutrition) && (
                             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 font-sans">

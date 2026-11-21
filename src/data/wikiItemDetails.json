@@ -1023,22 +1023,55 @@
   "radiationresisttea.advanced": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Rad. Resistance",
+        "value": "+30%",
+        "duration": "30 min"
+      }
+    ]
   },
   "advancedcoolingtea": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Cooling",
+        "value": "+15",
+        "duration": "45 min"
+      },
+      {
+        "effect": "Max Temperature",
+        "value": "+40",
+        "duration": "45 min"
+      }
+    ]
   },
   "advancedcraftingtea_quality": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Crafting Quality",
+        "value": "+75%",
+        "duration": "5 min"
+      }
+    ]
   },
   "advanceharvestingtea": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Harvest Yield",
+        "value": "+50%",
+        "duration": "20 min"
+      }
+    ]
   },
   "healingtea.advanced": {
     "nutrition": {
@@ -1050,12 +1083,26 @@
   "maxhealthtea.advanced": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Max Health",
+        "value": "+12%",
+        "duration": "20 min"
+      }
+    ]
   },
   "oretea.advanced": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Ore Yield",
+        "value": "+35%",
+        "duration": "30 min"
+      }
+    ]
   },
   "radiationremovetea.advanced": {
     "nutrition": {
@@ -1065,17 +1112,43 @@
   "scraptea.advanced": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Scrap Yield",
+        "value": "+225%",
+        "duration": "45 min"
+      }
+    ]
   },
   "advancedwarmingtea": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Min Temperature",
+        "value": "-8",
+        "duration": "45 min"
+      },
+      {
+        "effect": "Warming",
+        "value": "+10",
+        "duration": "45 min"
+      }
+    ]
   },
   "woodtea.advanced": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Wood Yield",
+        "value": "+100%",
+        "duration": "30 min"
+      }
+    ]
   },
   "xmas.advent": {
     "recycle": [
@@ -1343,14 +1416,28 @@
       "calories": "+30",
       "hydration": "+15",
       "instantHealth": "+2"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Horse Speed",
+        "value": "+2.5",
+        "duration": "1 min"
+      }
+    ]
   },
   "pie.apple": {
     "nutrition": {
       "calories": "+80",
       "hydration": "+15",
       "instantHealth": "+2"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Vision Clarity",
+        "value": "+1",
+        "duration": "15 min"
+      }
+    ]
   },
   "hazmatsuit_scientist_arctic": {
     "recycle": [
@@ -2950,22 +3037,55 @@
     ],
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Rad. Resistance",
+        "value": "+15%",
+        "duration": "30 min"
+      }
+    ]
   },
   "coolingtea": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Cooling",
+        "value": "+10",
+        "duration": "20 min"
+      },
+      {
+        "effect": "Max Temperature",
+        "value": "+40",
+        "duration": "20 min"
+      }
+    ]
   },
   "craftingtea_quality": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Crafting Quality",
+        "value": "+50%",
+        "duration": "200.0 sec"
+      }
+    ]
   },
   "harvestingtea": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Harvest Yield",
+        "value": "+35%",
+        "duration": "20 min"
+      }
+    ]
   },
   "healingtea": {
     "loot": [
@@ -3030,7 +3150,14 @@
   "maxhealthtea": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Max Health",
+        "value": "+5%",
+        "duration": "20 min"
+      }
+    ]
   },
   "oretea": {
     "loot": [
@@ -3062,7 +3189,14 @@
     ],
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Ore Yield",
+        "value": "+20%",
+        "duration": "30 min"
+      }
+    ]
   },
   "scraptea": {
     "loot": [
@@ -3094,12 +3228,31 @@
     ],
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Scrap Yield",
+        "value": "+100%",
+        "duration": "30 min"
+      }
+    ]
   },
   "warmingtea": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Min Temperature",
+        "value": "-15",
+        "duration": "20 min"
+      },
+      {
+        "effect": "Warming",
+        "value": "+5",
+        "duration": "20 min"
+      }
+    ]
   },
   "woodtea": {
     "loot": [
@@ -3131,7 +3284,14 @@
     ],
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Wood Yield",
+        "value": "+50%",
+        "duration": "30 min"
+      }
+    ]
   },
   "bathtub.planter": {
     "craft": {
@@ -3506,7 +3666,19 @@
       "calories": "+80",
       "hydration": "+15",
       "instantHealth": "+2"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Tea Potency",
+        "value": "+1.5",
+        "duration": "15 min"
+      },
+      {
+        "effect": "Nutrition Boost",
+        "value": "+2",
+        "duration": "15 min"
+      }
+    ]
   },
   "rug.bear": {
     "craft": {
@@ -3980,7 +4152,14 @@
       "calories": "+80",
       "hydration": "+15",
       "instantHealth": "+2"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Night Vision",
+        "value": "+1",
+        "duration": "15 min"
+      }
+    ]
   },
   "tool.binoculars": {
     "craft": {
@@ -5202,14 +5381,28 @@
       "calories": "+150",
       "hydration": "+10",
       "healthOverTime": "+8"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Horse Dung Output",
+        "value": "+2.5",
+        "duration": "2 min"
+      }
+    ]
   },
   "bread.brioche.loaf": {
     "nutrition": {
       "calories": "+150",
       "hydration": "-10",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Horse Dung Output",
+        "value": "+3.5",
+        "duration": "3 min"
+      }
+    ]
   },
   "easter.bronzeegg": false,
   "bucket.helmet": {
@@ -7167,7 +7360,14 @@
       "calories": "+80",
       "hydration": "+15",
       "instantHealth": "+2"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Farming Genetics",
+        "value": "+0.52",
+        "duration": "5 min"
+      }
+    ]
   },
   "chineselantern": {
     "craft": {
@@ -8909,21 +9109,42 @@
       "calories": "+50",
       "hydration": "+30",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Rad. Resistance",
+        "value": "+45%",
+        "duration": "30 min"
+      }
+    ]
   },
   "purecoolingtea.creamy": {
     "nutrition": {
       "calories": "+50",
       "hydration": "+30",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Cooling",
+        "value": "+20",
+        "duration": "1 hour"
+      }
+    ]
   },
   "pureharvestingtea.creamy": {
     "nutrition": {
       "calories": "+50",
       "hydration": "+30",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Harvest Yield",
+        "value": "+65%",
+        "duration": "20 min"
+      }
+    ]
   },
   "healingtea.pure.creamy": {
     "nutrition": {
@@ -8937,42 +9158,84 @@
       "calories": "+50",
       "hydration": "+30",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Max Health",
+        "value": "+20%",
+        "duration": "20 min"
+      }
+    ]
   },
   "oretea.pure.creamy": {
     "nutrition": {
       "calories": "+50",
       "hydration": "+30",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Ore Yield",
+        "value": "+50%",
+        "duration": "30 min"
+      }
+    ]
   },
   "scraptea.pure.creamy": {
     "nutrition": {
       "calories": "+50",
       "hydration": "+30",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Scrap Yield",
+        "value": "+350%",
+        "duration": "1 hour"
+      }
+    ]
   },
   "purewarmingtea.creamy": {
     "nutrition": {
       "calories": "+50",
       "hydration": "+30",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Warming",
+        "value": "+15",
+        "duration": "1 hour"
+      }
+    ]
   },
   "woodtea.pure.creamy": {
     "nutrition": {
       "calories": "+50",
       "hydration": "+30",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Wood Yield",
+        "value": "+200%",
+        "duration": "30 min"
+      }
+    ]
   },
   "pie.crocodile": {
     "nutrition": {
       "calories": "+80",
       "hydration": "+15",
       "instantHealth": "+2"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Vision Clarity",
+        "value": "+1",
+        "duration": "15 min"
+      }
+    ]
   },
   "crossbow": {
     "craft": {
@@ -12058,7 +12321,14 @@
       "calories": "+80",
       "hydration": "+15",
       "instantHealth": "+2"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Comfort",
+        "value": "+1",
+        "duration": "10 min"
+      }
+    ]
   },
   "fishtrophy": {
     "craft": {
@@ -17636,7 +17906,14 @@
       "calories": "+80",
       "hydration": "+15",
       "instantHealth": "+2"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Bleed Resistance",
+        "value": "+0.75",
+        "duration": "15 min"
+      }
+    ]
   },
   "bow.hunting": {
     "craft": {
@@ -24898,21 +25175,42 @@
       "calories": "+30",
       "hydration": "+40",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Rad. Resistance",
+        "value": "+45%",
+        "duration": "30 min"
+      }
+    ]
   },
   "purecoolingtea.milky": {
     "nutrition": {
       "calories": "+30",
       "hydration": "+40",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Cooling",
+        "value": "+20",
+        "duration": "1 hour"
+      }
+    ]
   },
   "pureharvestingtea.milky": {
     "nutrition": {
       "calories": "+30",
       "hydration": "+40",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Harvest Yield",
+        "value": "+65%",
+        "duration": "20 min"
+      }
+    ]
   },
   "healingtea.pure.milky": {
     "nutrition": {
@@ -24926,35 +25224,70 @@
       "calories": "+30",
       "hydration": "+40",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Max Health",
+        "value": "+20%",
+        "duration": "20 min"
+      }
+    ]
   },
   "oretea.pure.milky": {
     "nutrition": {
       "calories": "+30",
       "hydration": "+40",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Ore Yield",
+        "value": "+50%",
+        "duration": "30 min"
+      }
+    ]
   },
   "scraptea.pure.milky": {
     "nutrition": {
       "calories": "+30",
       "hydration": "+40",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Scrap Yield",
+        "value": "+350%",
+        "duration": "1 hour"
+      }
+    ]
   },
   "purewarmingtea.milky": {
     "nutrition": {
       "calories": "+30",
       "hydration": "+40",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Warming",
+        "value": "+15",
+        "duration": "1 hour"
+      }
+    ]
   },
   "woodtea.pure.milky": {
     "nutrition": {
       "calories": "+30",
       "hydration": "+40",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Wood Yield",
+        "value": "+200%",
+        "duration": "30 min"
+      }
+    ]
   },
   "minecart.planter": {
     "craft": {
@@ -28232,7 +28565,14 @@
       "calories": "+80",
       "hydration": "+15",
       "instantHealth": "+2"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Metabolism Speed",
+        "value": "+2",
+        "duration": "15 min"
+      }
+    ]
   },
   "fun.boomboxportable": {
     "craft": {
@@ -29239,29 +29579,69 @@
       "calories": "+80",
       "hydration": "+15",
       "instantHealth": "+2"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Max Health",
+        "value": "+10%",
+        "duration": "10 min"
+      }
+    ]
   },
   "clone.pumpkin": false,
   "seed.pumpkin": false,
   "radiationresisttea.pure": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Rad. Resistance",
+        "value": "+45%",
+        "duration": "30 min"
+      }
+    ]
   },
   "purecoolingtea": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Cooling",
+        "value": "+20",
+        "duration": "1 hour"
+      },
+      {
+        "effect": "Max Temperature",
+        "value": "+40",
+        "duration": "1 hour"
+      }
+    ]
   },
   "purecraftingtea_quality": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Crafting Quality",
+        "value": "+85%",
+        "duration": "400.0 sec"
+      }
+    ]
   },
   "pureharvestingtea": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Harvest Yield",
+        "value": "+65%",
+        "duration": "20 min"
+      }
+    ]
   },
   "healingtea.pure": {
     "nutrition": {
@@ -29273,12 +29653,26 @@
   "maxhealthtea.pure": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Max Health",
+        "value": "+20%",
+        "duration": "20 min"
+      }
+    ]
   },
   "oretea.pure": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Ore Yield",
+        "value": "+50%",
+        "duration": "30 min"
+      }
+    ]
   },
   "radiationremovetea.pure": {
     "nutrition": {
@@ -29288,17 +29682,43 @@
   "scraptea.pure": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Scrap Yield",
+        "value": "+350%",
+        "duration": "1 hour"
+      }
+    ]
   },
   "purewarmingtea": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Min Temperature",
+        "value": "+0",
+        "duration": "1 hour"
+      },
+      {
+        "effect": "Warming",
+        "value": "+15",
+        "duration": "1 hour"
+      }
+    ]
   },
   "woodtea.pure": {
     "nutrition": {
       "hydration": "+30"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Wood Yield",
+        "value": "+200%",
+        "duration": "30 min"
+      }
+    ]
   },
   "purpleidtag": false,
   "twitchsunglasses": {
@@ -30706,21 +31126,47 @@
       "calories": "+120",
       "hydration": "+25",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Vision Clarity",
+        "value": "+2",
+        "duration": "20 min"
+      }
+    ]
   },
   "pie.bear.rich": {
     "nutrition": {
       "calories": "+180",
       "hydration": "+20",
       "instantHealth": "+15"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Tea Potency",
+        "value": "+2",
+        "duration": "20 min"
+      },
+      {
+        "effect": "Nutrition Boost",
+        "value": "+3",
+        "duration": "20 min"
+      }
+    ]
   },
   "pie.beef.rich": {
     "nutrition": {
       "calories": "+150",
       "hydration": "+20",
       "instantHealth": "+10"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Max Health",
+        "value": "+15%",
+        "duration": "15 min"
+      }
+    ]
   },
   "pie.bigcat.rich": {
     "nutrition": {
@@ -30734,42 +31180,84 @@
       "calories": "+120",
       "hydration": "+20",
       "instantHealth": "+8"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Farming Genetics",
+        "value": "+0.8",
+        "duration": "10 min"
+      }
+    ]
   },
   "pie.crocodile.rich": {
     "nutrition": {
       "calories": "+150",
       "hydration": "+20",
       "instantHealth": "+10"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Vision Clarity",
+        "value": "+2",
+        "duration": "20 min"
+      }
+    ]
   },
   "pie.fish.rich": {
     "nutrition": {
       "calories": "+120",
       "hydration": "+20",
       "instantHealth": "+8"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Comfort",
+        "value": "+2",
+        "duration": "15 min"
+      }
+    ]
   },
   "pie.hunters.rich": {
     "nutrition": {
       "calories": "+160",
       "hydration": "+20",
       "instantHealth": "+12"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Bleed Resistance",
+        "value": "+1.0",
+        "duration": "20 min"
+      }
+    ]
   },
   "pie.pork.rich": {
     "nutrition": {
       "calories": "+140",
       "hydration": "+20",
       "instantHealth": "+10"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Metabolism Speed",
+        "value": "+3",
+        "duration": "20 min"
+      }
+    ]
   },
   "pie.pumpkin.rich": {
     "nutrition": {
       "calories": "+120",
       "hydration": "+30",
       "instantHealth": "+5"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Max Health",
+        "value": "+15%",
+        "duration": "15 min"
+      }
+    ]
   },
   "pie.mutton.rich": {
     "nutrition": {
@@ -38764,7 +39252,24 @@
     "nutrition": {
       "calories": "+500",
       "hydration": "+500"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Ore Yield",
+        "value": "+400%",
+        "duration": "1 hour"
+      },
+      {
+        "effect": "Scrap Yield",
+        "value": "+500%",
+        "duration": "1 hour"
+      },
+      {
+        "effect": "Wood Yield",
+        "value": "+500%",
+        "duration": "1 hour"
+      }
+    ]
   },
   "stocking.large": false,
   "supply.signal": {
@@ -38974,7 +39479,14 @@
       "calories": "+80",
       "hydration": "+15",
       "instantHealth": "+2"
-    }
+    },
+    "buffs": [
+      {
+        "effect": "Harvest Yield",
+        "value": "+150%",
+        "duration": "5 min"
+      }
+    ]
   },
   "electric.switch": {
     "craft": {
@@ -44279,5 +44791,23 @@
       "instantHealth": "+3"
     }
   },
-  "discord.zombie.plushie": false
+  "discord.zombie.plushie": false,
+  "purecraftingtea_quality.creamy": {
+    "buffs": [
+      {
+        "effect": "Crafting Quality",
+        "value": "+85%",
+        "duration": "400.0 sec"
+      }
+    ]
+  },
+  "purecraftingtea_quality.milky": {
+    "buffs": [
+      {
+        "effect": "Crafting Quality",
+        "value": "+85%",
+        "duration": "400.0 sec"
+      }
+    ]
+  }
 }

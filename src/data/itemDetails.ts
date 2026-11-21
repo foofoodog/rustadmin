@@ -40,6 +40,12 @@ export interface NutritionDetail {
   healthOverTime?: string;
 }
 
+export interface BuffDetail {
+  effect: string;
+  value: string;
+  duration: string;
+}
+
 export interface WikiItemDetail {
   craft?: CraftDetail;
   recycle?: RecycleDetail[];
@@ -47,6 +53,7 @@ export interface WikiItemDetail {
   loot?: LootSourceDetail[];
   ammoFor?: AmmoForDetail[];
   nutrition?: NutritionDetail;
+  buffs?: BuffDetail[];
 }
 
 export const ITEM_DETAILS: Record<string, WikiItemDetail> = (rawDetails as any) || {};
@@ -68,12 +75,33 @@ export function hasNutritionalValue(shortname: string): boolean {
   return false;
 }
 
-export function isChickenOrAnimalFeed(shortname: string): boolean {
-  return (
-    shortname.startsWith('seed.') ||
-    shortname === 'grub' ||
-    shortname === 'worm' ||
-    shortname === 'bread.loaf' ||
-    shortname === 'bread.brioche.loaf'
-  );
+export function hasItemBuffs(shortname: string): boolean {
+  const d = ITEM_DETAILS[shortname];
+  return !!(d && d.buffs && d.buffs.length > 0);
 }
+
+export function isAnimalFeed(shortname: string): boolean {
+  if (shortname.startsWith('clone.')) return false;
+  // Seeds & bait (Chicken feed & fishing bait)
+  if (shortname.startsWith('seed.') || shortname === 'grub' || shortname === 'worm') return true;
+  // Produce and foods eaten by horses/livestock in troughs and coops
+  if (
+    shortname === 'corn' ||
+    shortname === 'pumpkin' ||
+    shortname === 'potato' ||
+    shortname === 'apple' ||
+    shortname === 'apple.spoiled' ||
+    shortname === 'bread.loaf' ||
+    shortname === 'bread.brioche.loaf' ||
+    shortname === 'jar.pickle' ||
+    shortname === 'cactusflesh' ||
+    shortname.endsWith('.berry') ||
+    shortname.includes('raspberries') ||
+    shortname.includes('blueberries')
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export const isChickenOrAnimalFeed = isAnimalFeed;
