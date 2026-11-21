@@ -119,7 +119,7 @@ export const ItemsTab: React.FC = () => {
 
   const handleOpenGive = (item: RustItem) => {
     setSelectedItem(item);
-    setAmount(item.defaultAmount || 1);
+    setAmount(1);
   };
 
   const handleGive = async (e: React.FormEvent) => {
@@ -409,15 +409,15 @@ export const ItemsTab: React.FC = () => {
       {/* Give Item Modal */}
       {selectedItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl max-w-xl w-full p-5 space-y-4 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
             <button
               onClick={() => setSelectedItem(null)}
-              className="absolute right-4 top-4 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800"
+              className="absolute right-4 top-4 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 z-10"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="flex items-start space-x-3 border-b border-zinc-800 pb-3">
+            <div className="flex items-start space-x-3 border-b border-zinc-800 pb-3 pr-8">
               <div className="w-16 h-16 bg-zinc-950 border border-zinc-800 rounded-lg p-1.5 flex items-center justify-center shrink-0">
                 <ItemSprite
                   shortname={selectedItem.shortname}
@@ -425,22 +425,22 @@ export const ItemsTab: React.FC = () => {
                   alt={selectedItem.name}
                 />
               </div>
-              <div className="flex-1 min-w-0 pr-4">
-                <div className="flex items-center space-x-2">
-                  <h3 className="font-bold text-sm text-zinc-100 truncate">{selectedItem.name}</h3>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <h3 className="font-bold text-sm text-zinc-100">{selectedItem.name}</h3>
                   {selectedItem.rarity && (
-                    <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700/50">
+                    <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700/50 shrink-0">
                       {selectedItem.rarity}
                     </span>
                   )}
                   {selectedItem.isDlc && (
-                    <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded bg-purple-950/90 text-purple-300 border border-purple-800/70 text-[10px] font-bold uppercase shadow-sm">
-                      <Sparkles className="w-2.5 h-2.5 text-purple-400" />
+                    <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-purple-950/90 text-purple-300 border border-purple-800/70 text-[10px] font-bold uppercase shadow-sm whitespace-nowrap shrink-0">
+                      <Sparkles className="w-2.5 h-2.5 text-purple-400 shrink-0" />
                       <span>{selectedItem.dlcPack || 'DLC Content'}</span>
                     </span>
                   )}
                 </div>
-                <span className="text-xs font-mono text-rust-400 block truncate">{selectedItem.shortname}</span>
+                <span className="text-xs font-mono text-rust-400 block truncate mt-0.5">{selectedItem.shortname}</span>
                 <div className="flex items-center space-x-3 text-[11px] text-zinc-500 mt-1">
                   <span>Category: <strong className="text-zinc-400">{selectedItem.category}</strong></span>
                   {selectedItem.stackable && (
