@@ -15,7 +15,8 @@ import {
   Crosshair,
   Hammer,
   Recycle,
-  Boxes
+  Boxes,
+  Utensils
 } from 'lucide-react';
 import { 
   RUST_ITEMS, 
@@ -525,7 +526,17 @@ export const ItemsTab: React.FC = () => {
               const stats = getItemStats(selectedItem.shortname);
               const details = getItemDetails(selectedItem.shortname);
 
-              const hasCombat = !!stats || (!!details?.ammoFor && details.ammoFor.length > 0);
+              const isFoodOrConsumable =
+                selectedItem.category === 'Food' ||
+                !!details?.nutrition ||
+                stats?.calories !== undefined ||
+                stats?.hydration !== undefined;
+
+              const hasCombat =
+                !!stats ||
+                (!!details?.ammoFor && details.ammoFor.length > 0) ||
+                !!details?.nutrition;
+
               const hasCraft = !!details?.craft && (
                 (!!details.craft.ingredients && details.craft.ingredients.length > 0) ||
                 details.craft.researchCost !== undefined ||
@@ -540,7 +551,7 @@ export const ItemsTab: React.FC = () => {
 
               return (
                 <div className="space-y-2">
-                  {/* 1. Combat & Damage Stats */}
+                  {/* 1. Combat, Protection, or Nutrition Stats */}
                   {hasCombat && (
                     <div className="border border-zinc-800/90 rounded-lg overflow-hidden bg-zinc-950/60">
                       <button
@@ -549,19 +560,37 @@ export const ItemsTab: React.FC = () => {
                         className="w-full flex items-center justify-between px-3.5 py-2.5 bg-zinc-900/80 hover:bg-zinc-800/60 text-left transition-colors"
                       >
                         <div className="flex items-center space-x-2">
-                          <Crosshair className="w-3.5 h-3.5 text-rust-400 shrink-0" />
+                          {isFoodOrConsumable ? (
+                            <Utensils className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                          ) : (
+                            <Crosshair className="w-3.5 h-3.5 text-rust-400 shrink-0" />
+                          )}
                           <span className="text-xs font-semibold text-zinc-200">
                             {stats?.damage !== undefined || (details?.ammoFor && details.ammoFor.length > 0)
                               ? 'Combat & Damage Stats'
+                              : isFoodOrConsumable
+                              ? 'Nutrition & Consumable Stats'
                               : 'Item Performance & Protection'}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          {stats?.damage !== undefined && (
+                          {stats?.damage !== undefined ? (
                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rust-500/10 text-rust-400 border border-rust-500/20">
                               {stats.damage} dmg
                             </span>
-                          )}
+                          ) : details?.nutrition?.calories ? (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                              {details.nutrition.calories} cal
+                            </span>
+                          ) : stats?.calories !== undefined ? (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                              +{stats.calories} cal
+                            </span>
+                          ) : details?.nutrition?.hydration ? (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                              {details.nutrition.hydration} thirst
+                            </span>
+                          ) : null}
                           <ChevronDown
                             className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
                               openTwisties['combat'] ? 'rotate-180' : ''
@@ -573,103 +602,150 @@ export const ItemsTab: React.FC = () => {
                       {openTwisties['combat'] && (
                         <div className="p-3 border-t border-zinc-800/70 space-y-3 text-xs">
                           {/* Weapon / Attire / Food Stats Grid */}
-                          {stats && (
+                          {(stats || details?.nutrition) && (
                             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 font-sans">
-                              {stats.damage !== undefined && (
+                              {/* Nutrition Stats (Calories, Hydration, Healing) */}
+                              {details?.nutrition?.calories && (
                                 <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Damage</span>
-                                  <span className="font-semibold text-zinc-100">{stats.damage}</span>
+                                  <span className="text-zinc-400">Calories / Hunger</span>
+                                  <span className="font-semibold text-amber-400">{details.nutrition.calories} kcal</span>
                                 </div>
                               )}
-                              {stats.attackSpeed && (
+                              {details?.nutrition?.hydration && (
                                 <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Attack Speed</span>
-                                  <span className="font-semibold text-zinc-100">{stats.attackSpeed}</span>
+                                  <span className="text-zinc-400">Hydration / Thirst</span>
+                                  <span className="font-semibold text-cyan-400">{details.nutrition.hydration} ml</span>
                                 </div>
                               )}
-                              {stats.range && (
+                              {details?.nutrition?.instantHealth && (
                                 <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Range</span>
-                                  <span className="font-semibold text-zinc-100">{stats.range}</span>
+                                  <span className="text-zinc-400">Instant Heal</span>
+                                  <span className="font-semibold text-emerald-400">{details.nutrition.instantHealth} HP</span>
                                 </div>
                               )}
-                              {stats.drawTime && (
+                              {details?.nutrition?.healthOverTime && (
                                 <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Draw</span>
-                                  <span className="font-semibold text-zinc-100">{stats.drawTime}</span>
+                                  <span className="text-zinc-400">Heal Over Time</span>
+                                  <span className="font-semibold text-emerald-400">{details.nutrition.healthOverTime}</span>
                                 </div>
                               )}
-                              {stats.throwable && (
+                              {stats?.calories !== undefined && !details?.nutrition?.calories && (
                                 <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Throw</span>
-                                  <span className="font-semibold text-zinc-100">{stats.throwable}</span>
+                                  <span className="text-zinc-400">Calories / Hunger</span>
+                                  <span className="font-semibold text-amber-400">+{stats.calories} kcal</span>
                                 </div>
                               )}
-                              {stats.magazineSize !== undefined && (
+                              {stats?.hydration !== undefined && !details?.nutrition?.hydration && (
                                 <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Capacity</span>
-                                  <span className="font-semibold text-zinc-100">{stats.magazineSize} rds</span>
+                                  <span className="text-zinc-400">Hydration / Thirst</span>
+                                  <span className="font-semibold text-cyan-400">+{stats.hydration} ml</span>
                                 </div>
                               )}
-                              {stats.reloadTime && (
-                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Reload</span>
-                                  <span className="font-semibold text-zinc-100">{stats.reloadTime}</span>
-                                </div>
-                              )}
-                              {stats.recoil && (
-                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Recoil</span>
-                                  <span className="font-semibold text-zinc-100">{stats.recoil}</span>
-                                </div>
-                              )}
-                              {stats.projectileProtection && (
-                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Projectile</span>
-                                  <span className="font-semibold text-emerald-400">{stats.projectileProtection}</span>
-                                </div>
-                              )}
-                              {stats.meleeProtection && (
-                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Melee</span>
-                                  <span className="font-semibold text-emerald-400">{stats.meleeProtection}</span>
-                                </div>
-                              )}
-                              {stats.biteProtection && (
-                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Bite</span>
-                                  <span className="font-semibold text-zinc-200">{stats.biteProtection}</span>
-                                </div>
-                              )}
-                              {stats.radiationProtection && (
-                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Radiation</span>
-                                  <span className="font-semibold text-amber-400">{stats.radiationProtection}</span>
-                                </div>
-                              )}
-                              {stats.coldProtection && (
-                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Cold</span>
-                                  <span className="font-semibold text-cyan-400">{stats.coldProtection}</span>
-                                </div>
-                              )}
-                              {stats.explosionProtection && (
-                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                                  <span className="text-zinc-400">Explosion</span>
-                                  <span className="font-semibold text-rose-400">{stats.explosionProtection}</span>
-                                </div>
-                              )}
-                              {stats.instantHealth !== undefined && (
+                              {stats?.instantHealth !== undefined && !details?.nutrition?.instantHealth && (
                                 <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                                   <span className="text-zinc-400">Instant Heal</span>
                                   <span className="font-semibold text-emerald-400">+{stats.instantHealth} HP</span>
                                 </div>
                               )}
-                              {stats.healthOverTime !== undefined && (
+                              {stats?.healthOverTime !== undefined && !details?.nutrition?.healthOverTime && (
                                 <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                                   <span className="text-zinc-400">Heal Over Time</span>
                                   <span className="font-semibold text-emerald-400">+{stats.healthOverTime} HP</span>
                                 </div>
+                              )}
+                              {stats?.bleeding && (
+                                <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                  <span className="text-zinc-400">Bleeding</span>
+                                  <span className="font-semibold text-rose-400">{stats.bleeding}</span>
+                                </div>
+                              )}
+                              {stats && (
+                                <>
+                                  {stats.damage !== undefined && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Damage</span>
+                                      <span className="font-semibold text-zinc-100">{stats.damage}</span>
+                                    </div>
+                                  )}
+                                  {stats.attackSpeed && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Attack Speed</span>
+                                      <span className="font-semibold text-zinc-100">{stats.attackSpeed}</span>
+                                    </div>
+                                  )}
+                                  {stats.range && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Range</span>
+                                      <span className="font-semibold text-zinc-100">{stats.range}</span>
+                                    </div>
+                                  )}
+                                  {stats.drawTime && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Draw</span>
+                                      <span className="font-semibold text-zinc-100">{stats.drawTime}</span>
+                                    </div>
+                                  )}
+                                  {stats.throwable && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Throw</span>
+                                      <span className="font-semibold text-zinc-100">{stats.throwable}</span>
+                                    </div>
+                                  )}
+                                  {stats.magazineSize !== undefined && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Capacity</span>
+                                      <span className="font-semibold text-zinc-100">{stats.magazineSize} rds</span>
+                                    </div>
+                                  )}
+                                  {stats.reloadTime && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Reload</span>
+                                      <span className="font-semibold text-zinc-100">{stats.reloadTime}</span>
+                                    </div>
+                                  )}
+                                  {stats.recoil && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Recoil</span>
+                                      <span className="font-semibold text-zinc-100">{stats.recoil}</span>
+                                    </div>
+                                  )}
+                                  {stats.projectileProtection && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Projectile</span>
+                                      <span className="font-semibold text-emerald-400">{stats.projectileProtection}</span>
+                                    </div>
+                                  )}
+                                  {stats.meleeProtection && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Melee</span>
+                                      <span className="font-semibold text-emerald-400">{stats.meleeProtection}</span>
+                                    </div>
+                                  )}
+                                  {stats.biteProtection && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Bite</span>
+                                      <span className="font-semibold text-zinc-200">{stats.biteProtection}</span>
+                                    </div>
+                                  )}
+                                  {stats.radiationProtection && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Radiation</span>
+                                      <span className="font-semibold text-amber-400">{stats.radiationProtection}</span>
+                                    </div>
+                                  )}
+                                  {stats.coldProtection && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Cold</span>
+                                      <span className="font-semibold text-cyan-400">{stats.coldProtection}</span>
+                                    </div>
+                                  )}
+                                  {stats.explosionProtection && (
+                                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                                      <span className="text-zinc-400">Explosion</span>
+                                      <span className="font-semibold text-rose-400">{stats.explosionProtection}</span>
+                                    </div>
+                                  )}
+                                </>
                               )}
                             </div>
                           )}

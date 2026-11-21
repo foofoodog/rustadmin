@@ -33,12 +33,20 @@ export interface AmmoForDetail {
   headshot: string;
 }
 
+export interface NutritionDetail {
+  calories?: string;
+  hydration?: string;
+  instantHealth?: string;
+  healthOverTime?: string;
+}
+
 export interface WikiItemDetail {
   craft?: CraftDetail;
   recycle?: RecycleDetail[];
   recycleSafeZone?: RecycleDetail[];
   loot?: LootSourceDetail[];
   ammoFor?: AmmoForDetail[];
+  nutrition?: NutritionDetail;
 }
 
 export const ITEM_DETAILS: Record<string, WikiItemDetail> = (rawDetails as any) || {};
