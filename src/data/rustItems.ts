@@ -19,6 +19,28 @@ export function getDlcPack(shortname: string, name: string): string | null {
   const s = shortname.toLowerCase();
   const n = name.toLowerCase();
 
+  // Jungle Pack
+  if (
+    s.includes('cocoknight') ||
+    s.includes('rifle.ak.jungle') ||
+    s.includes('knife.bone.obsidian') ||
+    s.includes('jungle.rock') ||
+    s.includes('bamboo') ||
+    (s.includes('wall.shelves') && n.includes('bamboo'))
+  ) {
+    return 'Jungle Pack';
+  }
+
+  // Artist Pack
+  if (s.includes('sign.artistcanvas') || s === 'easel') {
+    return 'Artist Pack';
+  }
+
+  // Pilot Pack
+  if (s.includes('hazmatsuit.pilot') || s.includes('pilot.hazmat.box.wooden')) {
+    return 'Pilot Pack';
+  }
+
   // Abyss Pack
   if (s.includes('diver') || s.includes('abyss')) return 'Abyss Pack';
 

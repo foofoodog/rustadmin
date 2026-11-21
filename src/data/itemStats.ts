@@ -31,6 +31,16 @@ export interface ItemStats {
 
 // Base item aliases for reskinned DLC items and common shortname redirects
 export const BASE_ITEM_ALIASES: Record<string, string> = {
+  // Jungle Pack
+  'rifle.ak.jungle': 'rifle.ak',
+  'knife.bone.obsidian': 'knife.bone',
+  'jungle.rock': 'rock',
+  'cocoknight.armor.helmet': 'wood.armor.helmet',
+  'cocoknight.armor.torso': 'wood.armor.jacket',
+  'cocoknight.armor.pants': 'wood.armor.pants',
+  'cocoknight.armor.gloves': 'tactical.gloves',
+  'bamboo.barrel': 'box.wooden.large',
+
   // Abyss / Diver Pack
   diverhatchet: 'hatchet',
   diverpickaxe: 'pickaxe',
