@@ -32,8 +32,57 @@ export function getDlcPack(shortname: string, name: string): string | null {
   }
 
   // Artist Pack
-  if (s.includes('sign.artistcanvas') || s === 'easel') {
+  if (
+    s.includes('sign.artistcanvas') ||
+    s === 'easel' ||
+    s.includes('paintball') ||
+    s.includes('paintable')
+  ) {
     return 'Artist Pack';
+  }
+
+  // Storage Box Pack
+  if (s.startsWith('component.box.')) {
+    return 'Storage Box Pack';
+  }
+
+  // Industrial Decor Pack
+  if (
+    s.includes('industrial') && (
+      s.includes('shelves') ||
+      s.includes('barrel') ||
+      s.includes('door') ||
+      s.includes('light') ||
+      s.includes('torch')
+    )
+  ) {
+    return 'Industrial Decor Pack';
+  }
+
+  // Weapon Racks Pack
+  if (s.startsWith('gunrack') || s.startsWith('weaponrack')) {
+    if (s.includes('frontier')) return 'Frontier Pack';
+    return 'Weapon Racks Pack';
+  }
+
+  // Wallpaper Pack
+  if (s.startsWith('wallpaper.')) {
+    return 'Wallpaper Pack';
+  }
+
+  // Ice King Pack
+  if (
+    s.includes('icethrone') ||
+    s.includes('icemask') ||
+    s.includes('icevest') ||
+    s.includes('ice.wall')
+  ) {
+    return 'Ice King Pack';
+  }
+
+  // Graffiti Pack
+  if (s.startsWith('spraycan')) {
+    return 'Graffiti Pack';
   }
 
   // Pilot Pack
@@ -103,9 +152,7 @@ export function getDlcPack(shortname: string, name: string): string | null {
     s.includes('arcticsuit') ||
     s.includes('tomaha') ||
     s.includes('rifle.ak.ice') ||
-    s.includes('sculpture.ice') ||
-    s.includes('icemask') ||
-    s.includes('icevest')
+    s.includes('sculpture.ice')
   ) {
     return 'Arctic Pack';
   }

@@ -31,6 +31,32 @@ export interface ItemStats {
 
 // Base item aliases for reskinned DLC items and common shortname redirects
 export const BASE_ITEM_ALIASES: Record<string, string> = {
+  // Artist Pack
+  'gun.paintball': 'pistol.semiauto',
+  'attire.paintball.overalls': 'hazmatsuit',
+
+  // Storage Box Pack
+  'component.box.ammo.large': 'box.wooden.large',
+  'component.box.armor.large': 'box.wooden.large',
+  'component.box.charcoal.large': 'box.wooden.large',
+  'component.box.clothing.large': 'box.wooden.large',
+  'component.box.comps.large': 'box.wooden.large',
+  'component.box.explosives.large': 'box.wooden.large',
+  'component.box.food.large': 'box.wooden.large',
+  'component.box.guns.large': 'box.wooden.large',
+  'component.box.meds.large': 'box.wooden.large',
+  'component.box.metal.large': 'box.wooden.large',
+  'component.box.ore.large': 'box.wooden.large',
+  'component.box.scrap.large': 'box.wooden.large',
+  'component.box.stone.large': 'box.wooden.large',
+  'component.box.sulfur.large': 'box.wooden.large',
+  'component.box.tools.large': 'box.wooden.large',
+  'component.box.wood.large': 'box.wooden.large',
+
+  // Industrial Decor Pack
+  'industrial.storage.barrel.horizontal': 'box.wooden.large',
+  'industrial.storage.barrel.vertical': 'box.wooden.large',
+
   // Jungle Pack
   'rifle.ak.jungle': 'rifle.ak',
   'knife.bone.obsidian': 'knife.bone',
