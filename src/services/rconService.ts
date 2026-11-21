@@ -258,9 +258,20 @@ class RconService {
     const lower = text.toLowerCase();
     const timeStr = new Date().toLocaleTimeString();
 
+    // Ignore server status output, command echoes, and player table headers
+    if (
+      lower.includes('hostname:') ||
+      lower.includes('version :') ||
+      lower.includes('id name ping connected addr owner') ||
+      (lower.includes('listing') && lower.includes('plugins:'))
+    ) {
+      return null;
+    }
+
     // 1. Anti-cheat / Violations
     if (
-      lower.includes('violation') ||
+      lower.includes('antihack') ||
+      (lower.includes('violation') && (lower.includes('level') || lower.includes('increased') || lower.includes('kicked:') || lower.includes('banned:'))) ||
       lower.includes('flyhack') ||
       lower.includes('speedhack') ||
       lower.includes('eyehack') ||
