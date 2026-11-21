@@ -53,12 +53,24 @@ export const ItemsTab: React.FC = () => {
   }, [selectedCategory, selectedDlcPack, search]);
 
   const isDlcFilterActive = selectedDlcPack !== 'all';
+  const isSearchFilterActive = !!search.trim();
 
-  // Compute category counts (scoped to selected DLC pack if active)
+  // Compute category counts (scoped to active DLC pack AND active search query)
   const categoryCounts = useMemo(() => {
-    const scopedItems = isDlcFilterActive
-      ? items.filter((item) => item.dlcPack === selectedDlcPack)
-      : items;
+    const q = search.toLowerCase().trim();
+    const scopedItems = items.filter((item) => {
+      if (isDlcFilterActive && item.dlcPack !== selectedDlcPack) {
+        return false;
+      }
+      if (q) {
+        return (
+          item.name.toLowerCase().includes(q) ||
+          item.shortname.toLowerCase().includes(q) ||
+          (item.description && item.description.toLowerCase().includes(q))
+        );
+      }
+      return true;
+    });
 
     const counts: Record<string, number> = { All: scopedItems.length };
     for (const item of scopedItems) {
@@ -71,7 +83,7 @@ export const ItemsTab: React.FC = () => {
       }
     }
     return counts;
-  }, [items, isDlcFilterActive, selectedDlcPack]);
+  }, [items, isDlcFilterActive, selectedDlcPack, search]);
 
   // Compute available DLC packs with item counts
   const availableDlcPacks = useMemo(() => {
@@ -234,7 +246,7 @@ export const ItemsTab: React.FC = () => {
           const count = categoryCounts[cat] || 0;
           const isSelected = selectedCategory === cat;
 
-          // Counter badge styling: vibrant purple when DLC filter is active
+          // Counter badge styling: vibrant purple when DLC filter is active, rust when search is active
           let counterClass = '';
           if (isDlcFilterActive) {
             if (isSelected) {
@@ -245,6 +257,14 @@ export const ItemsTab: React.FC = () => {
               counterClass = count > 0
                 ? 'bg-purple-950 text-purple-300 border border-purple-700/70 shadow-sm font-semibold'
                 : 'bg-purple-950/40 text-purple-400/35 border border-purple-900/30';
+            }
+          } else if (isSearchFilterActive) {
+            if (isSelected) {
+              counterClass = 'bg-rust-700 text-white font-bold';
+            } else {
+              counterClass = count > 0
+                ? 'bg-rust-950/80 text-rust-300 border border-rust-700/60 shadow-sm font-semibold'
+                : 'bg-zinc-900 text-zinc-600 border border-zinc-800/40';
             }
           } else {
             counterClass = isSelected ? 'bg-rust-700 text-white' : 'bg-zinc-800 text-zinc-400';
@@ -257,8 +277,8 @@ export const ItemsTab: React.FC = () => {
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center space-x-1.5 ${
                 isSelected
                   ? 'bg-rust-600 text-white shadow-sm ring-1 ring-rust-500/50'
-                  : isDlcFilterActive && count === 0
-                  ? 'bg-zinc-900/70 border border-zinc-800/60 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'
+                  : (isDlcFilterActive || isSearchFilterActive) && count === 0
+                  ? 'bg-zinc-900/60 border border-zinc-800/40 text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800/50'
                   : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
               }`}
             >
