@@ -14,7 +14,12 @@ import {
   Send,
   Zap,
   Radio,
-  FileCheck2
+  FileCheck2,
+  Ghost,
+  Gift,
+  Egg,
+  Truck,
+  Sparkles
 } from 'lucide-react';
 import { rconService } from '../services/rconService';
 import { ServerStatus } from '../types/rcon';
@@ -257,13 +262,14 @@ export const DashboardTab: React.FC = () => {
         </div>
 
         {/* Event Spawners */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-sm space-y-6">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-sm space-y-5">
           <div className="flex items-center space-x-2 border-b border-zinc-800 pb-3">
             <Zap className="w-5 h-5 text-rust-500" />
             <h3 className="font-bold text-zinc-100 text-base">Monument & World Events</h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Standard World & Monument Encounters */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {/* Patrol Heli */}
             <div className="bg-zinc-950 border border-zinc-800 p-4 rounded-xl flex flex-col justify-between space-y-3">
               <div className="flex items-center space-x-3">
@@ -338,6 +344,113 @@ export const DashboardTab: React.FC = () => {
               >
                 Call Air Drop
               </button>
+            </div>
+
+            {/* CH47 Chinook */}
+            <div className="bg-zinc-950 border border-zinc-800 p-4 rounded-xl flex flex-col justify-between space-y-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-lg bg-cyan-950/60 border border-cyan-800/60 flex items-center justify-center text-cyan-400">
+                  <Plane className="w-5 h-5 rotate-45" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-zinc-100">CH47 Chinook</h4>
+                  <p className="text-xs text-zinc-400">Heavy scientist crate drop</p>
+                </div>
+              </div>
+              <button
+                onClick={() => runCommand('spawn.ch47event', 'CH47 Chinook Event called!')}
+                className="w-full py-1.5 bg-cyan-600/80 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors"
+              >
+                Call Chinook
+              </button>
+            </div>
+
+            {/* Travelling Vendor */}
+            <div className="bg-zinc-950 border border-zinc-800 p-4 rounded-xl flex flex-col justify-between space-y-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-lg bg-indigo-950/60 border border-indigo-800/60 flex items-center justify-center text-indigo-400">
+                  <Truck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm text-zinc-100">Travelling Vendor</h4>
+                  <p className="text-xs text-zinc-400">Spawn roving road vendor</p>
+                </div>
+              </div>
+              <button
+                onClick={() => runCommand('travellingvendor.startevent', 'Travelling Vendor event spawned!')}
+                className="w-full py-1.5 bg-indigo-600/80 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors"
+              >
+                Spawn Vendor
+              </button>
+            </div>
+          </div>
+
+          {/* Seasonal & Holiday Events */}
+          <div className="pt-2 border-t border-zinc-800/80 space-y-3">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+              <h4 className="font-bold text-xs uppercase tracking-wider text-zinc-400">
+                Seasonal & Holiday Events
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Halloween */}
+              <div className="bg-zinc-950 border border-purple-900/40 hover:border-purple-700/60 p-4 rounded-xl flex flex-col justify-between space-y-3 transition-colors shadow-sm">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-950/80 border border-purple-700/60 flex items-center justify-center text-purple-400">
+                    <Ghost className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-zinc-100">Halloween Event</h4>
+                    <p className="text-xs text-zinc-400">Candy hunt & scarecrow spawns</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => runCommand('halloween.enabled 1; spawn halloweenhunt', 'Halloween Event & Candy Hunt started!')}
+                  className="w-full py-1.5 bg-purple-600/85 hover:bg-purple-500 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm"
+                >
+                  Trigger Halloween
+                </button>
+              </div>
+
+              {/* Christmas */}
+              <div className="bg-zinc-950 border border-rose-900/40 hover:border-rose-700/60 p-4 rounded-xl flex flex-col justify-between space-y-3 transition-colors shadow-sm">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-rose-950/80 border border-rose-700/60 flex items-center justify-center text-rose-400">
+                    <Gift className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-zinc-100">Christmas Event</h4>
+                    <p className="text-xs text-zinc-400">Sleigh bells & present drops</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => runCommand('xmas.enabled 1; xmas.refill', 'Christmas bells ringing & presents dropped!')}
+                  className="w-full py-1.5 bg-rose-600/85 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm"
+                >
+                  Trigger Christmas
+                </button>
+              </div>
+
+              {/* Easter */}
+              <div className="bg-zinc-950 border border-amber-900/40 hover:border-amber-700/60 p-4 rounded-xl flex flex-col justify-between space-y-3 transition-colors shadow-sm">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-amber-950/80 border border-amber-700/60 flex items-center justify-center text-amber-400">
+                    <Egg className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-zinc-100">Easter Egg Hunt</h4>
+                    <p className="text-xs text-zinc-400">Competitive egg hunt & baskets</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => runCommand('spawn egghunt', 'Easter Egg Hunt started!')}
+                  className="w-full py-1.5 bg-amber-600/85 hover:bg-amber-500 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm"
+                >
+                  Trigger Easter
+                </button>
+              </div>
             </div>
           </div>
         </div>
