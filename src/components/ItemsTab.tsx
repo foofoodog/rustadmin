@@ -52,10 +52,16 @@ export const ItemsTab: React.FC = () => {
     setDisplayLimit(96);
   }, [selectedCategory, selectedDlcPack, search]);
 
-  // Compute category counts
+  const isDlcFilterActive = selectedDlcPack !== 'all';
+
+  // Compute category counts (scoped to selected DLC pack if active)
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { All: items.length };
-    for (const item of items) {
+    const scopedItems = isDlcFilterActive
+      ? items.filter((item) => item.dlcPack === selectedDlcPack)
+      : items;
+
+    const counts: Record<string, number> = { All: scopedItems.length };
+    for (const item of scopedItems) {
       counts[item.category] = (counts[item.category] || 0) + 1;
       if (item.isVehicle) {
         counts['Vehicles'] = (counts['Vehicles'] || 0) + 1;
@@ -65,7 +71,7 @@ export const ItemsTab: React.FC = () => {
       }
     }
     return counts;
-  }, [items]);
+  }, [items, isDlcFilterActive, selectedDlcPack]);
 
   // Compute available DLC packs with item counts
   const availableDlcPacks = useMemo(() => {
@@ -227,21 +233,38 @@ export const ItemsTab: React.FC = () => {
         {RUST_CATEGORIES.map((cat) => {
           const count = categoryCounts[cat] || 0;
           const isSelected = selectedCategory === cat;
+
+          // Counter badge styling: vibrant purple when DLC filter is active
+          let counterClass = '';
+          if (isDlcFilterActive) {
+            if (isSelected) {
+              counterClass = count > 0
+                ? 'bg-purple-900/90 text-purple-200 border border-purple-400/60 shadow-sm font-bold ring-1 ring-purple-400/30'
+                : 'bg-purple-950/70 text-purple-300/40 border border-purple-900/40';
+            } else {
+              counterClass = count > 0
+                ? 'bg-purple-950 text-purple-300 border border-purple-700/70 shadow-sm font-semibold'
+                : 'bg-purple-950/40 text-purple-400/35 border border-purple-900/30';
+            }
+          } else {
+            counterClass = isSelected ? 'bg-rust-700 text-white' : 'bg-zinc-800 text-zinc-400';
+          }
+
           return (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors flex items-center space-x-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center space-x-1.5 ${
                 isSelected
-                  ? 'bg-rust-600 text-white shadow-sm'
+                  ? 'bg-rust-600 text-white shadow-sm ring-1 ring-rust-500/50'
+                  : isDlcFilterActive && count === 0
+                  ? 'bg-zinc-900/70 border border-zinc-800/60 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'
                   : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
               }`}
             >
               <span>{cat}</span>
               <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                  isSelected ? 'bg-rust-700 text-white' : 'bg-zinc-800 text-zinc-400'
-                }`}
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono transition-colors ${counterClass}`}
               >
                 {count}
               </span>
