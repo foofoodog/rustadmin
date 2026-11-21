@@ -56,3 +56,24 @@ export function getItemDetails(shortname: string): WikiItemDetail | null {
   if (!d) return null;
   return d;
 }
+
+export function hasNutritionalValue(shortname: string): boolean {
+  const d = ITEM_DETAILS[shortname];
+  if (d && d.nutrition) {
+    const n = d.nutrition;
+    if (n.calories || n.hydration || n.instantHealth || n.healthOverTime) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function isChickenOrAnimalFeed(shortname: string): boolean {
+  return (
+    shortname.startsWith('seed.') ||
+    shortname === 'grub' ||
+    shortname === 'worm' ||
+    shortname === 'bread.loaf' ||
+    shortname === 'bread.brioche.loaf'
+  );
+}

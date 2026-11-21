@@ -16,7 +16,8 @@ import {
   Hammer,
   Recycle,
   Boxes,
-  Utensils
+  Utensils,
+  Egg
 } from 'lucide-react';
 import { 
   RUST_ITEMS, 
@@ -104,6 +105,12 @@ export const ItemsTab: React.FC = () => {
       if (item.isDlc) {
         counts['DLC / Packs'] = (counts['DLC / Packs'] || 0) + 1;
       }
+      if (item.hasNutrition) {
+        counts['Food (Nutritional)'] = (counts['Food (Nutritional)'] || 0) + 1;
+      }
+      if (item.isFeed) {
+        counts['Chicken & Animal Feed'] = (counts['Chicken & Animal Feed'] || 0) + 1;
+      }
     }
     return counts;
   }, [items, isDlcFilterActive, selectedDlcPack, search]);
@@ -132,6 +139,10 @@ export const ItemsTab: React.FC = () => {
         if (!item.isVehicle && item.category !== 'Vehicles') return false;
       } else if (selectedCategory === 'DLC / Packs') {
         if (!item.isDlc) return false;
+      } else if (selectedCategory === 'Food (Nutritional)') {
+        if (!item.hasNutrition) return false;
+      } else if (selectedCategory === 'Chicken & Animal Feed') {
+        if (!item.isFeed) return false;
       } else if (selectedCategory !== 'All' && item.category !== selectedCategory) {
         return false;
       }
@@ -298,6 +309,9 @@ export const ItemsTab: React.FC = () => {
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all flex items-center space-x-1.5 ${buttonClass}`}
             >
+              {cat === 'Food (Nutritional)' && <Utensils className="w-3 h-3 text-amber-400 shrink-0" />}
+              {cat === 'Chicken & Animal Feed' && <Egg className="w-3 h-3 text-amber-400 shrink-0" />}
+              {cat === 'DLC / Packs' && <Sparkles className="w-3 h-3 text-purple-400 shrink-0" />}
               <span>{cat}</span>
               <span
                 className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono transition-colors ${counterClass}`}
@@ -308,6 +322,57 @@ export const ItemsTab: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Contextual Food / Feed Sub-filters Row */}
+      {(selectedCategory === 'Food' || selectedCategory === 'Food (Nutritional)' || selectedCategory === 'Chicken & Animal Feed') && (
+        <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-zinc-900/70 border border-zinc-800 rounded-xl text-xs">
+          <span className="text-zinc-400 font-medium flex items-center gap-1.5">
+            <Filter className="w-3.5 h-3.5 text-rust-500" />
+            <span>Food Filter:</span>
+          </span>
+          <button
+            onClick={() => setSelectedCategory('Food')}
+            className={`px-2.5 py-1 rounded-lg text-xs transition-all flex items-center space-x-1.5 ${
+              selectedCategory === 'Food'
+                ? 'bg-rust-600 text-white font-semibold shadow-xs'
+                : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300'
+            }`}
+          >
+            <span>All Food Items</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full font-mono bg-black/25">
+              {categoryCounts['Food'] || 0}
+            </span>
+          </button>
+          <button
+            onClick={() => setSelectedCategory('Food (Nutritional)')}
+            className={`px-2.5 py-1 rounded-lg text-xs transition-all flex items-center space-x-1.5 ${
+              selectedCategory === 'Food (Nutritional)'
+                ? 'bg-rust-600 text-white font-semibold shadow-xs'
+                : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300'
+            }`}
+          >
+            <Utensils className="w-3 h-3 text-amber-400" />
+            <span>Nutritional Value Only</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full font-mono bg-black/25">
+              {categoryCounts['Food (Nutritional)'] || 0}
+            </span>
+          </button>
+          <button
+            onClick={() => setSelectedCategory('Chicken & Animal Feed')}
+            className={`px-2.5 py-1 rounded-lg text-xs transition-all flex items-center space-x-1.5 ${
+              selectedCategory === 'Chicken & Animal Feed'
+                ? 'bg-rust-600 text-white font-semibold shadow-xs'
+                : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300'
+            }`}
+          >
+            <Egg className="w-3 h-3 text-amber-400" />
+            <span>Chicken & Animal Feed (Seeds)</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full font-mono bg-black/25">
+              {categoryCounts['Chicken & Animal Feed'] || 0}
+            </span>
+          </button>
+        </div>
+      )}
 
       {/* Item Grid */}
       {filteredItems.length === 0 ? (
@@ -494,6 +559,12 @@ export const ItemsTab: React.FC = () => {
                         <span>{selectedItem.dlcPack || 'DLC Content'}</span>
                       </span>
                     )}
+                    {selectedItem.isFeed && (
+                      <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800/70 text-[10px] font-bold uppercase shadow-xs whitespace-nowrap shrink-0" title="Animal Feed (Chicken Coop & Livestock Trough)">
+                        <Egg className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                        <span>Chicken & Animal Feed</span>
+                      </span>
+                    )}
                   </div>
                   <span className="text-xs font-mono text-rust-400 block truncate mt-0.5">{selectedItem.shortname}</span>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-500 mt-1">
@@ -527,10 +598,10 @@ export const ItemsTab: React.FC = () => {
               const details = getItemDetails(selectedItem.shortname);
 
               const isFoodOrConsumable =
-                selectedItem.category === 'Food' ||
                 !!details?.nutrition ||
                 stats?.calories !== undefined ||
-                stats?.hydration !== undefined;
+                stats?.hydration !== undefined ||
+                (selectedItem.category === 'Food' && !selectedItem.isFeed && !selectedItem.shortname.startsWith('clone.'));
 
               const hasCombat =
                 !!stats ||

@@ -1186,7 +1186,13 @@
       }
     ]
   },
-  "fish.anchovy": false,
+  "fish.anchovy": {
+    "nutrition": {
+      "calories": "+30",
+      "hydration": "+5",
+      "instantHealth": "+1"
+    }
+  },
   "electric.andswitch": {
     "craft": {
       "ingredients": [
@@ -3806,7 +3812,13 @@
       }
     ]
   },
-  "pie.beef": false,
+  "pie.beef": {
+    "nutrition": {
+      "calories": "+100",
+      "hydration": "+15",
+      "instantHealth": "+5"
+    }
+  },
   "beehive": {
     "craft": {
       "ingredients": [
@@ -5192,7 +5204,13 @@
       "healthOverTime": "+8"
     }
   },
-  "bread.brioche.loaf": false,
+  "bread.brioche.loaf": {
+    "nutrition": {
+      "calories": "+150",
+      "hydration": "-10",
+      "instantHealth": "+5"
+    }
+  },
   "easter.bronzeegg": false,
   "bucket.helmet": {
     "craft": {
@@ -6001,7 +6019,13 @@
       }
     ]
   },
-  "candycane": false,
+  "candycane": {
+    "nutrition": {
+      "calories": "+100",
+      "hydration": "+20",
+      "instantHealth": "+5"
+    }
+  },
   "candycaneclub": {
     "loot": [
       {
@@ -6412,7 +6436,13 @@
       }
     ]
   },
-  "fish.catfish": false,
+  "fish.catfish": {
+    "nutrition": {
+      "calories": "+150",
+      "hydration": "+20",
+      "instantHealth": "+5"
+    }
+  },
   "cctv.camera": {
     "recycle": [
       {
@@ -8410,7 +8440,13 @@
       "healthOverTime": "+5"
     }
   },
-  "beefmeat.cooked": false,
+  "beefmeat.cooked": {
+    "nutrition": {
+      "calories": "+100",
+      "hydration": "+10",
+      "instantHealth": "+10"
+    }
+  },
   "bigcatmeat.cooked": {
     "nutrition": {
       "calories": "+120",
@@ -8514,7 +8550,13 @@
       "healthOverTime": "+2"
     }
   },
-  "muttonmeat.cooked": false,
+  "muttonmeat.cooked": {
+    "nutrition": {
+      "calories": "+100",
+      "hydration": "+10",
+      "instantHealth": "+10"
+    }
+  },
   "meat.pork.cooked": {
     "loot": [
       {
@@ -8855,16 +8897,76 @@
       }
     ]
   },
-  "cream": false,
-  "radiationresisttea.pure.creamy": false,
-  "purecoolingtea.creamy": false,
-  "pureharvestingtea.creamy": false,
-  "healingtea.pure.creamy": false,
-  "maxhealthtea.pure.creamy": false,
-  "oretea.pure.creamy": false,
-  "scraptea.pure.creamy": false,
-  "purewarmingtea.creamy": false,
-  "woodtea.pure.creamy": false,
+  "cream": {
+    "nutrition": {
+      "calories": "+80",
+      "hydration": "+30",
+      "instantHealth": "+2"
+    }
+  },
+  "radiationresisttea.pure.creamy": {
+    "nutrition": {
+      "calories": "+50",
+      "hydration": "+30",
+      "instantHealth": "+5"
+    }
+  },
+  "purecoolingtea.creamy": {
+    "nutrition": {
+      "calories": "+50",
+      "hydration": "+30",
+      "instantHealth": "+5"
+    }
+  },
+  "pureharvestingtea.creamy": {
+    "nutrition": {
+      "calories": "+50",
+      "hydration": "+30",
+      "instantHealth": "+5"
+    }
+  },
+  "healingtea.pure.creamy": {
+    "nutrition": {
+      "calories": "+50",
+      "hydration": "+30",
+      "instantHealth": "+5"
+    }
+  },
+  "maxhealthtea.pure.creamy": {
+    "nutrition": {
+      "calories": "+50",
+      "hydration": "+30",
+      "instantHealth": "+5"
+    }
+  },
+  "oretea.pure.creamy": {
+    "nutrition": {
+      "calories": "+50",
+      "hydration": "+30",
+      "instantHealth": "+5"
+    }
+  },
+  "scraptea.pure.creamy": {
+    "nutrition": {
+      "calories": "+50",
+      "hydration": "+30",
+      "instantHealth": "+5"
+    }
+  },
+  "purewarmingtea.creamy": {
+    "nutrition": {
+      "calories": "+50",
+      "hydration": "+30",
+      "instantHealth": "+5"
+    }
+  },
+  "woodtea.pure.creamy": {
+    "nutrition": {
+      "calories": "+50",
+      "hydration": "+30",
+      "instantHealth": "+5"
+    }
+  },
   "pie.crocodile": {
     "nutrition": {
       "calories": "+80",
@@ -15537,7 +15639,13 @@
   },
   "clone.hemp": false,
   "seed.hemp": false,
-  "fish.herring": false,
+  "fish.herring": {
+    "nutrition": {
+      "calories": "+40",
+      "hydration": "+5",
+      "instantHealth": "+2"
+    }
+  },
   "attire.hide.boots": {
     "craft": {
       "ingredients": [
@@ -24778,16 +24886,76 @@
       }
     ]
   },
-  "milk": false,
-  "radiationresisttea.pure.milky": false,
-  "purecoolingtea.milky": false,
-  "pureharvestingtea.milky": false,
-  "healingtea.pure.milky": false,
-  "maxhealthtea.pure.milky": false,
-  "oretea.pure.milky": false,
-  "scraptea.pure.milky": false,
-  "purewarmingtea.milky": false,
-  "woodtea.pure.milky": false,
+  "milk": {
+    "nutrition": {
+      "calories": "+50",
+      "hydration": "+50",
+      "instantHealth": "+2"
+    }
+  },
+  "radiationresisttea.pure.milky": {
+    "nutrition": {
+      "calories": "+30",
+      "hydration": "+40",
+      "instantHealth": "+5"
+    }
+  },
+  "purecoolingtea.milky": {
+    "nutrition": {
+      "calories": "+30",
+      "hydration": "+40",
+      "instantHealth": "+5"
+    }
+  },
+  "pureharvestingtea.milky": {
+    "nutrition": {
+      "calories": "+30",
+      "hydration": "+40",
+      "instantHealth": "+5"
+    }
+  },
+  "healingtea.pure.milky": {
+    "nutrition": {
+      "calories": "+30",
+      "hydration": "+40",
+      "instantHealth": "+5"
+    }
+  },
+  "maxhealthtea.pure.milky": {
+    "nutrition": {
+      "calories": "+30",
+      "hydration": "+40",
+      "instantHealth": "+5"
+    }
+  },
+  "oretea.pure.milky": {
+    "nutrition": {
+      "calories": "+30",
+      "hydration": "+40",
+      "instantHealth": "+5"
+    }
+  },
+  "scraptea.pure.milky": {
+    "nutrition": {
+      "calories": "+30",
+      "hydration": "+40",
+      "instantHealth": "+5"
+    }
+  },
+  "purewarmingtea.milky": {
+    "nutrition": {
+      "calories": "+30",
+      "hydration": "+40",
+      "instantHealth": "+5"
+    }
+  },
+  "woodtea.pure.milky": {
+    "nutrition": {
+      "calories": "+30",
+      "hydration": "+40",
+      "instantHealth": "+5"
+    }
+  },
   "minecart.planter": {
     "craft": {
       "ingredients": [
@@ -25668,7 +25836,13 @@
       }
     ]
   },
-  "mrspice.can": false,
+  "mrspice.can": {
+    "nutrition": {
+      "calories": "+60",
+      "hydration": "+20",
+      "instantHealth": "+3"
+    }
+  },
   "multiplegrenadelauncher": {
     "recycle": [
       {
@@ -26653,7 +26827,13 @@
     ]
   },
   "orangeidtag": false,
-  "fish.orangeroughy": false,
+  "fish.orangeroughy": {
+    "nutrition": {
+      "calories": "+100",
+      "hydration": "+10",
+      "instantHealth": "+5"
+    }
+  },
   "orchid": false,
   "clone.orchid": false,
   "seed.orchid": false,
@@ -29489,7 +29669,13 @@
       "hydration": "+3"
     }
   },
-  "beefmeat": false,
+  "beefmeat": {
+    "nutrition": {
+      "calories": "+40",
+      "hydration": "-10",
+      "instantHealth": "-5"
+    }
+  },
   "bigcatmeat": {
     "nutrition": {
       "calories": "+10",
@@ -29529,7 +29715,13 @@
       "hydration": "-3"
     }
   },
-  "muttonmeat": false,
+  "muttonmeat": {
+    "nutrition": {
+      "calories": "+40",
+      "hydration": "-10",
+      "instantHealth": "-5"
+    }
+  },
   "meat.boar": {
     "nutrition": {
       "calories": "+60"
@@ -30509,17 +30701,83 @@
     ]
   },
   "rhib": false,
-  "pie.apple.rich": false,
-  "pie.bear.rich": false,
-  "pie.beef.rich": false,
-  "pie.bigcat.rich": false,
-  "pie.chicken.rich": false,
-  "pie.crocodile.rich": false,
-  "pie.fish.rich": false,
-  "pie.hunters.rich": false,
-  "pie.pork.rich": false,
-  "pie.pumpkin.rich": false,
-  "pie.mutton.rich": false,
+  "pie.apple.rich": {
+    "nutrition": {
+      "calories": "+120",
+      "hydration": "+25",
+      "instantHealth": "+5"
+    }
+  },
+  "pie.bear.rich": {
+    "nutrition": {
+      "calories": "+180",
+      "hydration": "+20",
+      "instantHealth": "+15"
+    }
+  },
+  "pie.beef.rich": {
+    "nutrition": {
+      "calories": "+150",
+      "hydration": "+20",
+      "instantHealth": "+10"
+    }
+  },
+  "pie.bigcat.rich": {
+    "nutrition": {
+      "calories": "+150",
+      "hydration": "+20",
+      "instantHealth": "+10"
+    }
+  },
+  "pie.chicken.rich": {
+    "nutrition": {
+      "calories": "+120",
+      "hydration": "+20",
+      "instantHealth": "+8"
+    }
+  },
+  "pie.crocodile.rich": {
+    "nutrition": {
+      "calories": "+150",
+      "hydration": "+20",
+      "instantHealth": "+10"
+    }
+  },
+  "pie.fish.rich": {
+    "nutrition": {
+      "calories": "+120",
+      "hydration": "+20",
+      "instantHealth": "+8"
+    }
+  },
+  "pie.hunters.rich": {
+    "nutrition": {
+      "calories": "+160",
+      "hydration": "+20",
+      "instantHealth": "+12"
+    }
+  },
+  "pie.pork.rich": {
+    "nutrition": {
+      "calories": "+140",
+      "hydration": "+20",
+      "instantHealth": "+10"
+    }
+  },
+  "pie.pumpkin.rich": {
+    "nutrition": {
+      "calories": "+120",
+      "hydration": "+30",
+      "instantHealth": "+5"
+    }
+  },
+  "pie.mutton.rich": {
+    "nutrition": {
+      "calories": "+150",
+      "hydration": "+20",
+      "instantHealth": "+10"
+    }
+  },
   "riflebody": {
     "recycle": [
       {
@@ -31865,7 +32123,13 @@
       }
     ]
   },
-  "fish.salmon": false,
+  "fish.salmon": {
+    "nutrition": {
+      "calories": "+120",
+      "hydration": "+15",
+      "instantHealth": "+5"
+    }
+  },
   "water.salt": false,
   "workbench.upgrade.salvage": false,
   "axe.salvaged": {
@@ -32502,7 +32766,13 @@
       }
     ]
   },
-  "fish.sardine": false,
+  "fish.sardine": {
+    "nutrition": {
+      "calories": "+30",
+      "hydration": "+5",
+      "instantHealth": "+1"
+    }
+  },
   "explosive.satchel": {
     "craft": {
       "ingredients": [
@@ -33735,7 +34005,13 @@
       }
     ]
   },
-  "pie.mutton": false,
+  "pie.mutton": {
+    "nutrition": {
+      "calories": "+100",
+      "hydration": "+15",
+      "instantHealth": "+5"
+    }
+  },
   "shirt.collared": {
     "craft": {
       "ingredients": [
@@ -34639,7 +34915,13 @@
       }
     ]
   },
-  "skimmedmilk": false,
+  "skimmedmilk": {
+    "nutrition": {
+      "calories": "+40",
+      "hydration": "+50",
+      "instantHealth": "+2"
+    }
+  },
   "knife.skinning": {
     "craft": {
       "ingredients": [
@@ -35613,7 +35895,13 @@
       }
     ]
   },
-  "fish.smallshark": false,
+  "fish.smallshark": {
+    "nutrition": {
+      "calories": "+200",
+      "hydration": "+30",
+      "instantHealth": "+10"
+    }
+  },
   "spikes.trap": {
     "craft": {
       "ingredients": [
@@ -35687,7 +35975,13 @@
       }
     ]
   },
-  "fish.troutsmall": false,
+  "fish.troutsmall": {
+    "nutrition": {
+      "calories": "+100",
+      "hydration": "+10",
+      "instantHealth": "+5"
+    }
+  },
   "smallwaterbottle": {
     "loot": [
       {
@@ -35730,7 +36024,10 @@
         "amount": "1-6",
         "chance": 22.5
       }
-    ]
+    ],
+    "nutrition": {
+      "hydration": "+250"
+    }
   },
   "water.catcher.small": {
     "craft": {
@@ -37318,7 +37615,13 @@
       "hydration": "+2"
     }
   },
-  "beefmeat.spoiled": false,
+  "beefmeat.spoiled": {
+    "nutrition": {
+      "calories": "+20",
+      "hydration": "-20",
+      "instantHealth": "-10"
+    }
+  },
   "bigcatmeat.spoiled": {
     "nutrition": {
       "calories": "+10",
@@ -37361,7 +37664,13 @@
       "hydration": "+2"
     }
   },
-  "muttonmeat.spoiled": false,
+  "muttonmeat.spoiled": {
+    "nutrition": {
+      "calories": "+20",
+      "hydration": "-20",
+      "instantHealth": "-10"
+    }
+  },
   "porkmeat.spoiled": {
     "nutrition": {
       "calories": "+10",
@@ -41054,7 +41363,12 @@
         "amount": "1",
         "chance": 100
       }
-    ]
+    ],
+    "nutrition": {
+      "calories": "+50",
+      "hydration": "-20",
+      "instantHealth": "+5"
+    }
   },
   "wagon": false,
   "walkietalkie": false,
@@ -43958,6 +44272,12 @@
   "clone.yellow.berry": false,
   "seed.yellow.berry": false,
   "yellowidtag": false,
-  "fish.yellowperch": false,
+  "fish.yellowperch": {
+    "nutrition": {
+      "calories": "+80",
+      "hydration": "+10",
+      "instantHealth": "+3"
+    }
+  },
   "discord.zombie.plushie": false
 }

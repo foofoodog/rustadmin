@@ -1,4 +1,5 @@
 import allItemsData from './allRustItems.json';
+import { hasNutritionalValue, isChickenOrAnimalFeed } from './itemDetails';
 
 export interface RustItem {
   id?: number;
@@ -11,6 +12,8 @@ export interface RustItem {
   rarity?: string;
   icon?: string;
   isVehicle?: boolean;
+  hasNutrition?: boolean;
+  isFeed?: boolean;
   dlcPack?: string;
   isDlc?: boolean;
   despawnTime?: string;
@@ -305,6 +308,8 @@ export const RUST_ITEMS: RustItem[] = (allItemsData as any[]).map((item) => {
     rarity: item.rarity,
     icon: item.icon || `${item.shortname}.webp`,
     isVehicle: VEHICLE_SHORTNAMES.has(item.shortname),
+    hasNutrition: hasNutritionalValue(item.shortname),
+    isFeed: isChickenOrAnimalFeed(item.shortname),
     dlcPack: dlc || undefined,
     isDlc: !!dlc,
     despawnTime: item.despawnTime,
@@ -326,6 +331,8 @@ export const RUST_CATEGORIES = [
   'Tools',
   'Medical',
   'Food',
+  'Food (Nutritional)',
+  'Chicken & Animal Feed',
   'Ammo',
   'Traps',
   'Misc',
