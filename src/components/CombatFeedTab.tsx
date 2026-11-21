@@ -17,108 +17,19 @@ import {
   Crosshair
 } from 'lucide-react';
 import { rconService } from '../services/rconService';
-import { RconMessage } from '../types/rcon';
-
-export interface FeedEvent {
-  id: string;
-  type: 'kill' | 'raid' | 'anticheat' | 'connect' | 'disconnect' | 'ban';
-  timestamp: string;
-  raw: string;
-  attacker?: string;
-  victim?: string;
-  weapon?: string;
-  distance?: string;
-  details: string;
-}
+import { RconMessage, FeedEvent } from '../types/rcon';
 
 export const CombatFeedTab: React.FC = () => {
-  const [events, setEvents] = useState<FeedEvent[]>([]);
+  const [events, setEvents] = useState<FeedEvent[]>(() => rconService.getCombatHistory());
   const [filterType, setFilterType] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    const unsub = rconService.onLog((msg: RconMessage) => {
-      if (isPaused || !msg.Message) return;
-
-      const text = msg.Message.trim();
-      const lower = text.toLowerCase();
-      const timeStr = new Date().toLocaleTimeString();
-
-      let event: FeedEvent | null = null;
-
-      // 1. Anti-cheat / Violations
-      if (
-        lower.includes('violation') ||
-        lower.includes('flyhack') ||
-        lower.includes('speedhack') ||
-        lower.includes('eyehack') ||
-        lower.includes('packet flooding')
-      ) {
-        event = {
-          id: `ac-${Date.now()}-${Math.random()}`,
-          type: 'anticheat',
-          timestamp: timeStr,
-          raw: text,
-          details: text
-        };
-      }
-      // 2. Explosives / Raiding
-      else if (
-        lower.includes('timed.explosive') ||
-        lower.includes('ammo.rocket') ||
-        lower.includes('explosive.satchel') ||
-        lower.includes('mlrs') ||
-        lower.includes('grenade.f1') ||
-        (lower.includes('exploded') && !lower.includes('firework'))
-      ) {
-        event = {
-          id: `raid-${Date.now()}-${Math.random()}`,
-          type: 'raid',
-          timestamp: timeStr,
-          raw: text,
-          details: text
-        };
-      }
-      // 3. PvP / Combat death
-      else if (
-        lower.includes('was killed by') ||
-        lower.includes('killed by') ||
-        lower.includes('died (') ||
-        lower.includes('suicide')
-      ) {
-        // Attempt to parse kill details
-        event = {
-          id: `kill-${Date.now()}-${Math.random()}`,
-          type: 'kill',
-          timestamp: timeStr,
-          raw: text,
-          details: text
-        };
-      }
-      // 4. Connect / Disconnect
-      else if (lower.includes('joined [') || lower.includes('connected [') || lower.includes('steamauth')) {
-        event = {
-          id: `conn-${Date.now()}-${Math.random()}`,
-          type: 'connect',
-          timestamp: timeStr,
-          raw: text,
-          details: text
-        };
-      } else if (lower.includes('disconnecting:') || lower.includes('kicked:') || lower.includes('left the server')) {
-        event = {
-          id: `disc-${Date.now()}-${Math.random()}`,
-          type: lower.includes('kicked:') || lower.includes('banned:') ? 'ban' : 'disconnect',
-          timestamp: timeStr,
-          raw: text,
-          details: text
-        };
-      }
-
-      if (event) {
-        setEvents((prev) => [event!, ...prev].slice(0, 300));
-      }
+    const unsub = rconService.onCombatEvent((event: FeedEvent) => {
+      if (isPaused) return;
+      setEvents((prev) => [event, ...prev].slice(0, 500));
     });
 
     return () => unsub();
@@ -221,7 +132,10 @@ export const CombatFeedTab: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setEvents([])}
+            onClick={() => {
+              rconService.clearCombatHistory();
+              setEvents([]);
+            }}
             className="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs transition-colors"
             title="Clear Feed"
           >

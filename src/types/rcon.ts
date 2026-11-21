@@ -53,3 +53,16 @@ export interface ChatMessage {
   timestamp: string;
   color?: string;
 }
+
+export interface FeedEvent {
+  id: string;
+  type: 'kill' | 'raid' | 'anticheat' | 'connect' | 'disconnect' | 'ban';
+  timestamp: string;
+  raw: string;
+  attacker?: string;
+  victim?: string;
+  weapon?: string;
+  distance?: string;
+  details: string;
+}
+

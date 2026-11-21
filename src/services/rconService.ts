@@ -1,4 +1,4 @@
-import { RconMessage, ServerStatus, Player, OxidePlugin, ChatMessage } from '../types/rcon';
+import { RconMessage, ServerStatus, Player, OxidePlugin, ChatMessage, FeedEvent } from '../types/rcon';
 
 type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'error';
 type Listener<T> = (data: T) => void;
@@ -11,6 +11,9 @@ class RconService {
   private logListeners: Listener<RconMessage>[] = [];
   private logHistory: RconMessage[] = [];
   private chatListeners: Listener<ChatMessage>[] = [];
+  private chatHistory: ChatMessage[] = [];
+  private combatListeners: Listener<FeedEvent>[] = [];
+  private combatHistory: FeedEvent[] = [];
   private statusListeners: Listener<ServerStatus>[] = [];
   private playersListeners: Listener<Player[]>[] = [];
   private pluginsListeners: Listener<OxidePlugin[]>[] = [];
@@ -195,6 +198,137 @@ class RconService {
     }
   }
 
+  public getChatHistory(): ChatMessage[] {
+    return [...this.chatHistory];
+  }
+
+  public clearChatHistory(): void {
+    this.chatHistory = [];
+  }
+
+  public addChatToHistory(chat: ChatMessage): void {
+    this.chatHistory.push(chat);
+    if (this.chatHistory.length > 500) {
+      this.chatHistory.shift();
+    }
+  }
+
+  public async sendChatMessage(text: string): Promise<void> {
+    const chatItem: ChatMessage = {
+      id: Math.random().toString(36).substring(7),
+      sender: 'SERVER',
+      message: text,
+      timestamp: new Date().toLocaleTimeString(),
+      color: '#e78978',
+    };
+    this.addChatToHistory(chatItem);
+    this.chatListeners.forEach((l) => l(chatItem));
+    try {
+      await this.sendCommand(`say "${text}"`);
+    } catch (e) {
+      console.warn('Could not dispatch say to live server (offline):', e);
+    }
+  }
+
+  public getCombatHistory(): FeedEvent[] {
+    return [...this.combatHistory];
+  }
+
+  public clearCombatHistory(): void {
+    this.combatHistory = [];
+  }
+
+  public addCombatToHistory(event: FeedEvent): void {
+    this.combatHistory.unshift(event);
+    if (this.combatHistory.length > 500) {
+      this.combatHistory.pop();
+    }
+  }
+
+  public onCombatEvent(listener: Listener<FeedEvent>): () => void {
+    this.combatListeners.push(listener);
+    return () => {
+      this.combatListeners = this.combatListeners.filter((l) => l !== listener);
+    };
+  }
+
+  public parseFeedEvent(rawText: string): FeedEvent | null {
+    if (!rawText) return null;
+    const text = rawText.trim();
+    const lower = text.toLowerCase();
+    const timeStr = new Date().toLocaleTimeString();
+
+    // 1. Anti-cheat / Violations
+    if (
+      lower.includes('violation') ||
+      lower.includes('flyhack') ||
+      lower.includes('speedhack') ||
+      lower.includes('eyehack') ||
+      lower.includes('packet flooding')
+    ) {
+      return {
+        id: `ac-${Date.now()}-${Math.random()}`,
+        type: 'anticheat',
+        timestamp: timeStr,
+        raw: text,
+        details: text
+      };
+    }
+    // 2. Explosives / Raiding
+    if (
+      lower.includes('timed.explosive') ||
+      lower.includes('ammo.rocket') ||
+      lower.includes('explosive.satchel') ||
+      lower.includes('mlrs') ||
+      lower.includes('grenade.f1') ||
+      (lower.includes('exploded') && !lower.includes('firework'))
+    ) {
+      return {
+        id: `raid-${Date.now()}-${Math.random()}`,
+        type: 'raid',
+        timestamp: timeStr,
+        raw: text,
+        details: text
+      };
+    }
+    // 3. PvP / Combat death
+    if (
+      lower.includes('was killed by') ||
+      lower.includes('killed by') ||
+      lower.includes('died (') ||
+      lower.includes('suicide')
+    ) {
+      return {
+        id: `kill-${Date.now()}-${Math.random()}`,
+        type: 'kill',
+        timestamp: timeStr,
+        raw: text,
+        details: text
+      };
+    }
+    // 4. Connect / Disconnect
+    if (lower.includes('joined [') || lower.includes('connected [') || lower.includes('steamauth') || lower.includes('has entered the game')) {
+      return {
+        id: `conn-${Date.now()}-${Math.random()}`,
+        type: 'connect',
+        timestamp: timeStr,
+        raw: text,
+        details: text
+      };
+    }
+    if (lower.includes('disconnecting:') || lower.includes('kicked:') || lower.includes('banned:') || lower.includes('left the server')) {
+      return {
+        id: `disc-${Date.now()}-${Math.random()}`,
+        type: lower.includes('kicked:') || lower.includes('banned:') ? 'ban' : 'disconnect',
+        timestamp: timeStr,
+        raw: text,
+        details: text
+      };
+    }
+
+    return null;
+  }
+
   public logToConsole(message: string, type: 'Generic' | 'Log' | 'Warning' | 'Error' | 'Chat' = 'Generic') {
     const item: RconMessage = {
       Identifier: 9999,
@@ -298,8 +432,16 @@ class RconService {
     if (data.Type === 'Chat' || msg.startsWith('[CHAT]') || (msg.includes('] [Chat]') && !msg.includes('RCON:'))) {
       const chatItem = this.parseChatMessage(data);
       if (chatItem) {
+        this.addChatToHistory(chatItem);
         this.chatListeners.forEach((l) => l(chatItem));
       }
+    }
+
+    // Check for Combat & World Feed Events
+    const feedEvent = this.parseFeedEvent(msg);
+    if (feedEvent) {
+      this.addCombatToHistory(feedEvent);
+      this.combatListeners.forEach((l) => l(feedEvent));
     }
   }
 
