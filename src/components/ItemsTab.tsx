@@ -187,14 +187,14 @@ export const ItemsTab: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
           {/* DLC Filter Dropdown */}
           <div className="relative flex items-center">
-            <Sparkles className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-purple-400 pointer-events-none" />
+            <Sparkles className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-purple-500 dark:text-purple-400 pointer-events-none" />
             <select
               value={selectedDlcPack}
               onChange={(e) => setSelectedDlcPack(e.target.value)}
-              className={`pl-8 pr-7 py-1.5 bg-zinc-950 border rounded-lg text-xs font-medium focus:outline-none focus:border-rust-500 transition-colors appearance-none cursor-pointer w-full sm:w-auto ${
+              className={`pl-8 pr-7 py-1.5 bg-white dark:bg-zinc-950 border rounded-lg text-xs font-medium focus:outline-none focus:border-rust-500 transition-colors appearance-none cursor-pointer w-full sm:w-auto shadow-xs ${
                 selectedDlcPack !== 'all'
-                  ? 'border-purple-500/70 text-purple-200 bg-purple-950/25 ring-1 ring-purple-500/20'
-                  : 'border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                  ? 'border-purple-400 dark:border-purple-500/70 text-purple-700 dark:text-purple-200 bg-purple-50 dark:bg-purple-950/25 ring-1 ring-purple-500/30'
+                  : 'border-zinc-300 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-zinc-700'
               }`}
               title="Filter items by DLC or expansion pack"
             >
@@ -225,7 +225,7 @@ export const ItemsTab: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search item name or shortname (e.g. salvaged, ak)..."
-              className="pl-9 pr-8 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-rust-500 w-full sm:w-72 transition-colors"
+              className="pl-9 pr-8 py-1.5 bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg text-xs text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-rust-500 w-full sm:w-72 transition-colors shadow-xs"
             />
             {search && (
               <button
@@ -246,41 +246,32 @@ export const ItemsTab: React.FC = () => {
           const count = categoryCounts[cat] || 0;
           const isSelected = selectedCategory === cat;
 
-          // Counter badge styling: vibrant purple when DLC filter is active, rust when search is active
+          // Counter badge and button styling
+          let buttonClass = '';
           let counterClass = '';
-          if (isDlcFilterActive) {
-            if (isSelected) {
-              counterClass = count > 0
-                ? 'bg-purple-900/90 text-purple-200 border border-purple-400/60 shadow-sm font-bold ring-1 ring-purple-400/30'
-                : 'bg-purple-950/70 text-purple-300/40 border border-purple-900/40';
-            } else {
-              counterClass = count > 0
-                ? 'bg-purple-950 text-purple-300 border border-purple-700/70 shadow-sm font-semibold'
-                : 'bg-purple-950/40 text-purple-400/35 border border-purple-900/30';
-            }
-          } else if (isSearchFilterActive) {
-            if (isSelected) {
-              counterClass = 'bg-rust-700 text-white font-bold';
-            } else {
-              counterClass = count > 0
-                ? 'bg-rust-950/80 text-rust-300 border border-rust-700/60 shadow-sm font-semibold'
-                : 'bg-zinc-900 text-zinc-600 border border-zinc-800/40';
-            }
+
+          if (isSelected) {
+            buttonClass = 'bg-rust-600 text-white shadow-sm ring-1 ring-rust-500/50';
+            counterClass = 'bg-black/25 text-white font-bold ring-1 ring-white/20';
+          } else if (isDlcFilterActive && count > 0) {
+            buttonClass = 'bg-purple-50 dark:bg-purple-950/40 border border-purple-300 dark:border-purple-700/80 text-purple-900 dark:text-purple-200 hover:bg-purple-100 dark:hover:bg-purple-900/60 shadow-xs font-semibold';
+            counterClass = 'bg-purple-200 dark:bg-purple-900/90 text-purple-900 dark:text-purple-200 border border-purple-300 dark:border-purple-600/60 font-bold';
+          } else if (isSearchFilterActive && count > 0) {
+            buttonClass = 'bg-rust-50 dark:bg-rust-950/40 border border-rust-300 dark:border-rust-700/80 text-rust-900 dark:text-rust-200 hover:bg-rust-100 dark:hover:bg-rust-900/60 shadow-xs font-semibold';
+            counterClass = 'bg-rust-200 dark:bg-rust-900/90 text-rust-900 dark:text-rust-200 border border-rust-300 dark:border-rust-600/60 font-bold';
+          } else if ((isDlcFilterActive || isSearchFilterActive) && count === 0) {
+            buttonClass = 'bg-zinc-900/50 border border-zinc-800/60 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 opacity-60 hover:opacity-100 font-medium';
+            counterClass = 'bg-zinc-800/60 text-zinc-400 dark:text-zinc-500 border border-zinc-800/40 font-medium';
           } else {
-            counterClass = isSelected ? 'bg-rust-700 text-white' : 'bg-zinc-800 text-zinc-400';
+            buttonClass = 'bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-850 shadow-xs font-medium';
+            counterClass = 'bg-zinc-800 text-zinc-400 border border-zinc-700/50 font-medium';
           }
 
           return (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center space-x-1.5 ${
-                isSelected
-                  ? 'bg-rust-600 text-white shadow-sm ring-1 ring-rust-500/50'
-                  : (isDlcFilterActive || isSearchFilterActive) && count === 0
-                  ? 'bg-zinc-900/60 border border-zinc-800/40 text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800/50'
-                  : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all flex items-center space-x-1.5 ${buttonClass}`}
             >
               <span>{cat}</span>
               <span
@@ -317,11 +308,11 @@ export const ItemsTab: React.FC = () => {
               <div
                 key={item.shortname}
                 onClick={() => handleOpenGive(item)}
-                className="group bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-rust-500/60 rounded-xl p-3 flex flex-col justify-between items-center text-center cursor-pointer transition-all shadow-sm hover:shadow-lg hover:shadow-rust-950/20 relative"
+                className="group bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-rust-500 rounded-xl p-3 flex flex-col justify-between items-center text-center cursor-pointer transition-all shadow-sm hover:shadow-md relative"
               >
                 {/* Stack size badge if > 1 */}
                 {item.stackable && item.stackable > 1 && (
-                  <span className="absolute top-2 right-2 text-[10px] font-mono text-zinc-500 bg-zinc-950/80 px-1.5 py-0.5 rounded border border-zinc-800">
+                  <span className="absolute top-2 right-2 text-[10px] font-mono text-zinc-300 bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-700/60 font-semibold shadow-xs">
                     x{item.stackable >= 1000 ? `${item.stackable / 1000}k` : item.stackable}
                   </span>
                 )}
@@ -334,10 +325,10 @@ export const ItemsTab: React.FC = () => {
                       e.stopPropagation();
                       if (item.dlcPack) setSelectedDlcPack(item.dlcPack);
                     }}
-                    className="absolute top-2 left-2 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-purple-950/90 hover:bg-purple-900 text-purple-300 border border-purple-800/70 shadow-sm flex items-center space-x-1 max-w-[110px] cursor-pointer transition-colors"
+                    className="absolute top-2 left-2 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-purple-100 hover:bg-purple-200 dark:bg-purple-950/90 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-800/70 shadow-xs flex items-center space-x-1 max-w-[110px] cursor-pointer transition-colors"
                     title={`Filter by ${item.dlcPack || 'DLC Content'}`}
                   >
-                    <Sparkles className="w-2.5 h-2.5 text-purple-400 shrink-0" />
+                    <Sparkles className="w-2.5 h-2.5 text-purple-600 dark:text-purple-400 shrink-0" />
                     <span className="truncate">{item.dlcPack || 'DLC'}</span>
                   </button>
                 )}
@@ -352,13 +343,13 @@ export const ItemsTab: React.FC = () => {
                 </div>
                 <div className="w-full">
                   <h4
-                    className="text-xs font-bold text-zinc-200 group-hover:text-rust-400 transition-colors truncate"
+                    className="text-xs font-bold text-zinc-100 group-hover:text-rust-500 transition-colors truncate"
                     title={item.name}
                   >
                     {item.name}
                   </h4>
                   <span
-                    className="block text-[10px] font-mono text-zinc-500 truncate"
+                    className="block text-[10px] font-mono text-zinc-400 truncate"
                     title={item.shortname}
                   >
                     {item.shortname}
@@ -370,25 +361,25 @@ export const ItemsTab: React.FC = () => {
                     if (!stats) return null;
                     if (stats.damage !== undefined) {
                       return (
-                        <div className="flex items-center space-x-1 text-[10px] text-zinc-400 font-mono mt-0.5 truncate">
-                          <span className="text-rose-400 font-semibold">{stats.damage} Dmg</span>
-                          {stats.attackSpeed && <span className="text-zinc-500">• {stats.attackSpeed}</span>}
+                        <div className="flex items-center space-x-1 text-[10px] text-zinc-500 font-mono mt-0.5 truncate">
+                          <span className="text-rose-600 dark:text-rose-400 font-semibold">{stats.damage} Dmg</span>
+                          {stats.attackSpeed && <span className="text-zinc-400 dark:text-zinc-500">• {stats.attackSpeed}</span>}
                         </div>
                       );
                     }
                     if (stats.projectileProtection) {
                       return (
-                        <div className="flex items-center space-x-1 text-[10px] text-zinc-400 font-mono mt-0.5 truncate">
-                          <span className="text-emerald-400 font-semibold">{stats.projectileProtection} Proj</span>
-                          {stats.meleeProtection && <span className="text-zinc-500">• {stats.meleeProtection} Mel</span>}
+                        <div className="flex items-center space-x-1 text-[10px] text-zinc-500 font-mono mt-0.5 truncate">
+                          <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{stats.projectileProtection} Proj</span>
+                          {stats.meleeProtection && <span className="text-zinc-400 dark:text-zinc-500">• {stats.meleeProtection} Mel</span>}
                         </div>
                       );
                     }
                     if (stats.instantHealth) {
                       return (
-                        <div className="flex items-center space-x-1 text-[10px] text-emerald-400 font-mono mt-0.5 truncate">
+                        <div className="flex items-center space-x-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 truncate">
                           <span className="font-semibold">+{stats.instantHealth} HP</span>
-                          {stats.healthOverTime && <span className="text-zinc-500">(+{stats.healthOverTime})</span>}
+                          {stats.healthOverTime && <span className="text-zinc-400 dark:text-zinc-500">(+{stats.healthOverTime})</span>}
                         </div>
                       );
                     }
@@ -400,7 +391,7 @@ export const ItemsTab: React.FC = () => {
                     e.stopPropagation();
                     handleOpenGive(item);
                   }}
-                  className="mt-2 w-full py-1 bg-zinc-800 group-hover:bg-rust-600 text-zinc-300 group-hover:text-white rounded text-[11px] font-semibold flex items-center justify-center space-x-1 transition-colors"
+                  className="mt-2 w-full py-1 bg-zinc-800 hover:bg-rust-600 text-zinc-300 hover:text-white border border-zinc-700/50 hover:border-rust-500 rounded text-[11px] font-semibold flex items-center justify-center space-x-1 transition-colors shadow-xs"
                 >
                   <Gift className="w-3 h-3" />
                   <span>Give</span>
@@ -454,8 +445,8 @@ export const ItemsTab: React.FC = () => {
                     </span>
                   )}
                   {selectedItem.isDlc && (
-                    <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-purple-950/90 text-purple-300 border border-purple-800/70 text-[10px] font-bold uppercase shadow-sm whitespace-nowrap shrink-0">
-                      <Sparkles className="w-2.5 h-2.5 text-purple-400 shrink-0" />
+                    <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950/90 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-800/70 text-[10px] font-bold uppercase shadow-xs whitespace-nowrap shrink-0">
+                      <Sparkles className="w-2.5 h-2.5 text-purple-600 dark:text-purple-400 shrink-0" />
                       <span>{selectedItem.dlcPack || 'DLC Content'}</span>
                     </span>
                   )}
@@ -485,8 +476,8 @@ export const ItemsTab: React.FC = () => {
               return (
                 <div className="space-y-2">
                   {stats && (
-                    <div className="bg-[#181824]/90 border border-[#2b2b3d] rounded-lg p-3 text-xs shadow-inner space-y-2">
-                      <div className="flex items-center justify-between pb-1.5 border-b border-[#2d2d42]">
+                    <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-lg p-3 text-xs shadow-inner space-y-2">
+                      <div className="flex items-center justify-between pb-1.5 border-b border-zinc-800/80">
                         <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
                           Item Statistics
                         </span>
@@ -504,97 +495,97 @@ export const ItemsTab: React.FC = () => {
 
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-0.5 font-sans">
                         {stats.damage !== undefined && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Damage</span>
                             <span className="font-semibold text-zinc-100">{stats.damage}</span>
                           </div>
                         )}
                         {stats.attackSpeed && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Attack Speed</span>
                             <span className="font-semibold text-zinc-100">{stats.attackSpeed}</span>
                           </div>
                         )}
                         {stats.range && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Range</span>
                             <span className="font-semibold text-zinc-100">{stats.range}</span>
                           </div>
                         )}
                         {stats.drawTime && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Draw</span>
                             <span className="font-semibold text-zinc-100">{stats.drawTime}</span>
                           </div>
                         )}
                         {stats.throwable && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Throw</span>
                             <span className="font-semibold text-zinc-100">{stats.throwable}</span>
                           </div>
                         )}
                         {stats.magazineSize !== undefined && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Capacity</span>
                             <span className="font-semibold text-zinc-100">{stats.magazineSize} rds</span>
                           </div>
                         )}
                         {stats.reloadTime && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Reload</span>
                             <span className="font-semibold text-zinc-100">{stats.reloadTime}</span>
                           </div>
                         )}
                         {stats.recoil && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Recoil</span>
                             <span className="font-semibold text-zinc-100">{stats.recoil}</span>
                           </div>
                         )}
                         {stats.projectileProtection && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Projectile</span>
                             <span className="font-semibold text-emerald-400">{stats.projectileProtection}</span>
                           </div>
                         )}
                         {stats.meleeProtection && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Melee</span>
                             <span className="font-semibold text-emerald-400">{stats.meleeProtection}</span>
                           </div>
                         )}
                         {stats.biteProtection && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Bite</span>
                             <span className="font-semibold text-zinc-200">{stats.biteProtection}</span>
                           </div>
                         )}
                         {stats.radiationProtection && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Radiation</span>
                             <span className="font-semibold text-amber-400">{stats.radiationProtection}</span>
                           </div>
                         )}
                         {stats.coldProtection && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Cold</span>
                             <span className="font-semibold text-cyan-400">{stats.coldProtection}</span>
                           </div>
                         )}
                         {stats.explosionProtection && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Explosion</span>
                             <span className="font-semibold text-rose-400">{stats.explosionProtection}</span>
                           </div>
                         )}
                         {stats.instantHealth !== undefined && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Instant Heal</span>
                             <span className="font-semibold text-emerald-400">+{stats.instantHealth} HP</span>
                           </div>
                         )}
                         {stats.healthOverTime !== undefined && (
-                          <div className="flex justify-between py-0.5 border-b border-white/5">
+                          <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                             <span className="text-zinc-400">Heal Over Time</span>
                             <span className="font-semibold text-emerald-400">+{stats.healthOverTime} HP</span>
                           </div>

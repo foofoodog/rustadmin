@@ -22,42 +22,27 @@ html.dark {
 
 html.light {
   --color-zinc-50: 10 10 12;
-  --color-zinc-100: 24 24 27;
-  --color-zinc-200: 39 39 42;
-  --color-zinc-300: 63 63 70;
-  --color-zinc-400: 100 116 139;
-  --color-zinc-500: 148 163 184;
-  --color-zinc-600: 203 213 225;
-  --color-zinc-700: 218 222 229;
-  --color-zinc-750: 226 230 237;
-  --color-zinc-800: 236 239 245;
-  --color-zinc-850: 241 243 248;
+  --color-zinc-100: 15 23 42;
+  --color-zinc-200: 30 41 59;
+  --color-zinc-300: 51 65 85;
+  --color-zinc-400: 71 85 105;
+  --color-zinc-500: 100 116 139;
+  --color-zinc-600: 148 163 184;
+  --color-zinc-700: 203 213 225;
+  --color-zinc-750: 218 224 233;
+  --color-zinc-800: 226 232 240;
+  --color-zinc-850: 238 242 246;
   --color-zinc-900: 255 255 255;
-  --color-zinc-950: 244 245 249;
+  --color-zinc-950: 241 245 249;
   color-scheme: light;
 }
 
 /* Light mode specific badge and pill enhancements */
-html.light .bg-purple-950\/60,
-html.light .bg-purple-950\/40,
-html.light .bg-purple-950\/80 {
-  background-color: rgb(243 232 255 / 0.85);
-  color: #7e22ce;
-  border-color: #d8b4fe;
-}
-html.light .text-purple-300,
-html.light .text-purple-200 {
-  color: #7e22ce;
-}
 html.light .bg-emerald-950\/40,
 html.light .bg-emerald-950\/60 {
   background-color: rgb(209 250 229 / 0.85);
   color: #047857;
   border-color: #6ee7b7;
-}
-html.light .text-emerald-400,
-html.light .text-emerald-300 {
-  color: #047857;
 }
 html.light .bg-amber-950\/40,
 html.light .bg-amber-950\/60 {
@@ -65,29 +50,17 @@ html.light .bg-amber-950\/60 {
   color: #b45309;
   border-color: #fcd34d;
 }
-html.light .text-amber-400,
-html.light .text-amber-300 {
-  color: #b45309;
-}
 html.light .bg-rose-950\/60,
 html.light .bg-rose-950\/40 {
   background-color: rgb(255 228 230 / 0.85);
   color: #be123c;
   border-color: #fda4af;
 }
-html.light .text-rose-400,
-html.light .text-rose-300 {
-  color: #be123c;
-}
 html.light .bg-cyan-950\/30,
 html.light .bg-cyan-950\/60 {
   background-color: rgb(207 250 254 / 0.85);
   color: #0e7490;
   border-color: #67e8f9;
-}
-html.light .text-cyan-300,
-html.light .text-cyan-400 {
-  color: #0e7490;
 }
 
 @layer base {
